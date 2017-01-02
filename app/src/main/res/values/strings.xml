@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">memarket</string>
+    <string name="app_name_caps">MEMARKET</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_menu">MenuActivity</string>
 </resources>
