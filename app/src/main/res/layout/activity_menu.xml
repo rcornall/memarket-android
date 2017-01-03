@@ -7,13 +7,58 @@
     android:fitsSystemWindows="true"
     tools:context="com.robthecornallgmail.memarket.MenuActivity">
 
-    <android.support.design.widget.AppBarLayout
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/content_menu"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:layout_height="match_parent"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:context="com.robthecornallgmail.memarket.MenuActivity"
+        tools:showIn="@layout/activity_menu">
 
-    </android.support.design.widget.AppBarLayout>
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:id="@+id/spinner" />
 
-    <include layout="@layout/content_menu" />
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/image_and_description_height"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:layout_below="@+id/spinner"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:rowCount="1"
+            android:columnCount="2"
+            android:id="@+id/gridLayout">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:text="Name"
+                android:ems="10"
+                android:id="@+id/dataFromServer"
+                android:layout_below="@+id/gridLayout"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+            <android.support.v7.widget.AppCompatImageButton
+                android:id="@+id/image10guy"
+                app:srcCompat="@drawable/icon10guy"
+                android:layout_width="100dp"
+                android:layout_gravity="right"
+                android:scaleType="centerCrop"/>
+        </GridLayout>
+
+    </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>

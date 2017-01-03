@@ -3,5 +3,9 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorMyGrey">#272822</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorMyOffGrey">#4d5346</color>
+    <color name="colorAccent">#ff4081</color>
+    <color name="pumpkinSpice">#FD971F</color>
+    <color name="monokaiGreen">#A6E22E</color>
+    <color name="monokaiBlue">#66D9EF</color>
 </resources>

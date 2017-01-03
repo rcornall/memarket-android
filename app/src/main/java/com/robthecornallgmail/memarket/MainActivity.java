@@ -22,16 +22,16 @@ public class MainActivity extends AppCompatActivity {
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-
-
-        });
+//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+//            }
+//
+//
+//        });
         // Locate the button in activity_main.xml
         Button button = (Button) findViewById(R.id.startButton);
         // Capture button clicks
@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     // Example of a call to a native method
-    TextView tv = (TextView) findViewById(R.id.sample_text);
+    //    TextView tv = (TextView) findViewById(R.id.sample_text);
     //    tv.setText(stringFromJNI());
     }
 

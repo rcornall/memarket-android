@@ -8,56 +8,43 @@
     android:fitsSystemWindows="true"
     tools:context="com.robthecornallgmail.memarket.MainActivity">
 
-    <android.support.design.widget.AppBarLayout
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorMyGrey"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-    </android.support.design.widget.AppBarLayout>
-
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_gravity="center_horizontal">
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab"
+
+        <TextView
+            android:id="@+id/titleText"
+            android:fontFamily="cursive"
+            android:textSize="30dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_margin="@dimen/fab_margin"
-            app:srcCompat="@android:drawable/ic_dialog_email" />
+            android:layout_above="@+id/pixelPepe"
+            android:layout_centerInParent="true"
+            android:text="MeMarket" />
+
 
         <ImageButton
-            android:layout_gravity="center_horizontal"
-            android:layout_width="147dp"
-            android:layout_height="146dp"
-            android:layout_centerInParent="true"
-            android:layout_marginBottom="@dimen/fab_margin"
+            android:id="@+id/pixelPepe"
+            android:layout_width="125dp"
+            android:layout_height="120dp"
             app:srcCompat="@drawable/pixel_pepe"
             android:scaleType="fitXY"
-            android:id="@+id/pixelPepe" />
+            android:background="@android:color/transparent"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"/>
 
         <Button
             android:id="@+id/startButton"
-            android:layout_below="@+id/pixelPepe"
+            style="?android:attr/buttonStyleSmall"
             android:text="Start.."
-            android:layout_width="wrap_content"
-            android:layout_centerInParent="true"
+            android:textAllCaps="true"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:fadingEdgeLength="20px"
-            android:background="@color/colorMyGrey"
-            android:layout_gravity="center_horizontal"
-            android:textColor="@color/colorPrimary"/>
+            android:layout_below="@+id/pixelPepe"
+            android:layout_centerHorizontal="true" />
 
-        <include layout="@layout/content_main"
-            android:id="@+id/include" />
     </RelativeLayout>
 </android.support.design.widget.CoordinatorLayout>
