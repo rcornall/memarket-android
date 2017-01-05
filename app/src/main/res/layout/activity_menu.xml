@@ -5,11 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.robthecornallgmail.memarket.MenuActivity">
+    tools:context="com.robthecornallgmail.memarket.Activities.MenuActivity">
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <RelativeLayout
         android:id="@+id/content_menu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -18,22 +16,50 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:context="com.robthecornallgmail.memarket.MenuActivity"
+        tools:context="com.robthecornallgmail.memarket.Activities.MenuActivity"
         tools:showIn="@layout/activity_menu">
 
         <Spinner
+            android:spinnerMode="dropdown"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/spinnerHeight"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:id="@+id/spinner" />
-
+            android:id="@+id/memeChoicesSpinner" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:alpha="0.8"
+            android:layout_alignBottom="@id/memeChoicesSpinner"
+            android:background="@android:color/darker_gray"/>
+        <View
+            android:layout_width="1dp"
+            android:layout_height="@dimen/spinnerHeight"
+            android:alpha="0.8"
+            android:layout_alignRight="@id/memeChoicesSpinner"
+            android:background="@android:color/darker_gray"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="5dp"
+            android:alpha="0.5"
+            android:layout_alignTop="@id/memeChoicesSpinner"
+            android:background="@color/colorMyOffGrey"/>
+        <View
+            android:layout_width="1dp"
+            android:layout_height="33dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="5dp"
+            android:alpha="0.5"
+            android:layout_alignLeft="@id/memeChoicesSpinner"
+            android:background="@color/colorMyOffGrey"/>
         <GridLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/image_and_description_height"
             android:layout_marginTop="@dimen/activity_vertical_margin"
-            android:layout_below="@+id/spinner"
+            android:layout_below="@+id/memeChoicesSpinner"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:rowCount="1"
@@ -41,20 +67,23 @@
             android:id="@+id/gridLayout">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="textPersonName"
-                android:text="Name"
-                android:ems="10"
                 android:id="@+id/dataFromServer"
-                android:layout_below="@+id/gridLayout"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true" />
-
+                android:layout_columnWeight="2"
+                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:text="loading..."
+                android:ems="10"
+                android:minLines="2"
+                android:maxLines="6"
+                android:ellipsize="none"
+                android:scrollHorizontally="false"/>
             <android.support.v7.widget.AppCompatImageButton
-                android:id="@+id/image10guy"
-                app:srcCompat="@drawable/icon10guy"
+                android:id="@+id/memeIcon"
+                app:srcCompat="@drawable/icon_high_guy_meme"
+                android:background="@android:drawable/picture_frame"
+                android:backgroundTint="@color/pictureFrame"
                 android:layout_width="100dp"
+                android:layout_columnWeight="1"
                 android:layout_gravity="right"
                 android:scaleType="centerCrop"/>
         </GridLayout>

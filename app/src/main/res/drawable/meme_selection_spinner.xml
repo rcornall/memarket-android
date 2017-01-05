@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item><layer-list>
+        <item><shape>
+            <gradient android:angle="90" android:endColor="@color/colorMyGrey" android:startColor="@color/colorMyGrey" android:type="linear" />
+
+            <stroke android:width="1dp" android:color="@color/colorMyGrey" />
+
+            <corners android:radius="2dp" />
+
+            <padding android:bottom="0dp" android:left="3dp" android:right="3dp" android:top="3dp" />
+        </shape></item>
+        <item ><bitmap android:gravity="bottom|right" android:src="@drawable/spinner_ab_default_holo_dark_am3" />
+        </item>
+    </layer-list></item>
+</selector>
