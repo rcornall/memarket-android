@@ -62,7 +62,7 @@ public class MenuActivity extends AppCompatActivity
                 String name = parentView.getItemAtPosition(position).toString();
                 Log.v("Spinner", "test:10 guy. " + "real:" + name + ".");
                 TextView stockTextView = (TextView) findViewById(R.id.dataFromServer);
-                String stockView = name + String.format(Locale.US, "'s current stock is %d, INVEST NOW", memeMap.get(name));
+                String stockView = name + String.format(Locale.US, "'s current stock is %d", memeMap.get(name));
                 stockTextView.setText(stockView);
 
                 // get name of icon jpg or png

@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity
             {
                 // Start NewActivity.class
                 Intent myIntent = new Intent(MainActivity.this,
-                MenuActivity.class);
+                LoginActivity.class);
                 startActivity(myIntent);
             }
         });

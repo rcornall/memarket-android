@@ -2,7 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.robthecornallgmail.memarket">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- To auto-complete the email text field in the login form with the user's emails -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.READ_PROFILE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/pixel_pepe"
@@ -24,6 +30,14 @@
             android:label="@string/title_activity_menu"
             android:parentActivityName=".Activities.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.robthecornallgmail.memarket.Activities.MainActivity" />
+        </activity>
+        <activity
+            android:name=".Activities.LoginActivity"
+            android:label="@string/title_activity_login"
+            android:parentActivityName=".Activities.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.robthecornallgmail.memarket.Activities.MainActivity" />
