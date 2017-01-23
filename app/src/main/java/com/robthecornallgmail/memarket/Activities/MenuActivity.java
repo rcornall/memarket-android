@@ -28,6 +28,8 @@ import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import com.robthecornallgmail.memarket.Util.Defines;
+
 
 public class MenuActivity extends AppCompatActivity
 {
@@ -46,7 +48,7 @@ public class MenuActivity extends AppCompatActivity
         memeChoicesSpinner = (Spinner) findViewById(R.id.memeChoicesSpinner);
 
 
-        new GetDataFromServer().execute("http://192.168.1.73:8000/getData.php?action");
+        new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getData.php?action");
 
         memeChoicesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
