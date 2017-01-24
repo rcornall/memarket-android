@@ -3,25 +3,19 @@ package com.robthecornallgmail.memarket.Util;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.ContentValues;
+import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Build;
-import android.util.Log;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
-import android.content.Context;
+
+import com.robthecornallgmail.memarket.Activities.LoginActivity;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by rob on 02/01/17.
@@ -87,6 +81,33 @@ public class MyHelper {
         }
     }
 
+    public enum HttpResponses
+    {
+        TIMEOUT,
+        FAILURE,
+        SUCCESS,
+    }
+    public static class results
+    {
+        public Boolean success;
+        public HttpResponses httpResponse;
+        public String response;
+        public Integer code;
+    }
+    public static void AlertBox(Activity activity, String msg)
+    {
+        AlertDialog alertDialog = new AlertDialog.Builder(activity, android.R.style.Theme_DeviceDefault_Dialog_Alert).create();
+        alertDialog.setTitle("Alert");
+        alertDialog.setMessage(msg);
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
+    }
+}
 //    public static String executePostHttpRequest(final String path, Map<String, String> params) throws Exception
 //    {
 //        String result = null;
@@ -146,6 +167,7 @@ public class MyHelper {
 //
 //        return result.toString();
 //    }
-}
+
+
 
 

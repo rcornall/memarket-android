@@ -16,6 +16,7 @@
         <item name="android:textColorSecondary">@android:color/holo_green_light</item>
         <item name="android:textColorSecondaryInverse">@android:color/holo_blue_dark</item>
         <item name="android:textColorHint">@color/greenWhite</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -32,10 +33,13 @@
         <item name="android:textColorHint">@color/greenWhite</item>
         <!--<item name="android:textColorSecondaryInverse">?android:attr/textColorSecondary</item>-->
         <item name="android:statusBarColor">@color/monokaiDarkGreen</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 
     <style name="login_button_style">
         <item name="android:background">@color/colorMyOffGrey</item>
         <item name="android:layout_margin">@dimen/login_button_margin</item>
+        <item name="android:textColor">@color/monokaiGreen</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
 </resources>

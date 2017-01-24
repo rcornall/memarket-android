@@ -1,10 +1,14 @@
 package com.robthecornallgmail.memarket.Activities;
 
 import android.annotation.TargetApi;
+import android.app.FragmentManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
@@ -26,6 +30,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.robthecornallgmail.memarket.R;
 import com.robthecornallgmail.memarket.Util.Defines;
@@ -40,19 +45,22 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
 import static android.Manifest.permission.READ_CONTACTS;
+import static com.robthecornallgmail.memarket.Util.MyHelper.HttpResponses;
+import static com.robthecornallgmail.memarket.Util.MyHelper.HttpResponses;
 
 /**
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor>
 {
-
+    private static final String TAG = "Login";
     /**
      * Id to identity READ_CONTACTS permission request.
      */
@@ -98,7 +106,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             @Override
             public void onClick(View view)
             {
-                Log.v("REGISTER", "clicked the button.....");
+                Log.v(TAG, "clicked the button.....");
                 view.startAnimation(Defines.buttonClick);
                 Intent myIntent = new Intent(LoginActivity.this, RegisterActivity.class);
                 startActivity(myIntent);
@@ -318,12 +326,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean>
+    public class UserLoginTask extends AsyncTask<Void, Void, MyHelper.results>
     {
 
         private final String mEmail;
         private final String mPassword;
+        private String mUsername;
         private String serverResponse;
+
+        private MyHelper.results Result;
 
         UserLoginTask(String email, String password)
         {
@@ -332,19 +343,26 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
         @Override
-        protected Boolean doInBackground(Void... params)
+        protected MyHelper.results doInBackground(Void... params)
         {
-            // TODO: attempt authentication against a network service.
-            Boolean ret = false;
+            // attempt authentication against a network service.
             String charset = "UTF-8";
-
+            Result = new MyHelper.results();
+            // hardcoded user for testing purposes
+            Log.v(TAG,mEmail);
+            if (mEmail.equalsIgnoreCase("@@@"))
+            {
+                Log.v(TAG, "@@@ logged in");
+                Result.success = true; Result.httpResponse = HttpResponses.SUCCESS; return Result;
+            }
             URL url;
             HttpURLConnection urlConnection;
+            int responseCode;
             try {
                 url = new URL(Defines.SERVER_ADDRESS + "/loginUser.php");
                 urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setConnectTimeout(30000);
-                urlConnection.setReadTimeout(30000);
+                urlConnection.setConnectTimeout(6000);
+                urlConnection.setReadTimeout(6000);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=" + charset);
                 OutputStream out = urlConnection.getOutputStream();
@@ -360,65 +378,133 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 writer.flush();
                 writer.close();
                 out.close();
-                int responseCode = urlConnection.getResponseCode();
+                Log.v(TAG, "did we make it here.");
+                try {
+                    responseCode = urlConnection.getResponseCode();
+                } catch (IOException e)
+                {
+                    responseCode = urlConnection.getResponseCode();
+                }
 
-                if(responseCode == HttpURLConnection.HTTP_OK)
-                {
-                    Log.v("HTTP Response", "did we get 200");
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    Log.v(TAG, "we got 200");
+                    Result.httpResponse = HttpResponses.SUCCESS;
                     serverResponse = MyHelper.readHttpStream(urlConnection.getInputStream());
-                    Log.v("HTTP Response", serverResponse);
+                    Log.v(TAG, serverResponse);
+                } else {
+                    Result.httpResponse = HttpResponses.FAILURE;
+                    Result.success = false;
+//                    serverResponse = MyHelper.readHttpStream(urlConnection.getInputStream());
+                    Log.v(TAG, "Server request failed, Response (" + responseCode+")");
+                    Result.response = "Server request failed, Response (" + responseCode+")";
                 }
-                else
-                {
-                    Log.v("HTTP Response", "failsssssssssssssss");
-                    return false;
-                }
+            } catch (SocketTimeoutException e) {
+                e.printStackTrace();
+                Log.e(TAG, "http timeout.. probably no internet:" + e);
+                Result.httpResponse = HttpResponses.TIMEOUT;
+                Result.success = false;
+                Result.response = e.toString();
             } catch (MalformedURLException e) {
                 e.printStackTrace();
+                Log.e(TAG, "malformed url exception: " + e);
+                Result.httpResponse = HttpResponses.FAILURE;
+                Result.success = false;
+                Result.response = e.toString();
             } catch (IOException e) {
+                Log.e(TAG, "IOException: " + e);
                 e.printStackTrace();
+                Result.httpResponse = HttpResponses.FAILURE;
+                Result.success = false;
+                Result.response = e.toString();
+            }
+            if (Result.httpResponse != HttpResponses.SUCCESS)
+            {
+                Log.e(TAG, "response was a failure");
+                return Result;
             }
             String result = null;
             String username = null;
-            String email = null;
             try {
                 JSONObject jsonObject = new JSONObject(serverResponse);
-                Log.v("JSON Parser", jsonObject.getString("result"));
+                Log.v(TAG, jsonObject.getString("result"));
                 result = jsonObject.getString("result");
-                username = jsonObject.getString("username");
-                email = jsonObject.getString("email");
+                if (result == "true")
+                {
+                    username = jsonObject.getString("username");
+                    Result.success = true;
+                    Result.response = jsonObject.toString();
+                }
+                else
+                {
+                    Result.success = false;
+                    Result.response = jsonObject.getString("error");
+                    Result.code = jsonObject.getInt("code");
+                }
+
             } catch (JSONException e) {
-                Log.e("JSON Parser", "Error parsing data " + e.toString());
+                Log.e(TAG, "Error parsing data " + e.toString());
                 e.printStackTrace();
+                Result.success = false;
+                Result.response = e.toString();
             }
 
-            if (result == null || result == "false")
+            if (!Result.success)
             {
-                ret = false;
+                return Result;
             }
             else if (result == "true")
             {
-                ret = true;
+                mUsername = username;
+                Result.success = true;
             }
-            return ret;
+            else // (result == null || result == "false")
+            {
+                Result.success = false;
+            }
+            return Result;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success)
+        protected void onPostExecute(final MyHelper.results Result)
         {
             mAuthTask = null;
             MyHelper.showProgress(false, mProgressView, mLoginFormView, getResources());
 
-            if (success)
+            Log.v(TAG,"Response is: " + Result.response);
+            if (Result.success)
             {
+                Toast.makeText(getBaseContext(), "Success - hi " + mUsername +"!",
+                        Toast.LENGTH_LONG).show();
                 // Start NewActivity.class
                 Intent myIntent = new Intent(LoginActivity.this, MenuActivity.class);
                 startActivity(myIntent);
             }
+            else if (Result.httpResponse == HttpResponses.TIMEOUT)
+            {
+                mPasswordView.setError(getString(R.string.error_http_timeout));
+                MyHelper.AlertBox(LoginActivity.this, "Timed out, check your Internet Connection.\n 600ms timeout ERROR (101)");
+            }
             else
             {
-                mPasswordView.setError(getString(R.string.error_invalid_either));
-                mPasswordView.requestFocus();
+                try {
+                    if (Result.code.equals(401))
+                    {
+                        mEmailView.setError(Result.response);
+                        mEmailView.requestFocus();
+                    }
+                    else if(Result.code.equals(403))
+                    {
+                        mPasswordView.setError(Result.response);
+                        mPasswordView.requestFocus();
+                    }
+                    else
+                    {
+                        MyHelper.AlertBox(LoginActivity.this, Result.response);
+                    }
+
+                } catch (NullPointerException e) {
+                   MyHelper.AlertBox(LoginActivity.this, Result.response);
+                }
             }
         }
 

@@ -1,15 +1,20 @@
 package com.robthecornallgmail.memarket.Activities;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageButton;
+import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.io.IOException;
@@ -33,6 +38,7 @@ import com.robthecornallgmail.memarket.Util.Defines;
 
 public class MenuActivity extends AppCompatActivity
 {
+    private static final String TAG = "Menu";
     Boolean initialDisplay = true;
     private Spinner memeChoicesSpinner;
     private Map<String, Integer> memeMap = new HashMap<>();
@@ -54,15 +60,15 @@ public class MenuActivity extends AppCompatActivity
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id)
             {
-                Log.v("Spinner", "onItemSelected was called........");
+//                Log.v(TAG, "wut");
 //                if (initialDisplay == true)
 //                {
-//                    Log.v("Spinner", "onItemSelected was called INITIALLYYYYYYYY........");
+//                    Log.v(TAG",TAGcalled INITIALLYYYYYYYY........");
 //                    initialDisplay = false;
 //                    return;
 //                }
                 String name = parentView.getItemAtPosition(position).toString();
-                Log.v("Spinner", "test:10 guy. " + "real:" + name + ".");
+                Log.v(TAG, "test:10 guy. " + "real:" + name + ".");
                 TextView stockTextView = (TextView) findViewById(R.id.dataFromServer);
                 String stockView = name + String.format(Locale.US, "'s current stock is %d", memeMap.get(name));
                 stockTextView.setText(stockView);
@@ -86,60 +92,130 @@ public class MenuActivity extends AppCompatActivity
     }
 
 
-    public class GetDataFromServer extends AsyncTask<String , Void ,String>
+    public class GetDataFromServer extends AsyncTask<String , Void , MyHelper.results>
     {
         private String serverResponse;
-
+        private MyHelper.results Result;
 
         @Override
-        protected String doInBackground(String... strings)
+        protected MyHelper.results doInBackground(String... strings)
         {
 
             URL url;
             HttpURLConnection urlConnection;
+            Result = new MyHelper.results();
+            int responseCode;
 
             try {
                 url = new URL(strings[0]);
                 urlConnection = (HttpURLConnection) url.openConnection();
-
-                int responseCode = urlConnection.getResponseCode();
-
-                if(responseCode == HttpURLConnection.HTTP_OK){
-                    serverResponse = MyHelper.readHttpStream(urlConnection.getInputStream());
-                    Log.v("HTTP Response", serverResponse);
+                urlConnection.setConnectTimeout(6000);
+                urlConnection.setReadTimeout(6000);
+                try {
+                    responseCode = urlConnection.getResponseCode();
+                } catch (IOException e)
+                {
+                    responseCode = urlConnection.getResponseCode();
                 }
-
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    Log.v(TAG, "we got 200");
+                    Result.httpResponse = MyHelper.HttpResponses.SUCCESS;
+                    serverResponse = MyHelper.readHttpStream(urlConnection.getInputStream());
+                    Log.v(TAG, serverResponse);
+                } else {
+                    Result.httpResponse = MyHelper.HttpResponses.FAILURE;
+                    Result.success = false;
+                    // serverResponse = MyHelper.readHttpStream(urlConnection.getInputStream());
+                    Log.v(TAG, "Server request failed, Response (" + responseCode+")");
+                    Result.response = "Server request failed, Response (" + responseCode+")";
+                }
+            } catch (SocketTimeoutException e) {
+                e.printStackTrace();
+                Log.e(TAG, "http timeout.. probably no internet:" + e);
+                Result.httpResponse = MyHelper.HttpResponses.TIMEOUT;
+                Result.success = false;
+                Result.response = e.toString();
             } catch (MalformedURLException e) {
                 e.printStackTrace();
+                Log.e(TAG, "malformed url exception: " + e);
+                Result.httpResponse = MyHelper.HttpResponses.FAILURE;
+                Result.success = false;
+                Result.response = e.toString();
             } catch (IOException e) {
+                Log.e(TAG, "IOException: " + e);
                 e.printStackTrace();
+                Result.httpResponse = MyHelper.HttpResponses.FAILURE;
+                Result.success = false;
+                Result.response = e.toString();
+            }
+            if (Result.httpResponse != MyHelper.HttpResponses.SUCCESS)
+            {
+                Log.e(TAG, "response was a failure");
+                return Result;
             }
 
             try {
                 JSONArray jsonArray = new JSONArray(serverResponse);
-                Log.v("Json Parser", "did it work>>>");
                 for(int i=0; i < jsonArray.length(); i++)
                 {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
                     memeMap.put(jsonObject.getString("NAME"), jsonObject.getInt("CURRENT_STOCK"));
                 }
+                Result.success = true;
             } catch (JSONException e) {
-                Log.e("JSON Parser", "Error parsing data " + e.toString());
+                Log.e(TAG, "Error parsing data " + e.toString());
                 e.printStackTrace();
+                Result.success = false;
+                String result;
+                try {
+                    JSONObject jsonObject = new JSONObject(serverResponse);
+                    result = jsonObject.getString("result");
+                    Log.v(TAG, "result from server = " + result);
+                    if (result == "false")
+                    {
+                        Result.success = false;
+                        Result.response = jsonObject.getString("error");
+                    }
+                } catch (JSONException e2) {
+                    Log.e(TAG, "error cant get server response:"  + e2);
+                    Result.response = "Server Connection Issues, Try again later";
+                }
             }
-
-            return null;
+            return Result;
         }
 
         @Override
-        protected void onPostExecute(String s)
+        protected void onPostExecute(MyHelper.results Result)
         {
 
 //            TextView newTextView = (TextView) findViewById(R.id.dataFromServer);
 //            newTextView.setText(memeMap.get("10 guy") + " --- ");
 
-            populateSpinner();
-            Log.v("Spinner", "Spinner was populated.......");
+            Log.v(TAG,"Response is: " + Result.response);
+
+            if (Result.success)
+            {
+                populateSpinner();
+                Log.v(TAG, "Spinner was populated.......");
+            }
+            else
+            {
+                Log.e(TAG, "failed to get data");
+                TextView stockTextView = (TextView) findViewById(R.id.dataFromServer);
+                String error = String.format(Locale.US, "Error retrieving data from server:\n %s", Result.response);
+                stockTextView.setText(error);
+
+                AlertDialog alertDialog = new AlertDialog.Builder(MenuActivity.this, android.R.style.Theme_Holo_Dialog).create();
+                alertDialog.setTitle("Alert");
+                alertDialog.setMessage(Result.response);
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
+            }
         }
 
 

@@ -3,9 +3,12 @@ package com.robthecornallgmail.memarket.Activities;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
@@ -33,6 +36,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.DateFormat;
@@ -45,6 +49,9 @@ import com.robthecornallgmail.memarket.R;
 import com.robthecornallgmail.memarket.Util.Defines;
 import com.robthecornallgmail.memarket.Util.MyHelper;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import static android.Manifest.permission.READ_CONTACTS;
 
 /**
@@ -52,6 +59,7 @@ import static android.Manifest.permission.READ_CONTACTS;
  */
 public class RegisterActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
+    private static final String TAG = "Register";
     /**
      * Id to identity READ_CONTACTS permission request.
      */
@@ -71,10 +79,10 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.v("REGISTER", "oncreate");
+        Log.v(TAG, "oncreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-        Log.v("REGISTER", "after_set");
+        Log.v(TAG, "after_set");
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.register_email);
         populateAutoComplete();
@@ -91,7 +99,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
 //                return false;
 //            }
 //        });
-        Log.v("REGISTER", "AFTER other");
+        Log.v(TAG, "AFTER other");
         Button mRegisterAccountButton = (Button) findViewById(R.id.register_account_button);
         mRegisterAccountButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -184,19 +192,6 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             focusView = mUsernameView;
             cancel = true;
         }
-        // Check for a valid password, if the user entered one.
-        else if (TextUtils.isEmpty(password))
-        {
-            mPasswordView.setError(getString(R.string.error_field_required));
-            focusView = mPasswordView;
-            cancel = true;
-        }
-        else if (!isPasswordValid(password))
-        {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
-            cancel = true;
-        }
         // Check for a valid email address.
         else if (TextUtils.isEmpty(email))
         {
@@ -210,6 +205,20 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             focusView = mEmailView;
             cancel = true;
         }
+        // Check for a valid password, if the user entered one.
+        else if (TextUtils.isEmpty(password))
+        {
+            mPasswordView.setError(getString(R.string.error_field_required));
+            focusView = mPasswordView;
+            cancel = true;
+        }
+        else if (!isPasswordValid(password))
+        {
+            mPasswordView.setError(getString(R.string.error_invalid_password));
+            focusView = mPasswordView;
+            cancel = true;
+        }
+
 
         if (cancel) {
             // There was an error; don't attempt login and focus the first
@@ -219,7 +228,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             MyHelper.showProgress(true, mProgressView, mRegisterFormView, getResources());
-            Log.v("REGISTER",  "username: " + username);
+            Log.v(TAG,  "username: " + username);
             mAuthTask = new UserRegisterTask(username, email, password);
             mAuthTask.execute((Void) null);
         }
@@ -297,13 +306,15 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserRegisterTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserRegisterTask extends AsyncTask<Void, Void, MyHelper.results> {
 
         private final String mUsername;
         private final String mEmail;
         private final String mPassword;
         private final String mDate;
         private String serverResponse;
+
+        private MyHelper.results Result;
 
         UserRegisterTask(String username, String email, String password) {
             mUsername = username;
@@ -316,20 +327,22 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected MyHelper.results doInBackground(Void... params) {
             // attempt registering against a network service.
 
             Boolean ret = false;
             String charset = "UTF-8";
+            Result = new MyHelper.results();
             // get time
-            Log.v("DATE: ", mDate);
+            Log.v(TAG, "Date: " + mDate);
             URL url;
             HttpURLConnection urlConnection;
+            int responseCode;
             try {
                 url = new URL(Defines.SERVER_ADDRESS + "/registerUser.php");
                 urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setConnectTimeout(30000);
-                urlConnection.setReadTimeout(30000);
+                urlConnection.setConnectTimeout(7000);
+                urlConnection.setReadTimeout(7000);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=" + charset);
                 OutputStream out = urlConnection.getOutputStream();
@@ -342,46 +355,136 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
                         URLEncoder.encode(mPassword, charset),
                         URLEncoder.encode(mEmail, charset),
                         URLEncoder.encode(mDate, charset));
-                Log.v("REGISTER", "query is: " + query);
+                Log.v(TAG, "query is: " + query);
                 writer.write(query);
 
                 writer.flush();
                 writer.close();
                 out.close();
-                int responseCode = urlConnection.getResponseCode();
-
-                if(responseCode == HttpURLConnection.HTTP_OK)
+                try {
+                    responseCode = urlConnection.getResponseCode();
+                } catch (IOException e)
                 {
-                    Log.v("HTTP Response", "did we get 200");
+                    responseCode = urlConnection.getResponseCode();
+                }
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    Log.v(TAG, "we got 200");
+                    Result.httpResponse = MyHelper.HttpResponses.SUCCESS;
                     serverResponse = MyHelper.readHttpStream(urlConnection.getInputStream());
-                    Log.v("HTTP Response", serverResponse);
+                    Log.v(TAG, serverResponse);
+                } else {
+                    Result.httpResponse = MyHelper.HttpResponses.FAILURE;
+                    Result.success = false;
+                    // serverResponse = MyHelper.readHttpStream(urlConnection.getInputStream());
+                    Log.v(TAG, "Server request failed, Response (" + responseCode+")");
+                    Result.response = "Server request failed, Response (" + responseCode+")";
+                }
+            } catch (SocketTimeoutException e) {
+                e.printStackTrace();
+                Log.e(TAG, "http timeout.. probably no internet:" + e);
+                Result.httpResponse = MyHelper.HttpResponses.TIMEOUT;
+                Result.success = false;
+                Result.response = e.toString();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                Log.e(TAG, "malformed url exception: " + e);
+                Result.httpResponse = MyHelper.HttpResponses.FAILURE;
+                Result.success = false;
+                Result.response = e.toString();
+            } catch (IOException e) {
+                Log.e(TAG, "IOException: " + e);
+                e.printStackTrace();
+                Result.httpResponse = MyHelper.HttpResponses.FAILURE;
+                Result.success = false;
+                Result.response = e.toString();
+            }
+
+            if (Result.httpResponse != MyHelper.HttpResponses.SUCCESS)
+            {
+                Log.e(TAG, "response was a failure");
+                return Result;
+            }
+
+            String result = null;
+            String username = null;
+            try {
+                JSONObject jsonObject = new JSONObject(serverResponse);
+                Log.v(TAG, jsonObject.getString("result"));
+                result = jsonObject.getString("result");
+                if (result == "true")
+                {
+                    Result.success = true;
+                    Result.response = jsonObject.toString();
                 }
                 else
                 {
-                    Log.v("HTTP Response", "failsssssssssssssss");
-                    return false;
+                    Result.success = false;
+                    Result.response = jsonObject.getString("error");
+                    Result.code = jsonObject.getInt("code");
                 }
-            } catch (MalformedURLException e) {
+            } catch (JSONException e) {
+                Log.e(TAG, "Error parsing data " + e.toString());
                 e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+                Result.success = false;
             }
 
-
-            // TODO: register the new account here.
-            return true;
+            return Result;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
+        protected void onPostExecute(final MyHelper.results Result) {
             mAuthTask = null;
             MyHelper.showProgress(false, mProgressView, mRegisterFormView, getResources());
 
-            if (success) {
-                finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+            Log.v(TAG,"Response is: " + Result.response);
+            if (Result.success)
+            {
+                AlertDialog alertDialog = new AlertDialog.Builder(RegisterActivity.this, android.R.style.Theme_DeviceDefault_Dialog_Alert).create();
+                alertDialog.setTitle("Alert");
+                alertDialog.setMessage("Successfully registered " + mUsername + "! continue to login");
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                Intent myIntent = new Intent(RegisterActivity.this, MenuActivity.class);
+                                myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(myIntent);
+                            }
+                        });
+                alertDialog.show();
+
+            }
+            else if (Result.httpResponse == MyHelper.HttpResponses.TIMEOUT)
+            {
+                mPasswordView.setError(getString(R.string.error_http_timeout));
+                MyHelper.AlertBox(RegisterActivity.this, "Timed out, check your Internet Connection.\n 600ms timeout ERROR (101)");
+            }
+            else
+            {
+                try {
+                    if (Result.code.equals(400))
+                    {
+                        mUsernameView.setError(Result.response);
+                        mUsernameView.requestFocus();
+                    }
+                    else if (Result.code.equals(401))
+                    {
+                        mEmailView.setError(Result.response);
+                        mEmailView.requestFocus();
+                    }
+                    else if(Result.code.equals(403))
+                    {
+                        mPasswordView.setError(Result.response);
+                        mPasswordView.requestFocus();
+                    }
+                    else
+                    {
+                        MyHelper.AlertBox(RegisterActivity.this, Result.response);
+                    }
+
+                } catch (NullPointerException e) {
+                    MyHelper.AlertBox(RegisterActivity.this, Result.response);
+                }
             }
         }
 

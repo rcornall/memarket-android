@@ -82,7 +82,7 @@
                 app:srcCompat="@drawable/icon_high_guy_meme"
                 android:background="@android:drawable/picture_frame"
                 android:backgroundTint="@color/pictureFrame"
-                android:layout_width="100dp"
+                android:layout_width="140dp"
                 android:layout_columnWeight="1"
                 android:layout_gravity="right"
                 android:scaleType="centerCrop"/>

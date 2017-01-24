@@ -21,5 +21,6 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="error_http_timeout">Timeout: Check your internet connection</string>
     <string name="title_activity_register">Register a new account</string>
 </resources>
