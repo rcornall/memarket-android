@@ -34,7 +34,9 @@ import android.widget.Toast;
 
 import com.robthecornallgmail.memarket.R;
 import com.robthecornallgmail.memarket.Util.Defines;
+import com.robthecornallgmail.memarket.Util.MyApplication;
 import com.robthecornallgmail.memarket.Util.MyHelper;
+import com.robthecornallgmail.memarket.Util.UserObject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,6 +63,9 @@ import static com.robthecornallgmail.memarket.Util.MyHelper.HttpResponses;
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor>
 {
     private static final String TAG = "Login";
+
+    private MyApplication mApplication;
+
     /**
      * Id to identity READ_CONTACTS permission request.
      */
@@ -81,7 +86,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_login);//********
+        // get app local data obj
+        Log.v(TAG, "MEMARKET TESTESTESTES");
+        mApplication = (MyApplication) getApplicationContext();
+        // appState.userData. // Do whatever you need to with the data here.
         setupActionBar();
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.login_email);
@@ -331,7 +340,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         private final String mEmail;
         private final String mPassword;
-        private String mUsername;
+
         private String serverResponse;
 
         private MyHelper.results Result;
@@ -430,7 +439,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 result = jsonObject.getString("result");
                 if (result == "true")
                 {
-                    username = jsonObject.getString("username");
+                    mApplication.userData.setID(jsonObject.getInt("id"));
+                    mApplication.userData.setUsername(jsonObject.getString("username"));
+                    mApplication.userData.setEmail(jsonObject.getString("email"));
+                    mApplication.userData.setMoney(jsonObject.getInt("money"));
+                    Log.e(TAG, "memarket  " + jsonObject.getInt("money") + jsonObject.getInt("id"));
                     Result.success = true;
                     Result.response = jsonObject.toString();
                 }
@@ -454,7 +467,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
             else if (result == "true")
             {
-                mUsername = username;
                 Result.success = true;
             }
             else // (result == null || result == "false")
@@ -473,10 +485,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             Log.v(TAG,"Response is: " + Result.response);
             if (Result.success)
             {
-                Toast.makeText(getBaseContext(), "Success - hi " + mUsername +"!",
-                        Toast.LENGTH_LONG).show();
+                Toast.makeText(getBaseContext(), "Success - hi " + mApplication.userData.getUsername() +"!",
+                        Toast.LENGTH_SHORT).show();
                 // Start NewActivity.class
                 Intent myIntent = new Intent(LoginActivity.this, MenuActivity.class);
+                // these flags would clear the task stack..
+                // myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                // myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(myIntent);
             }
             else if (Result.httpResponse == HttpResponses.TIMEOUT)

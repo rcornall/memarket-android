@@ -411,7 +411,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
                 JSONObject jsonObject = new JSONObject(serverResponse);
                 Log.v(TAG, jsonObject.getString("result"));
                 result = jsonObject.getString("result");
-                if (result == "true")
+                if (result.equals("true"))
                 {
                     Result.success = true;
                     Result.response = jsonObject.toString();
@@ -447,7 +447,10 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
                                 Intent myIntent = new Intent(RegisterActivity.this, MenuActivity.class);
-                                myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                //instead just override onBackPressed in MenuActivity to close app.
+                                // and add logout button ..
                                 startActivity(myIntent);
                             }
                         });
