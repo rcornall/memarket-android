@@ -71,8 +71,10 @@ public class MenuActivity extends AppCompatActivity
     private Map<String, Integer> mMemeNametoIDMap = new HashMap<>();
     private Map<Integer, LineGraphSeries<DataPoint>> mMemeIDtoSeriesMap = new HashMap<>();
     private Map<String, Integer> mMemeNametoStockMap = new HashMap<>();
+    private Map<Integer, Integer> mMemeIDtoAmountHeld = new HashMap<>();
 
     private String mSelectedName;
+    private Integer mSelectedMemeID;
 
     // map meme IDs to their respective past Data from server.
     private Map<Integer, MemePastData> mGraphDataObjectMap = new HashMap<>();
@@ -133,6 +135,12 @@ public class MenuActivity extends AppCompatActivity
 //                    return;
 //                }
                 mSelectedName = parentView.getItemAtPosition(position).toString();
+                try {
+                    mSelectedMemeID = mMemeNametoIDMap.get(mSelectedName);
+                } catch (NullPointerException e)
+                {
+                    e.printStackTrace();
+                }
                 Log.v(TAG, "test:10 guy. " + "real:" + mSelectedName + ".");
                 TextView stockTextView = (TextView) findViewById(R.id.dataFromServer);
                 String stockView = mSelectedName + String.format(Locale.US, "'s current stock is %d", mMemeNametoStockMap.get(mSelectedName));
@@ -140,6 +148,14 @@ public class MenuActivity extends AppCompatActivity
 
                 TextView circleStockView = (TextView) findViewById(R.id.circle_stock_thing);
                 circleStockView.setText("$" + mMemeNametoStockMap.get(mSelectedName).toString());
+
+                TextView sharesOwnedView = (TextView) findViewById(R.id.shares_owned);
+                try {
+                    sharesOwnedView.setText("Shares Currently Held = " + mMemeIDtoAmountHeld.get(mSelectedMemeID).toString());
+                } catch (NullPointerException e) {
+                    sharesOwnedView.setText("Shares Currently Held = 0");
+                            e.printStackTrace();
+                }
 
                 TextView graphTitle = (TextView) findViewById(R.id.graphTitle);
                 graphTitle.setText(mSelectedName);
@@ -320,6 +336,7 @@ public class MenuActivity extends AppCompatActivity
         sellStock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Integer memeID = mMemeNametoIDMap.get(mSelectedName);
                 v.startAnimation(Defines.buttonClick);
                 if (mApplication.userData.getMoney() < mMemeNametoStockMap.get(mSelectedName) + 5)
                 {
@@ -328,13 +345,22 @@ public class MenuActivity extends AppCompatActivity
                 }
                 else
                 {
-                    new PurchaseStockFromServer(mApplication.userData.getID(), mMemeNametoIDMap.get(mSelectedName), 1).execute(Defines.SERVER_ADDRESS + "/sellStock.php");
+                    try {
+                        Integer currentAmount = mMemeIDtoAmountHeld.get(memeID);
+                        if (currentAmount > 0)
+                            new PurchaseStockFromServer(mApplication.userData.getID(), memeID, 1).execute(Defines.SERVER_ADDRESS + "/sellStock.php");
+                    } catch (NullPointerException e) {
+                        // cannot sell if the user doesnt own any stock to sell.
+                        e.printStackTrace();
+                    }
                 }
 
             }
         });
 
-        new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getData.php?action");
+        new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getData.php?action", "GETTING_DATA");
+
+        new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getUserStocks.php?user=" + mApplication.userData.getID(), "GETTING_USER_STOCKS");
 
     }
     @Override
@@ -350,6 +376,7 @@ public class MenuActivity extends AppCompatActivity
         private final Integer mMemeID;
         private final Integer mAmount;
         private Integer mNewMoney;
+        private Integer mNewStocks;
         PurchaseStockFromServer(Integer user_id, Integer meme_id, Integer amount)
         {
             mUserID = user_id;
@@ -418,6 +445,8 @@ public class MenuActivity extends AppCompatActivity
                 if (result.equals("true"))
                 {
                     mNewMoney = jsonObject.getInt("new_money");
+                    mNewStocks = jsonObject.getInt("new_stocks");
+                    mMemeIDtoAmountHeld.put(mMemeID, mNewStocks);
                     return true;
                 }
                 else
@@ -449,6 +478,9 @@ public class MenuActivity extends AppCompatActivity
                 moneyTextView.setText("$" + mNewMoney.toString());
                 moneyTextView.clearAnimation();
                 moneyTextView.startAnimation(growAnim);
+
+                TextView sharesOwnedView = (TextView) findViewById(R.id.shares_owned);
+                sharesOwnedView.setText("Shares Currently Held = " + mNewStocks);
             }
             return;
         }
@@ -466,7 +498,6 @@ public class MenuActivity extends AppCompatActivity
             HttpURLConnection urlConnection;
             Result = new MyHelper.results();
             int responseCode;
-
             try {
                 url = new URL(strings[0]);
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -520,11 +551,22 @@ public class MenuActivity extends AppCompatActivity
                 for(int i=0; i < jsonArray.length(); i++)
                 {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    Integer ID = jsonObject.getInt("ID");
-                    String NAME = jsonObject.getString("NAME");
-                    Integer CURRENT_STOCK = jsonObject.getInt("CURRENT_STOCK");
-                    mMemeNametoIDMap.put(NAME, ID);
-                    mMemeNametoStockMap.put(NAME, CURRENT_STOCK);
+                    if (strings[1].equals("GETTING_DATA"))
+                    {
+                        Integer ID = jsonObject.getInt("ID");
+                        String NAME = jsonObject.getString("NAME");
+                        Integer CURRENT_STOCK = jsonObject.getInt("CURRENT_STOCK");
+                        mMemeNametoIDMap.put(NAME, ID);
+                        mMemeNametoStockMap.put(NAME, CURRENT_STOCK);
+                    } else if (strings[1].equals("GETTING_USER_STOCKS")) {
+                        Integer MEME_ID = jsonObject.getInt("MEME_ID");
+                        Integer AMOUNT = jsonObject.getInt("AMOUNT");
+                        mMemeIDtoAmountHeld.put(MEME_ID, AMOUNT);
+                    } else {
+                        Result.success = false;
+                        Log.e(TAG, "params wrong..");
+                        return  Result;
+                    }
                 }
                 Result.success = true;
             } catch (JSONException e) {
