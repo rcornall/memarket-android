@@ -102,9 +102,18 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     @Override
     public void onListFragmentInteraction(MemeRow row)
     {
-
-        mMemeDetailsFragment = MemeDetailsFragment.newInstance(row.getName(), row.getPrice());
-        Log.v(TAG, "onListFragmentInteraction called" + row.getName());
+        mSelectedName = row.getName();
+        Integer amountOwned = 0;
+        try {
+            mSelectedMemeID = mMemeNametoIDMap.get(mSelectedName);
+            amountOwned = mMemeIDtoAmountHeld.get(mSelectedMemeID);
+        } catch (NullPointerException e)
+        {
+            e.printStackTrace();
+        }
+        Log.e(TAG, mSelectedMemeID.toString() + " " + amountOwned.toString());
+        mMemeDetailsFragment = MemeDetailsFragment.newInstance(mSelectedName, row.getPrice(), amountOwned);
+        Log.v(TAG, "onListFragmentInteraction called" + mSelectedName);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.anim.enter_from_bottom, 0);
         transaction.addToBackStack(null);
@@ -112,21 +121,27 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         transaction.commit();
         mSearchView.setVisibility(View.GONE);
 
+//        try {
+//
+//            mMemeDetailsFragment.updateStocksOwned(amountOwned);
+//        } catch (NullPointerException e) {
+//            e.printStackTrace();
+//        }
+
         try {
-            if (!mGraphDataObjectMap.get(mMemeNametoIDMap.get(row.getName())).isDoneAlready()) {
-                mGetGraphTask = new GetGraphData(mMemeNametoIDMap.get(row.getName()));
+            if (!mGraphDataObjectMap.get(mMemeNametoIDMap.get(mSelectedName)).isDoneAlready()) {
+                mGetGraphTask = new GetGraphData(mMemeNametoIDMap.get(mSelectedName));
                 mGetGraphTask.execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
             }
             else
             {
-
                 //still need to refresh graph with newly selected meme's data previously stored
                 mGraphView.removeAllSeries();
-                mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(row.getName())));
+                mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
             }
         } catch (NullPointerException e) {
             //we didnt load data into that mMemeNametoIDMap.get(mSelectedName) yet.
-            mGetGraphTask = new GetGraphData(mMemeNametoIDMap.get(row.getName()));
+            mGetGraphTask = new GetGraphData(mMemeNametoIDMap.get(mSelectedName));
             mGetGraphTask.execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
         }
     }
@@ -214,6 +229,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         });
 
         new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getData.php?action", "GETTING_DATA");
+        new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getUserStocks.php?user=" + mApplication.userData.getID(), "GETTING_USER_STOCKS");
 
 
 
@@ -292,124 +308,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 //            }
 //        });
 //
-//        final ToggleButton dayButton = (ToggleButton) findViewById(R.id.DayButton);
-//        final ToggleButton weekButton = (ToggleButton) findViewById(R.id.WeekButton);
-//        final ToggleButton monthButton = (ToggleButton) findViewById(R.id.MonthButton);
-//        final ToggleButton yearButton = (ToggleButton) findViewById(R.id.YearButton);
-//        dayButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                if (isChecked) {
-//                    weekButton.setChecked(false);
-//                    monthButton.setChecked(false);
-//                    yearButton.setChecked(false);
-//                    mDateRange = com.robthecornallgmail.memarket.Activities.DateRange.DAY;
-//
-//                    mGraphView.removeAllSeries();
-//                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
-//                    mGraphView.getGridLabelRenderer().setNumHorizontalLabels(6); //spacing
-//                    Calendar cal = Calendar.getInstance();
-//                    Date start = cal.getTime();
-//                    cal.add(Calendar.HOUR, -24);
-//                    Date end = cal.getTime();
-//                    mGraphView.getViewport().setMaxX(start.getTime());
-//                    mGraphView.getViewport().setMinX(end.getTime());
-//                    // refresh graph (its glitchy)
-//                    mGraphView.refreshDrawableState();
-//                    mGraphView.removeAllSeries();
-//                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
-//                    mGraphView.refreshDrawableState();
-//                } else {
-//
-//                }
-//            }
-//        });
-//        weekButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                if (isChecked) {
-//                    dayButton.setChecked(false);
-//                    monthButton.setChecked(false);
-//                    yearButton.setChecked(false);
-//                    mDateRange = com.robthecornallgmail.memarket.Activities.DateRange.WEEK;
-//
-//                    mGraphView.removeAllSeries();
-//                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
-//                    mGraphView.getGridLabelRenderer().setNumHorizontalLabels(4); //spacing
-//                    Calendar cal = Calendar.getInstance();
-//                    Date start = cal.getTime();
-//                    cal.add(Calendar.DAY_OF_YEAR, -7);
-//                    Date end = cal.getTime();
-//                    mGraphView.getViewport().setMaxX(start.getTime());
-//                    mGraphView.getViewport().setMinX(end.getTime());
-//                    // refresh graph (its glitchy)
-//                    mGraphView.refreshDrawableState();
-//                    mGraphView.removeAllSeries();
-//                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
-//                    mGraphView.refreshDrawableState();
-//
-//
-//                } else {
-//
-//                }
-//            }
-//        });
-//        monthButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                if (isChecked) {
-//                    dayButton.setChecked(false);
-//                    weekButton.setChecked(false);
-//                    yearButton.setChecked(false);
-//                    mDateRange = com.robthecornallgmail.memarket.Activities.DateRange.MONTH;
-//
-//                    mGraphView.removeAllSeries();
-//                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
-//                    mGraphView.getGridLabelRenderer().setNumHorizontalLabels(4); //spacing
-//                    Calendar cal = Calendar.getInstance();
-//                    Date start = cal.getTime();
-//                    cal.add(Calendar.DAY_OF_YEAR, -30);
-//                    Date end = cal.getTime();
-//                    mGraphView.getViewport().setMaxX(start.getTime());
-//                    mGraphView.getViewport().setMinX(end.getTime());
-//                    // refresh graph (its glitchy)
-//                    mGraphView.refreshDrawableState();
-//                    mGraphView.removeAllSeries();
-//                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
-//                    mGraphView.refreshDrawableState();
-//                } else {
-//
-//                }
-//            }
-//        });
-//        yearButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                if (isChecked) {
-//                    dayButton.setChecked(false);
-//                    weekButton.setChecked(false);
-//                    monthButton.setChecked(false);
-//                    mDateRange = com.robthecornallgmail.memarket.Activities.DateRange.YEAR;
-//
-//                    mGraphView.removeAllSeries();
-//                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
-//                    mGraphView.getGridLabelRenderer().setNumHorizontalLabels(4); //
-//                    Calendar cal = Calendar.getInstance();
-//                    Date start = cal.getTime();
-//                    cal.add(Calendar.YEAR, -1);
-//                    Date end = cal.getTime();
-//                    mGraphView.getViewport().setMaxX(start.getTime());
-//                    mGraphView.getViewport().setMinX(end.getTime());
-//                    // refresh graph (its glitchy)
-//                    mGraphView.refreshDrawableState();
-//                    mGraphView.removeAllSeries();
-//                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
-//                    mGraphView.refreshDrawableState();
-//                } else {
-//
-//                }
-//            }
-//        });
+
 //
 //        Button buyStock = (Button) findViewById(R.id.buy_stock_button);
 //        buyStock.setOnClickListener(new View.OnClickListener() {
@@ -580,11 +479,12 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     {
         private String serverResponse;
         private MyHelper.results Result;
+        private String mRequest;
 
         @Override
         protected MyHelper.results doInBackground(String... strings)
         {
-
+            mRequest = strings[1];
             URL url;
             HttpURLConnection urlConnection;
             Result = new MyHelper.results();
@@ -691,13 +591,17 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
             Log.v(TAG,"Response is: " + Result.response);
 
-            if (Result.success)
-            {
+            if (Result.success) {
 //                mFraLgment = (ListMemesFragment) getSupportFragmentManager().findFragmentById(R.id.meme_list_fragment);
-                try {
-                    mMemeListFragment.updateList(mMemeNametoStockMap);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                if (mRequest == "GETTING_DATA")
+                {
+                    try {
+                        mMemeListFragment.updateList(mMemeNametoStockMap);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+
                 }
             }
             else

@@ -10,7 +10,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
@@ -20,10 +22,13 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import com.robthecornallgmail.memarket.Activities.DateRange;
 import com.robthecornallgmail.memarket.Activities.MainActivity;
 import com.robthecornallgmail.memarket.R;
+import com.robthecornallgmail.memarket.Util.MyApplication;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -34,15 +39,19 @@ import java.util.Date;
  * create an instance of this fragment.
  */
 public class MemeDetailsFragment extends Fragment {
+    private MyApplication mApplication;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_PARAM3 = "param3";
     private static final String TAG = "Details";
     // TODO: Rename and change types of parameters
     private View mView;
     private String mMemeName;
+    private Integer mMemeID;
     private Integer mMemePrice;
+    private Integer mStocksOwned;
     private TextView mMemeTitleView;
     private TextView mMoneyView;
     private AppCompatImageButton mImageView;
@@ -51,8 +60,16 @@ public class MemeDetailsFragment extends Fragment {
     private Button mBuyButton;
     private TextView mGraphTitle;
     private GraphView mGraphView;
+    private ToggleButton mDayButton;
+    private ToggleButton mWeekButton;
+    private ToggleButton mMonthButton;
+    private ToggleButton mYearButton;
 
     private DateRange mDateRange;
+    private LineGraphSeries<DataPoint> mCurrentSeries;
+
+    private Map<String, Integer> mMemeNametoIDMap = new HashMap<>();
+    private Map<Integer, Integer> mMemeIDtoAmountHeld = new HashMap<>();
 
 
     private OnFragmentInteractionListener mListener;
@@ -70,11 +87,12 @@ public class MemeDetailsFragment extends Fragment {
      * @return A new instance of fragment MemeDetailsFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static MemeDetailsFragment newInstance(String name, Integer price) {
+    public static MemeDetailsFragment newInstance(String name, Integer price, Integer owned) {
         MemeDetailsFragment fragment = new MemeDetailsFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, name);
         args.putInt(ARG_PARAM2, price);
+        args.putInt(ARG_PARAM3, owned);
         fragment.setArguments(args);
         return fragment;
     }
@@ -85,6 +103,7 @@ public class MemeDetailsFragment extends Fragment {
         if (getArguments() != null) {
             mMemeName = getArguments().getString(ARG_PARAM1);
             mMemePrice = getArguments().getInt(ARG_PARAM2);
+            mStocksOwned = getArguments().getInt(ARG_PARAM3);
             Log.e(TAG, "memename: " + mMemeName);
             Log.e(TAG, "memename: " + mMemePrice.toString());
         }
@@ -97,6 +116,7 @@ public class MemeDetailsFragment extends Fragment {
 
         try {
             mView = inflater.inflate(R.layout.fragment_meme_details, container, false);
+            mApplication = (MyApplication) getActivity().getApplicationContext();
             mMemeTitleView = (TextView) mView.findViewById(R.id.detail_meme_title);
             mMoneyView = (TextView) mView.findViewById(R.id.detail_meme_price);
             mImageView = (AppCompatImageButton) mView.findViewById(R.id.memeIcon);
@@ -105,13 +125,151 @@ public class MemeDetailsFragment extends Fragment {
             mBuyButton = (Button) mView.findViewById(R.id.buy_stock_button);
             mGraphTitle = (TextView) mView.findViewById(R.id.graphTitle);
             mGraphView = (GraphView) mView.findViewById(R.id.graph);
+            mDayButton = (ToggleButton) mView.findViewById(R.id.DayButton);
+            mWeekButton = (ToggleButton) mView.findViewById(R.id.WeekButton);
+            mMonthButton = (ToggleButton) mView.findViewById(R.id.MonthButton);
+            mYearButton = (ToggleButton) mView.findViewById(R.id.YearButton);
 
             mMemeTitleView.setText(mMemeName);
             mMoneyView.setText("$"+mMemePrice.toString());
 
+            mStocksOwnedView.setText(mStocksOwned.toString());
+            mGraphTitle.setText(mMemeName + "'s stock trend" );
+
             String iconName = "icon_" + mMemeName.replaceAll(" ", "_").toLowerCase();
             int iconId = getResources().getIdentifier(iconName, "drawable", MainActivity.PACKAGE_NAME);
             mImageView.setImageResource(iconId);
+
+            mDayButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        mWeekButton.setChecked(false);
+                        mMonthButton.setChecked(false);
+                        mYearButton.setChecked(false);
+                        mDateRange = com.robthecornallgmail.memarket.Activities.DateRange.DAY;
+
+                        mGraphView.removeAllSeries();
+                        mGraphView.addSeries(mCurrentSeries);
+                        mGraphView.getGridLabelRenderer().setNumHorizontalLabels(6); //spacing
+                        Calendar cal = Calendar.getInstance();
+                        Date start = cal.getTime();
+                        cal.add(Calendar.HOUR, -24);
+                        Date end = cal.getTime();
+                        mGraphView.getViewport().setMaxX(start.getTime());
+                        mGraphView.getViewport().setMinX(end.getTime());
+                        // refresh graph (its glitchy)
+                        mGraphView.refreshDrawableState();
+                        mGraphView.removeAllSeries();
+                        mGraphView.addSeries(mCurrentSeries);
+                        mGraphView.refreshDrawableState();
+                    } else {
+
+                    }
+                }
+            });
+            mWeekButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        mDayButton.setChecked(false);
+                        mMonthButton.setChecked(false);
+                        mYearButton.setChecked(false);
+                        mDateRange = com.robthecornallgmail.memarket.Activities.DateRange.WEEK;
+
+                        mGraphView.removeAllSeries();
+                        mGraphView.addSeries(mCurrentSeries);
+                        mGraphView.getGridLabelRenderer().setNumHorizontalLabels(4); //spacing
+                        Calendar cal = Calendar.getInstance();
+                        Date start = cal.getTime();
+                        cal.add(Calendar.DAY_OF_YEAR, -7);
+                        Date end = cal.getTime();
+                        mGraphView.getViewport().setMaxX(start.getTime());
+                        mGraphView.getViewport().setMinX(end.getTime());
+                        // refresh graph (its glitchy)
+                        mGraphView.refreshDrawableState();
+                        mGraphView.removeAllSeries();
+                        mGraphView.addSeries(mCurrentSeries);
+                        mGraphView.refreshDrawableState();
+
+
+                    } else {
+
+                    }
+                }
+            });
+            mMonthButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        mDayButton.setChecked(false);
+                        mWeekButton.setChecked(false);
+                        mYearButton.setChecked(false);
+                        mDateRange = com.robthecornallgmail.memarket.Activities.DateRange.MONTH;
+
+                        mGraphView.removeAllSeries();
+                        mGraphView.addSeries(mCurrentSeries);
+                        mGraphView.getGridLabelRenderer().setNumHorizontalLabels(4); //spacing
+                        Calendar cal = Calendar.getInstance();
+                        Date start = cal.getTime();
+                        cal.add(Calendar.DAY_OF_YEAR, -30);
+                        Date end = cal.getTime();
+                        mGraphView.getViewport().setMaxX(start.getTime());
+                        mGraphView.getViewport().setMinX(end.getTime());
+                        // refresh graph (its glitchy)
+                        mGraphView.refreshDrawableState();
+                        mGraphView.removeAllSeries();
+                        mGraphView.addSeries(mCurrentSeries);
+                        mGraphView.refreshDrawableState();
+                    } else {
+
+                    }
+                }
+            });
+            mYearButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        mDayButton.setChecked(false);
+                        mWeekButton.setChecked(false);
+                        mMonthButton.setChecked(false);
+                        mDateRange = com.robthecornallgmail.memarket.Activities.DateRange.YEAR;
+
+                        mGraphView.removeAllSeries();
+                        mGraphView.addSeries(mCurrentSeries);
+                        mGraphView.getGridLabelRenderer().setNumHorizontalLabels(4); //
+                        Calendar cal = Calendar.getInstance();
+                        Date start = cal.getTime();
+                        cal.add(Calendar.YEAR, -1);
+                        Date end = cal.getTime();
+                        mGraphView.getViewport().setMaxX(start.getTime());
+                        mGraphView.getViewport().setMinX(end.getTime());
+                        // refresh graph (its glitchy)
+                        mGraphView.refreshDrawableState();
+                        mGraphView.removeAllSeries();
+                        mGraphView.addSeries(mCurrentSeries);
+                        mGraphView.refreshDrawableState();
+                    } else {
+
+                    }
+                }
+            });
+//            mBuyButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//                if (mApplication.userData.getMoney() < mMemeNametoStockMap.get(mSelectedName) + 5)
+//                {
+//                    Toast.makeText(getBaseContext(), "Not enough money!",
+//                            Toast.LENGTH_SHORT).show();
+//                }
+//                else
+//                {
+//                    new PurchaseStockFromServer(mApplication.userData.getID(), mMemeNametoIDMap.get(mSelectedName), 1).execute(Defines.SERVER_ADDRESS + "/purchaseStock.php");
+//                }
+//
+//            }
+//            });
             return mView;
         } catch (Exception e) {
             e.printStackTrace();
@@ -120,11 +278,7 @@ public class MemeDetailsFragment extends Fragment {
     }
 
     // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onMemeDetailsFragmentInteraction(uri);
-        }
-    }
+
 
     @Override
     public void onAttach(Context context) {
@@ -147,6 +301,7 @@ public class MemeDetailsFragment extends Fragment {
         // remove old mMemeIDtoSeriesMap.get(mMemeID)(line)
         mDateRange = dateRange;
                 mGraphView.removeAllSeries();
+                mCurrentSeries = dataPointLineGraphSeries;
                 mGraphView.addSeries(dataPointLineGraphSeries);
                 // set date label formatter
 
@@ -188,6 +343,16 @@ public class MemeDetailsFragment extends Fragment {
                 mGraphView.getViewport().setMaxX(start.getTime());
                 mGraphView.getViewport().setMinX(end.getTime());
     }
+
+    public void updateOwned(Map<Integer, Integer> owned, Map<String , Integer> nametoID) {
+        mMemeIDtoAmountHeld = owned;
+        mMemeNametoIDMap = nametoID;
+    }
+
+    public void updateStocksOwned(Integer owned) {
+        mStocksOwnedView.setText(owned.toString());
+    }
+
 
     /**
      * This interface must be implemented by activities that contain this

@@ -110,42 +110,9 @@ public class ListMemesFragment extends Fragment {
         super.onDetach();
         mListener = null;
     }
-    private void prepareMemeRowData() {
-        MemeRow movie = new MemeRow("Mad Max: Fury Road", 25);
-        memeRowList.add(movie);
-
-        movie = new MemeRow("Inside Out", 3);
-        memeRowList.add(movie);
-
-        movie = new MemeRow("Star Wars: Episode VII - The Force Awakens", 5);
-        memeRowList.add(movie);
-
-        movie = new MemeRow("Shaun the Sheep", 234);
-        memeRowList.add(movie);
-
-        movie = new MemeRow("The Martian", 234);
-        memeRowList.add(movie);
-
-        movie = new MemeRow("Mission: Impossible Rogue Nation", 3);
-        memeRowList.add(movie);
-
-        movie = new MemeRow("Up", 4);
-        memeRowList.add(movie);
-
-        movie = new MemeRow("Star Trek",67);
-        memeRowList.add(movie);
-
-        movie = new MemeRow("The LEGO MemeRow", 77);
-        memeRowList.add(movie);
-
-        movie = new MemeRow("Iron Man", 77);
-        memeRowList.add(movie);
-
-        mAdapter.notifyDataSetChanged();
-    }
 
     public void updateList(Map<String, Integer> map) {
-
+        memeRowList.clear();
         for (Map.Entry<String , Integer> entry: map.entrySet()) {
             MemeRow meme = new MemeRow(entry.getKey(), entry.getValue());
             memeRowList.add(meme);
