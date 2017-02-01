@@ -12,12 +12,13 @@ import com.robthecornallgmail.memarket.R;
 
 public class MainActivity extends AppCompatActivity
 {
-
+    public static String PACKAGE_NAME;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        PACKAGE_NAME = getApplicationContext().getPackageName();
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
 

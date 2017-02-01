@@ -2,18 +2,28 @@ package com.robthecornallgmail.memarket.Activities;
 
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.graphics.drawable.AnimationDrawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageButton;
+import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
@@ -45,7 +55,11 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+import com.robthecornallgmail.memarket.Fragments.ListMemesFragment;
+import com.robthecornallgmail.memarket.Fragments.MemeDetailsFragment;
+import com.robthecornallgmail.memarket.Fragments.MemesListAdapter;
 import com.robthecornallgmail.memarket.Util.MemePastData;
+import com.robthecornallgmail.memarket.Util.MemeRow;
 import com.robthecornallgmail.memarket.Util.MyApplication;
 import com.robthecornallgmail.memarket.Util.MyHelper;
 import com.robthecornallgmail.memarket.R;
@@ -57,7 +71,7 @@ import org.w3c.dom.Text;
 
 import com.robthecornallgmail.memarket.Util.Defines;
 
-public class MenuActivity extends AppCompatActivity
+public class MenuActivity extends AppCompatActivity implements ListMemesFragment.OnListFragmentInteractionListener, MemeDetailsFragment.OnFragmentInteractionListener
 {
     private MyApplication mApplication;
 
@@ -66,6 +80,8 @@ public class MenuActivity extends AppCompatActivity
     private Spinner memeChoicesSpinner;
     private Button mSettingsWheelButton;
     private GraphView mGraphView;
+    private TextView mMemeTitleView;
+    private TextView mMoneyView;
     private GetGraphData mGetGraphTask;
     private DateRange mDateRange = DateRange.DAY;
     private Map<String, Integer> mMemeNametoIDMap = new HashMap<>();
@@ -75,9 +91,51 @@ public class MenuActivity extends AppCompatActivity
 
     private String mSelectedName;
     private Integer mSelectedMemeID;
+    EditText mSearchView;
+
+    final ListMemesFragment mMemeListFragment  = new ListMemesFragment();
+    MemeDetailsFragment mMemeDetailsFragment;
 
     // map meme IDs to their respective past Data from server.
     private Map<Integer, MemePastData> mGraphDataObjectMap = new HashMap<>();
+
+    @Override
+    public void onListFragmentInteraction(MemeRow row)
+    {
+
+        mMemeDetailsFragment = MemeDetailsFragment.newInstance(row.getName(), row.getPrice());
+        Log.v(TAG, "onListFragmentInteraction called" + row.getName());
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(R.anim.enter_from_bottom, 0);
+        transaction.addToBackStack(null);
+        transaction.add(R.id.meme_details_fragment, mMemeDetailsFragment);
+        transaction.commit();
+        mSearchView.setVisibility(View.GONE);
+
+        try {
+            if (!mGraphDataObjectMap.get(mMemeNametoIDMap.get(row.getName())).isDoneAlready()) {
+                mGetGraphTask = new GetGraphData(mMemeNametoIDMap.get(row.getName()));
+                mGetGraphTask.execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
+            }
+            else
+            {
+
+                //still need to refresh graph with newly selected meme's data previously stored
+                mGraphView.removeAllSeries();
+                mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(row.getName())));
+            }
+        } catch (NullPointerException e) {
+            //we didnt load data into that mMemeNametoIDMap.get(mSelectedName) yet.
+            mGetGraphTask = new GetGraphData(mMemeNametoIDMap.get(row.getName()));
+            mGetGraphTask.execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
+        }
+    }
+    @Override
+    public void onMemeDetailsFragmentInteraction(Uri uri)
+    {
+        Log.v(TAG, "onListFragmentInteraction called");
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -89,7 +147,7 @@ public class MenuActivity extends AppCompatActivity
 //        setSupportActionBar(toolbar);
 
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mGraphView = (GraphView) findViewById(R.id.graph);
+//        mGraphView = (GraphView) findViewById(R.id.graph);
 
         mSettingsWheelButton = (Button) findViewById(R.id.settings_button);
         mSettingsWheelButton.setOnClickListener(new View.OnClickListener() {
@@ -115,257 +173,293 @@ public class MenuActivity extends AppCompatActivity
             }
         });
 
+
+        final ImageView characterIcon = (ImageView) findViewById(R.id.character_icon);
+        characterIcon.post(new Runnable() {
+            @Override
+            public void run() {
+                // start the blinking animation..
+                ((AnimationDrawable) characterIcon.getBackground()).start();
+            }
+        });
+
         TextView username = (TextView) findViewById(R.id.username_text);
         username.setText(mApplication.userData.getUsername());
 
         final TextView money = (TextView) findViewById(R.id.money_text);
         money.setText("$" + mApplication.userData.getMoney().toString());
 
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-        memeChoicesSpinner = (Spinner) findViewById(R.id.memeChoicesSpinner);
-        memeChoicesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        transaction.add(R.id.meme_list_fragment, mMemeListFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+        mSearchView = (EditText) findViewById(R.id.search_meme_view);
+
+        mSearchView.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id)
-            {
-//                Log.v(TAG, "wut");
-//                if (initialDisplay == true)
-//                {
-//                    Log.v(TAG",TAGcalled INITIALLYYYYYYYY........");
-//                    initialDisplay = false;
-//                    return;
-//                }
-                mSelectedName = parentView.getItemAtPosition(position).toString();
-                try {
-                    mSelectedMemeID = mMemeNametoIDMap.get(mSelectedName);
-                } catch (NullPointerException e)
-                {
-                    e.printStackTrace();
-                }
-                Log.v(TAG, "test:10 guy. " + "real:" + mSelectedName + ".");
-                TextView stockTextView = (TextView) findViewById(R.id.dataFromServer);
-                String stockView = mSelectedName + String.format(Locale.US, "'s current stock is %d", mMemeNametoStockMap.get(mSelectedName));
-                stockTextView.setText(stockView);
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-                TextView circleStockView = (TextView) findViewById(R.id.circle_stock_thing);
-                circleStockView.setText("$" + mMemeNametoStockMap.get(mSelectedName).toString());
-
-                TextView sharesOwnedView = (TextView) findViewById(R.id.shares_owned);
-                try {
-                    sharesOwnedView.setText("Shares Currently Held = " + mMemeIDtoAmountHeld.get(mSelectedMemeID).toString());
-                } catch (NullPointerException e) {
-                    sharesOwnedView.setText("Shares Currently Held = 0");
-                            e.printStackTrace();
-                }
-
-                TextView graphTitle = (TextView) findViewById(R.id.graphTitle);
-                graphTitle.setText(mSelectedName);
-
-                // get mSelectedName of icon jpg or png
-                String iconName = "icon_" + mSelectedName.replaceAll(" ", "_").toLowerCase();
-                int iconId = getResources().getIdentifier(iconName, "drawable", getPackageName());
-                AppCompatImageButton memeIcon = (AppCompatImageButton) findViewById(R.id.memeIcon);
-                memeIcon.setImageResource(iconId);
-
-                // fill graph with data of past (day, month?)
-                try {
-                    if (!mGraphDataObjectMap.get(mMemeNametoIDMap.get(mSelectedName)).isDoneAlready()) {
-                        mGetGraphTask = new GetGraphData(mMemeNametoIDMap.get(mSelectedName));
-                        mGetGraphTask.execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
-                    }
-                    else
-                    {
-                        //still need to refresh graph with newly selected meme's data previously stored
-                        mGraphView.removeAllSeries();
-                        mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
-                    }
-                } catch (NullPointerException e) {
-                    //we didnt load data into that mMemeNametoIDMap.get(mSelectedName) yet.
-                    mGetGraphTask = new GetGraphData(mMemeNametoIDMap.get(mSelectedName));
-                    mGetGraphTask.execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
-                }
-
-//                mGraphDataObjectMap.get(3).pastMonthData
-
-                return;
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parentView) {
-                // your code here
-                return;
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                mMemeListFragment.filter(s.toString());
             }
-        });
 
-        final ToggleButton dayButton = (ToggleButton) findViewById(R.id.DayButton);
-        final ToggleButton weekButton = (ToggleButton) findViewById(R.id.WeekButton);
-        final ToggleButton monthButton = (ToggleButton) findViewById(R.id.MonthButton);
-        final ToggleButton yearButton = (ToggleButton) findViewById(R.id.YearButton);
-        dayButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    weekButton.setChecked(false);
-                    monthButton.setChecked(false);
-                    yearButton.setChecked(false);
-                    mDateRange = com.robthecornallgmail.memarket.Activities.DateRange.DAY;
-
-                    mGraphView.removeAllSeries();
-                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
-                    mGraphView.getGridLabelRenderer().setNumHorizontalLabels(6); //spacing
-                    Calendar cal = Calendar.getInstance();
-                    Date start = cal.getTime();
-                    cal.add(Calendar.HOUR, -24);
-                    Date end = cal.getTime();
-                    mGraphView.getViewport().setMaxX(start.getTime());
-                    mGraphView.getViewport().setMinX(end.getTime());
-                    // refresh graph (its glitchy)
-                    mGraphView.refreshDrawableState();
-                    mGraphView.removeAllSeries();
-                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
-                    mGraphView.refreshDrawableState();
-                } else {
-
-                }
-            }
-        });
-        weekButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    dayButton.setChecked(false);
-                    monthButton.setChecked(false);
-                    yearButton.setChecked(false);
-                    mDateRange = com.robthecornallgmail.memarket.Activities.DateRange.WEEK;
-
-                    mGraphView.removeAllSeries();
-                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
-                    mGraphView.getGridLabelRenderer().setNumHorizontalLabels(4); //spacing
-                    Calendar cal = Calendar.getInstance();
-                    Date start = cal.getTime();
-                    cal.add(Calendar.DAY_OF_YEAR, -7);
-                    Date end = cal.getTime();
-                    mGraphView.getViewport().setMaxX(start.getTime());
-                    mGraphView.getViewport().setMinX(end.getTime());
-                    // refresh graph (its glitchy)
-                    mGraphView.refreshDrawableState();
-                    mGraphView.removeAllSeries();
-                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
-                    mGraphView.refreshDrawableState();
-
-
-                } else {
-
-                }
-            }
-        });
-        monthButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    dayButton.setChecked(false);
-                    weekButton.setChecked(false);
-                    yearButton.setChecked(false);
-                    mDateRange = com.robthecornallgmail.memarket.Activities.DateRange.MONTH;
-
-                    mGraphView.removeAllSeries();
-                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
-                    mGraphView.getGridLabelRenderer().setNumHorizontalLabels(4); //spacing
-                    Calendar cal = Calendar.getInstance();
-                    Date start = cal.getTime();
-                    cal.add(Calendar.DAY_OF_YEAR, -30);
-                    Date end = cal.getTime();
-                    mGraphView.getViewport().setMaxX(start.getTime());
-                    mGraphView.getViewport().setMinX(end.getTime());
-                    // refresh graph (its glitchy)
-                    mGraphView.refreshDrawableState();
-                    mGraphView.removeAllSeries();
-                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
-                    mGraphView.refreshDrawableState();
-                } else {
-
-                }
-            }
-        });
-        yearButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    dayButton.setChecked(false);
-                    weekButton.setChecked(false);
-                    monthButton.setChecked(false);
-                    mDateRange = com.robthecornallgmail.memarket.Activities.DateRange.YEAR;
-
-                    mGraphView.removeAllSeries();
-                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
-                    mGraphView.getGridLabelRenderer().setNumHorizontalLabels(4); //
-                    Calendar cal = Calendar.getInstance();
-                    Date start = cal.getTime();
-                    cal.add(Calendar.YEAR, -1);
-                    Date end = cal.getTime();
-                    mGraphView.getViewport().setMaxX(start.getTime());
-                    mGraphView.getViewport().setMinX(end.getTime());
-                    // refresh graph (its glitchy)
-                    mGraphView.refreshDrawableState();
-                    mGraphView.removeAllSeries();
-                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
-                    mGraphView.refreshDrawableState();
-                } else {
-
-                }
-            }
-        });
-
-        Button buyStock = (Button) findViewById(R.id.buy_stock_button);
-        buyStock.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                v.startAnimation(Defines.buttonClick);
-                if (mApplication.userData.getMoney() < mMemeNametoStockMap.get(mSelectedName) + 5)
-                {
-                    Toast.makeText(getBaseContext(), "Not enough money!",
-                            Toast.LENGTH_SHORT).show();
-                }
-                else
-                {
-                    new PurchaseStockFromServer(mApplication.userData.getID(), mMemeNametoIDMap.get(mSelectedName), 1).execute(Defines.SERVER_ADDRESS + "/purchaseStock.php");
-                }
-
-            }
-        });
-        Button sellStock = (Button) findViewById(R.id.sell_stock_button);
-        sellStock.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Integer memeID = mMemeNametoIDMap.get(mSelectedName);
-                v.startAnimation(Defines.buttonClick);
-                if (mApplication.userData.getMoney() < mMemeNametoStockMap.get(mSelectedName) + 5)
-                {
-                    Toast.makeText(getBaseContext(), "Not enough money!",
-                            Toast.LENGTH_SHORT).show();
-                }
-                else
-                {
-                    try {
-                        Integer currentAmount = mMemeIDtoAmountHeld.get(memeID);
-                        if (currentAmount > 0)
-                            new PurchaseStockFromServer(mApplication.userData.getID(), memeID, 1).execute(Defines.SERVER_ADDRESS + "/sellStock.php");
-                    } catch (NullPointerException e) {
-                        // cannot sell if the user doesnt own any stock to sell.
-                        e.printStackTrace();
-                    }
-                }
+            public void afterTextChanged(Editable s) {
 
             }
         });
 
         new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getData.php?action", "GETTING_DATA");
 
-        new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getUserStocks.php?user=" + mApplication.userData.getID(), "GETTING_USER_STOCKS");
 
+
+
+//        memeChoicesSpinner = (Spinner) findViewById(R.id.memeChoicesSpinner);
+//        memeChoicesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id)
+//            {
+////                Log.v(TAG, "wut");
+////                if (initialDisplay == true)
+////                {
+////                    Log.v(TAG",TAGcalled INITIALLYYYYYYYY........");
+////                    initialDisplay = false;
+////                    return;
+////                }
+//                mSelectedName = parentView.getItemAtPosition(position).toString();
+//                try {
+//                    mSelectedMemeID = mMemeNametoIDMap.get(mSelectedName);
+//                } catch (NullPointerException e)
+//                {
+//                    e.printStackTrace();
+//                }
+//                Log.v(TAG, "test:10 guy. " + "real:" + mSelectedName + ".");
+//                TextView stockTextView = (TextView) findViewById(R.id.dataFromServer);
+//                String stockView = mSelectedName + String.format(Locale.US, "'s current stock is %d", mMemeNametoStockMap.get(mSelectedName));
+//                stockTextView.setText(stockView);
+//
+//                TextView circleStockView = (TextView) findViewById(R.id.circle_stock_thing);
+//                circleStockView.setText("$" + mMemeNametoStockMap.get(mSelectedName).toString());
+//
+//                TextView sharesOwnedView = (TextView) findViewById(R.id.shares_owned);
+//                try {
+//                    sharesOwnedView.setText("Shares Currently Held = " + mMemeIDtoAmountHeld.get(mSelectedMemeID).toString());
+//                } catch (NullPointerException e) {
+//                    sharesOwnedView.setText("Shares Currently Held = 0");
+//                            e.printStackTrace();
+//                }
+//
+//                TextView graphTitle = (TextView) findViewById(R.id.graphTitle);
+//                graphTitle.setText(mSelectedName);
+//
+//                // get mSelectedName of icon jpg or png
+//                String iconName = "icon_" + mSelectedName.replaceAll(" ", "_").toLowerCase();
+//                int iconId = getResources().getIdentifier(iconName, "drawable", getPackageName());
+//                AppCompatImageButton memeIcon = (AppCompatImageButton) findViewById(R.id.memeIcon);
+//                memeIcon.setImageResource(iconId);
+//
+//                // fill graph with data of past (day, month?)
+//                try {
+//                    if (!mGraphDataObjectMap.get(mMemeNametoIDMap.get(mSelectedName)).isDoneAlready()) {
+//                        mGetGraphTask = new GetGraphData(mMemeNametoIDMap.get(mSelectedName));
+//                        mGetGraphTask.execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
+//                    }
+//                    else
+//                    {
+//                        //still need to refresh graph with newly selected meme's data previously stored
+//                        mGraphView.removeAllSeries();
+//                        mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
+//                    }
+//                } catch (NullPointerException e) {
+//                    //we didnt load data into that mMemeNametoIDMap.get(mSelectedName) yet.
+//                    mGetGraphTask = new GetGraphData(mMemeNametoIDMap.get(mSelectedName));
+//                    mGetGraphTask.execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
+//                }
+//
+////                mGraphDataObjectMap.get(3).pastMonthData
+//
+//                return;
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parentView) {
+//                // your code here
+//                return;
+//            }
+//        });
+//
+//        final ToggleButton dayButton = (ToggleButton) findViewById(R.id.DayButton);
+//        final ToggleButton weekButton = (ToggleButton) findViewById(R.id.WeekButton);
+//        final ToggleButton monthButton = (ToggleButton) findViewById(R.id.MonthButton);
+//        final ToggleButton yearButton = (ToggleButton) findViewById(R.id.YearButton);
+//        dayButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                if (isChecked) {
+//                    weekButton.setChecked(false);
+//                    monthButton.setChecked(false);
+//                    yearButton.setChecked(false);
+//                    mDateRange = com.robthecornallgmail.memarket.Activities.DateRange.DAY;
+//
+//                    mGraphView.removeAllSeries();
+//                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
+//                    mGraphView.getGridLabelRenderer().setNumHorizontalLabels(6); //spacing
+//                    Calendar cal = Calendar.getInstance();
+//                    Date start = cal.getTime();
+//                    cal.add(Calendar.HOUR, -24);
+//                    Date end = cal.getTime();
+//                    mGraphView.getViewport().setMaxX(start.getTime());
+//                    mGraphView.getViewport().setMinX(end.getTime());
+//                    // refresh graph (its glitchy)
+//                    mGraphView.refreshDrawableState();
+//                    mGraphView.removeAllSeries();
+//                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
+//                    mGraphView.refreshDrawableState();
+//                } else {
+//
+//                }
+//            }
+//        });
+//        weekButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                if (isChecked) {
+//                    dayButton.setChecked(false);
+//                    monthButton.setChecked(false);
+//                    yearButton.setChecked(false);
+//                    mDateRange = com.robthecornallgmail.memarket.Activities.DateRange.WEEK;
+//
+//                    mGraphView.removeAllSeries();
+//                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
+//                    mGraphView.getGridLabelRenderer().setNumHorizontalLabels(4); //spacing
+//                    Calendar cal = Calendar.getInstance();
+//                    Date start = cal.getTime();
+//                    cal.add(Calendar.DAY_OF_YEAR, -7);
+//                    Date end = cal.getTime();
+//                    mGraphView.getViewport().setMaxX(start.getTime());
+//                    mGraphView.getViewport().setMinX(end.getTime());
+//                    // refresh graph (its glitchy)
+//                    mGraphView.refreshDrawableState();
+//                    mGraphView.removeAllSeries();
+//                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
+//                    mGraphView.refreshDrawableState();
+//
+//
+//                } else {
+//
+//                }
+//            }
+//        });
+//        monthButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                if (isChecked) {
+//                    dayButton.setChecked(false);
+//                    weekButton.setChecked(false);
+//                    yearButton.setChecked(false);
+//                    mDateRange = com.robthecornallgmail.memarket.Activities.DateRange.MONTH;
+//
+//                    mGraphView.removeAllSeries();
+//                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
+//                    mGraphView.getGridLabelRenderer().setNumHorizontalLabels(4); //spacing
+//                    Calendar cal = Calendar.getInstance();
+//                    Date start = cal.getTime();
+//                    cal.add(Calendar.DAY_OF_YEAR, -30);
+//                    Date end = cal.getTime();
+//                    mGraphView.getViewport().setMaxX(start.getTime());
+//                    mGraphView.getViewport().setMinX(end.getTime());
+//                    // refresh graph (its glitchy)
+//                    mGraphView.refreshDrawableState();
+//                    mGraphView.removeAllSeries();
+//                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
+//                    mGraphView.refreshDrawableState();
+//                } else {
+//
+//                }
+//            }
+//        });
+//        yearButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                if (isChecked) {
+//                    dayButton.setChecked(false);
+//                    weekButton.setChecked(false);
+//                    monthButton.setChecked(false);
+//                    mDateRange = com.robthecornallgmail.memarket.Activities.DateRange.YEAR;
+//
+//                    mGraphView.removeAllSeries();
+//                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
+//                    mGraphView.getGridLabelRenderer().setNumHorizontalLabels(4); //
+//                    Calendar cal = Calendar.getInstance();
+//                    Date start = cal.getTime();
+//                    cal.add(Calendar.YEAR, -1);
+//                    Date end = cal.getTime();
+//                    mGraphView.getViewport().setMaxX(start.getTime());
+//                    mGraphView.getViewport().setMinX(end.getTime());
+//                    // refresh graph (its glitchy)
+//                    mGraphView.refreshDrawableState();
+//                    mGraphView.removeAllSeries();
+//                    mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
+//                    mGraphView.refreshDrawableState();
+//                } else {
+//
+//                }
+//            }
+//        });
+//
+//        Button buyStock = (Button) findViewById(R.id.buy_stock_button);
+//        buyStock.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (mApplication.userData.getMoney() < mMemeNametoStockMap.get(mSelectedName) + 5)
+//                {
+//                    Toast.makeText(getBaseContext(), "Not enough money!",
+//                            Toast.LENGTH_SHORT).show();
+//                }
+//                else
+//                {
+//                    new PurchaseStockFromServer(mApplication.userData.getID(), mMemeNametoIDMap.get(mSelectedName), 1).execute(Defines.SERVER_ADDRESS + "/purchaseStock.php");
+//                }
+//
+//            }
+//        });
+//        Button sellStock = (Button) findViewById(R.id.sell_stock_button);
+//        sellStock.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Integer memeID = mMemeNametoIDMap.get(mSelectedName);
+//                try {
+//                    Integer currentAmount = mMemeIDtoAmountHeld.get(memeID);
+//                    if (currentAmount > 0)
+//                        new PurchaseStockFromServer(mApplication.userData.getID(), memeID, 1).execute(Defines.SERVER_ADDRESS + "/sellStock.php");
+//                } catch (NullPointerException e) {
+//                    // cannot sell if the user doesnt own any stock to sell.
+//                    e.printStackTrace();
+//                    Toast.makeText(getBaseContext(), "No Shares to Sell!",
+//                            Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        });
+//
+//        new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getData.php?action", "GETTING_DATA");
+//
+//        new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getUserStocks.php?user=" + mApplication.userData.getID(), "GETTING_USER_STOCKS");
+//
     }
     @Override
     public void onBackPressed() {
-        moveTaskToBack(true);
+        FragmentManager fm = getSupportFragmentManager();
+        if (fm.getBackStackEntryCount() == 2) {
+            Log.i("MainActivity", "popping backstack");
+            fm.popBackStackImmediate();
+            mSearchView.setVisibility(View.VISIBLE);
+        } else {
+            moveTaskToBack(true);
+        }
     }
 
 
@@ -467,20 +561,17 @@ public class MenuActivity extends AppCompatActivity
         {
             if (Result)
             {
-                TextView moneyTextView = (TextView) findViewById(R.id.money_text);
-                Animation shrinkAnim = AnimationUtils.loadAnimation(MenuActivity.this, R.anim.shrink_money);
-                shrinkAnim.reset();
-                Animation growAnim = AnimationUtils.loadAnimation(MenuActivity.this, R.anim.shrink_money);
-                growAnim.reset();
-
-                moneyTextView.clearAnimation();
-                moneyTextView.startAnimation(shrinkAnim);
-                moneyTextView.setText("$" + mNewMoney.toString());
-                moneyTextView.clearAnimation();
-                moneyTextView.startAnimation(growAnim);
-
-                TextView sharesOwnedView = (TextView) findViewById(R.id.shares_owned);
-                sharesOwnedView.setText("Shares Currently Held = " + mNewStocks);
+//                TextView moneyTextView = (TextView) findViewById(R.id.money_text);
+//                Animation shrinkAnim = AnimationUtils.loadAnimation(MenuActivity.this, R.anim.shrink_money);
+//                Animation growAnim = AnimationUtils.loadAnimation(MenuActivity.this, R.anim.shrink_money);
+//
+//                moneyTextView.clearAnimation();
+//                moneyTextView.startAnimation(shrinkAnim);
+//                moneyTextView.setText("$" + mNewMoney.toString());
+//                moneyTextView.startAnimation(growAnim);
+//
+//                TextView sharesOwnedView = (TextView) findViewById(R.id.shares_owned);
+//                sharesOwnedView.setText("Shares Currently Held = " + mNewStocks);
             }
             return;
         }
@@ -602,27 +693,30 @@ public class MenuActivity extends AppCompatActivity
 
             if (Result.success)
             {
-                populateSpinner();
-                Log.v(TAG, "Spinner was populated.......");
-
+//                mFraLgment = (ListMemesFragment) getSupportFragmentManager().findFragmentById(R.id.meme_list_fragment);
+                try {
+                    mMemeListFragment.updateList(mMemeNametoStockMap);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             else
             {
-                Log.e(TAG, "failed to get data");
-                TextView stockTextView = (TextView) findViewById(R.id.dataFromServer);
-                String error = String.format(Locale.US, "Error retrieving data from server:\n %s", Result.response);
-                stockTextView.setText(error);
-
-                AlertDialog alertDialog = new AlertDialog.Builder(MenuActivity.this, android.R.style.Theme_Holo_Dialog).create();
-                alertDialog.setTitle("Alert");
-                alertDialog.setMessage(Result.response);
-                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                alertDialog.show();
+//                Log.e(TAG, "failed to get data");
+//                TextView stockTextView = (TextView) findViewById(R.id.dataFromServer);
+//                String error = String.format(Locale.US, "Error retrieving data from server:\n %s", Result.response);
+//                stockTextView.setText(error);
+//
+//                AlertDialog alertDialog = new AlertDialog.Builder(MenuActivity.this, android.R.style.Theme_Holo_Dialog).create();
+//                alertDialog.setTitle("Alert");
+//                alertDialog.setMessage(Result.response);
+//                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+//                        new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                dialog.dismiss();
+//                            }
+//                        });
+//                alertDialog.show();
             }
         }
 
@@ -760,101 +854,118 @@ public class MenuActivity extends AppCompatActivity
 //            newTextView.setText(mMemeNametoStockMap.get("10 guy") + " --- ");
 
             Log.v(TAG,"Response is: " + Result.response);
-
             if (Result.success)
             {
-                mMemeIDtoSeriesMap.put(mMemeID, new LineGraphSeries<DataPoint>());
-//                populateSpinner();
-                Log.v(TAG, "graph data was got??.......");
-
-                for(Map.Entry<Date, Integer> entry : mGraphDataObjectMap.get(mMemeID).pastYearData.entrySet()) {
-                    mMemeIDtoSeriesMap.get(mMemeID).appendData(new DataPoint(entry.getKey(),entry.getValue()), true, 35040);
-                    Log.v(TAG , entry.getKey().toString());
-                    Log.v(TAG , entry.getValue().toString());
-                }
-                mMemeIDtoSeriesMap.get(mMemeID).setColor(ContextCompat.getColor(MenuActivity.this, R.color.monokaiBlue));
-                mMemeIDtoSeriesMap.get(mMemeID).setDrawDataPoints(true);
-                mMemeIDtoSeriesMap.get(mMemeID).setDataPointsRadius(10);
-                mMemeIDtoSeriesMap.get(mMemeID).setThickness(8);
-                // remove old mMemeIDtoSeriesMap.get(mMemeID)(line)
-                mGraphView.removeAllSeries();
-                mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeID));
-                // set date label formatter
-
-                mGraphView.getViewport().setScalable(true);
-                mGraphView.getViewport().setScrollable(true);
-
-                mGraphView.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(MenuActivity.this));
-                mGraphView.getGridLabelRenderer().setNumHorizontalLabels(6); // only 4 because of the space
-                mGraphView.getGridLabelRenderer().setTextSize(33);
-                mGraphView.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
-                    @Override
-                    public String formatLabel(double value, boolean isValueX) {
-                        // TODO Auto-generated method stub
-                        if (isValueX) {
-                            Date date = new Date((long) (value));
-                            Calendar calendar = Calendar.getInstance();
-                            calendar.setTime(date);
-                            Log.v(TAG, date.toString());
-                            SimpleDateFormat sdf = new SimpleDateFormat();
-                            if (mDateRange == DateRange.DAY) {
-                                sdf.applyPattern("h:mma");
-                            } else if (mDateRange == DateRange.WEEK) {
-                                sdf.applyPattern("E h:mma");
-                            } else if (mDateRange == DateRange.MONTH) {
-                                sdf.applyPattern("MMM dd, ha");
-                            } else /*(mDateRange == DateRange.YEAR)*/ {
-                                sdf.applyPattern("MMM d, ''yy");
-                            }
-                            return (sdf.format(date));
-                        } else {
-                            return "$" + (int) value;
-                        }
+                try {
+                    mMemeIDtoSeriesMap.put(mMemeID, new LineGraphSeries<DataPoint>());
+                    for(Map.Entry<Date, Integer> entry : mGraphDataObjectMap.get(mMemeID).pastYearData.entrySet()) {
+                        mMemeIDtoSeriesMap.get(mMemeID).appendData(new DataPoint(entry.getKey(),entry.getValue()), true, 35040);
+                        Log.v(TAG , entry.getKey().toString());
+                        Log.v(TAG , entry.getValue().toString());
                     }
-                });
-                Calendar cal = Calendar.getInstance();
-                Date start = cal.getTime();
-                cal.add(Calendar.HOUR, -24);
-                Date end = cal.getTime();
-                mGraphView.getViewport().setMaxX(start.getTime());
-                mGraphView.getViewport().setMinX(end.getTime());
-
+                    mMemeIDtoSeriesMap.get(mMemeID).setColor(ContextCompat.getColor(MenuActivity.this, R.color.monokaiBlue));
+                    mMemeIDtoSeriesMap.get(mMemeID).setDrawDataPoints(true);
+                    mMemeIDtoSeriesMap.get(mMemeID).setDataPointsRadius(10);
+                    mMemeIDtoSeriesMap.get(mMemeID).setThickness(8);
+                    mMemeDetailsFragment.updateGraph(mMemeIDtoSeriesMap.get(mMemeID),mDateRange);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-            else
-            {
-                Log.e(TAG, "failed to get data for graph");
 
-                AlertDialog alertDialog = new AlertDialog.Builder(MenuActivity.this, android.R.style.Theme_Holo_Dialog).create();
-                alertDialog.setTitle("Alert");
-                alertDialog.setMessage(Result.response);
-                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                alertDialog.show();
-            }
+//            {
+//                mMemeIDtoSeriesMap.put(mMemeID, new LineGraphSeries<DataPoint>());
+////                populateSpinner();
+//                Log.v(TAG, "graph data was got??.......");
+//
+//                for(Map.Entry<Date, Integer> entry : mGraphDataObjectMap.get(mMemeID).pastYearData.entrySet()) {
+//                    mMemeIDtoSeriesMap.get(mMemeID).appendData(new DataPoint(entry.getKey(),entry.getValue()), true, 35040);
+//                    Log.v(TAG , entry.getKey().toString());
+//                    Log.v(TAG , entry.getValue().toString());
+//                }
+//                mMemeIDtoSeriesMap.get(mMemeID).setColor(ContextCompat.getColor(MenuActivity.this, R.color.monokaiBlue));
+//                mMemeIDtoSeriesMap.get(mMemeID).setDrawDataPoints(true);
+//                mMemeIDtoSeriesMap.get(mMemeID).setDataPointsRadius(10);
+//                mMemeIDtoSeriesMap.get(mMemeID).setThickness(8);
+//                // remove old mMemeIDtoSeriesMap.get(mMemeID)(line)
+//                mGraphView.removeAllSeries();
+//                mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeID));
+//                // set date label formatter
+//
+//                mGraphView.getViewport().setScalable(true);
+//                mGraphView.getViewport().setScrollable(true);
+//
+//                mGraphView.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(MenuActivity.this));
+//                mGraphView.getGridLabelRenderer().setNumHorizontalLabels(6); // only 4 because of the space
+//                mGraphView.getGridLabelRenderer().setTextSize(33);
+//                mGraphView.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
+//                    @Override
+//                    public String formatLabel(double value, boolean isValueX) {
+//                        // TODO Auto-generated method stub
+//                        if (isValueX) {
+//                            Date date = new Date((long) (value));
+//                            Calendar calendar = Calendar.getInstance();
+//                            calendar.setTime(date);
+//                            Log.v(TAG, date.toString());
+//                            SimpleDateFormat sdf = new SimpleDateFormat();
+//                            if (mDateRange == DateRange.DAY) {
+//                                sdf.applyPattern("h:mma");
+//                            } else if (mDateRange == DateRange.WEEK) {
+//                                sdf.applyPattern("E h:mma");
+//                            } else if (mDateRange == DateRange.MONTH) {
+//                                sdf.applyPattern("MMM dd, ha");
+//                            } else /*(mDateRange == DateRange.YEAR)*/ {
+//                                sdf.applyPattern("MMM d, ''yy");
+//                            }
+//                            return (sdf.format(date));
+//                        } else {
+//                            return "$" + (int) value;
+//                        }
+//                    }
+//                });
+//                Calendar cal = Calendar.getInstance();
+//                Date start = cal.getTime();
+//                cal.add(Calendar.HOUR, -24);
+//                Date end = cal.getTime();
+//                mGraphView.getViewport().setMaxX(start.getTime());
+//                mGraphView.getViewport().setMinX(end.getTime());
+//
+//            }
+//            else
+//            {
+//                Log.e(TAG, "failed to get data for graph");
+//
+//                AlertDialog alertDialog = new AlertDialog.Builder(MenuActivity.this, android.R.style.Theme_Holo_Dialog).create();
+//                alertDialog.setTitle("Alert");
+//                alertDialog.setMessage(Result.response);
+//                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+//                        new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                dialog.dismiss();
+//                            }
+//                        });
+//                alertDialog.show();
+//            }
         }
 
 
     }
-    private void populateSpinner()
-    {
-        List<String> spinnerLables = new ArrayList<>();
-        for (String key : mMemeNametoStockMap.keySet()) {
-            spinnerLables.add(key);
-        }
-
-        //            Spinner memeChoicesSpinner = (Spinner) findViewById(R.id.memeChoicesSpinner);
-        // Creating adapter for spinner
-        Collections.sort(spinnerLables);
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, spinnerLables);
-        // Drop down layout style - list view with radio button
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        // attaching data adapter to spinner
-        memeChoicesSpinner.setAdapter(spinnerAdapter);
-    }
+//    private void populateSpinner()
+//    {
+//        List<String> spinnerLables = new ArrayList<>();
+//        for (String key : mMemeNametoStockMap.keySet()) {
+//            spinnerLables.add(key);
+//        }
+//
+//        //            Spinner memeChoicesSpinner = (Spinner) findViewById(R.id.memeChoicesSpinner);
+//        // Creating adapter for spinner
+//        Collections.sort(spinnerLables);
+//        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, spinnerLables);
+//        // Drop down layout style - list view with radio button
+//        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//
+//        // attaching data adapter to spinner
+//        memeChoicesSpinner.setAdapter(spinnerAdapter);
+//    }
 
 }

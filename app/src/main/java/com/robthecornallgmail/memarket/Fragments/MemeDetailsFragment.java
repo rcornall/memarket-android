@@ -1,0 +1,206 @@
+package com.robthecornallgmail.memarket.Fragments;
+
+import android.content.Context;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v7.widget.AppCompatImageButton;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
+
+import com.jjoe64.graphview.DefaultLabelFormatter;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
+import com.robthecornallgmail.memarket.Activities.DateRange;
+import com.robthecornallgmail.memarket.Activities.MainActivity;
+import com.robthecornallgmail.memarket.R;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
+/**
+ * A simple {@link Fragment} subclass.
+ * Activities that contain this fragment must implement the
+ * {@link MemeDetailsFragment.OnFragmentInteractionListener} interface
+ * to handle interaction events.
+ * Use the {@link MemeDetailsFragment#newInstance} factory method to
+ * create an instance of this fragment.
+ */
+public class MemeDetailsFragment extends Fragment {
+    // TODO: Rename parameter arguments, choose names that match
+    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    private static final String ARG_PARAM1 = "param1";
+    private static final String ARG_PARAM2 = "param2";
+    private static final String TAG = "Details";
+    // TODO: Rename and change types of parameters
+    private View mView;
+    private String mMemeName;
+    private Integer mMemePrice;
+    private TextView mMemeTitleView;
+    private TextView mMoneyView;
+    private AppCompatImageButton mImageView;
+    private TextView mStocksOwnedView;
+    private Button mSellButton;
+    private Button mBuyButton;
+    private TextView mGraphTitle;
+    private GraphView mGraphView;
+
+    private DateRange mDateRange;
+
+
+    private OnFragmentInteractionListener mListener;
+
+    public MemeDetailsFragment() {
+        // Required empty public constructor
+    }
+
+    /**
+     * Use this factory method to create a new instance of
+     * this fragment using the provided parameters.
+     *
+     * @param param1 Parameter 1.
+     * @param param2 Parameter 2.
+     * @return A new instance of fragment MemeDetailsFragment.
+     */
+    // TODO: Rename and change types and number of parameters
+    public static MemeDetailsFragment newInstance(String name, Integer price) {
+        MemeDetailsFragment fragment = new MemeDetailsFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_PARAM1, name);
+        args.putInt(ARG_PARAM2, price);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            mMemeName = getArguments().getString(ARG_PARAM1);
+            mMemePrice = getArguments().getInt(ARG_PARAM2);
+            Log.e(TAG, "memename: " + mMemeName);
+            Log.e(TAG, "memename: " + mMemePrice.toString());
+        }
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+
+        try {
+            mView = inflater.inflate(R.layout.fragment_meme_details, container, false);
+            mMemeTitleView = (TextView) mView.findViewById(R.id.detail_meme_title);
+            mMoneyView = (TextView) mView.findViewById(R.id.detail_meme_price);
+            mImageView = (AppCompatImageButton) mView.findViewById(R.id.memeIcon);
+            mStocksOwnedView = (TextView) mView.findViewById(R.id.stocks_owned);
+            mSellButton = (Button) mView.findViewById(R.id.sell_stock_button);
+            mBuyButton = (Button) mView.findViewById(R.id.buy_stock_button);
+            mGraphTitle = (TextView) mView.findViewById(R.id.graphTitle);
+            mGraphView = (GraphView) mView.findViewById(R.id.graph);
+
+            mMemeTitleView.setText(mMemeName);
+            mMoneyView.setText("$"+mMemePrice.toString());
+
+            String iconName = "icon_" + mMemeName.replaceAll(" ", "_").toLowerCase();
+            int iconId = getResources().getIdentifier(iconName, "drawable", MainActivity.PACKAGE_NAME);
+            mImageView.setImageResource(iconId);
+            return mView;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // TODO: Rename method, update argument and hook method into UI event
+    public void onButtonPressed(Uri uri) {
+        if (mListener != null) {
+            mListener.onMemeDetailsFragmentInteraction(uri);
+        }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnFragmentInteractionListener) {
+            mListener = (OnFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
+    public void updateGraph(LineGraphSeries<DataPoint> dataPointLineGraphSeries, DateRange dateRange) {
+        // remove old mMemeIDtoSeriesMap.get(mMemeID)(line)
+        mDateRange = dateRange;
+                mGraphView.removeAllSeries();
+                mGraphView.addSeries(dataPointLineGraphSeries);
+                // set date label formatter
+
+                mGraphView.getViewport().setScalable(true);
+                mGraphView.getViewport().setScrollable(true);
+
+                mGraphView.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(getContext()));
+                mGraphView.getGridLabelRenderer().setNumHorizontalLabels(6); // only 4 because of the space
+                mGraphView.getGridLabelRenderer().setTextSize(33);
+                mGraphView.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
+                    @Override
+                    public String formatLabel(double value, boolean isValueX) {
+                        // TODO Auto-generated method stub
+                        if (isValueX) {
+                            Date date = new Date((long) (value));
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.setTime(date);
+                            Log.v(TAG, date.toString());
+                            SimpleDateFormat sdf = new SimpleDateFormat();
+                            if (mDateRange == DateRange.DAY) {
+                                sdf.applyPattern("h:mma");
+                            } else if (mDateRange == DateRange.WEEK) {
+                                sdf.applyPattern("E h:mma");
+                            } else if (mDateRange == DateRange.MONTH) {
+                                sdf.applyPattern("MMM dd, ha");
+                            } else /*(mDateRange == DateRange.YEAR)*/ {
+                                sdf.applyPattern("MMM d, ''yy");
+                            }
+                            return (sdf.format(date));
+                        } else {
+                            return "$" + (int) value;
+                        }
+                    }
+                });
+                Calendar cal = Calendar.getInstance();
+                Date start = cal.getTime();
+                cal.add(Calendar.HOUR, -24);
+                Date end = cal.getTime();
+                mGraphView.getViewport().setMaxX(start.getTime());
+                mGraphView.getViewport().setMinX(end.getTime());
+    }
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        void onMemeDetailsFragmentInteraction(Uri uri);
+    }
+}

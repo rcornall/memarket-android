@@ -4,12 +4,14 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorMyGrey">#272822</color>
     <color name="colorMyOffGrey">#4d5346</color>
+    <color name="colorMyBetweenGrey">#33372f</color>
     <color name="pictureFrame">#0f1009</color>
     <color name="colorAccent">#ff4081</color>
     <color name="sublWhite">#d2d2ac</color>
     <color name="pumpkinSpice">#FD971F</color>
     <color name="monokaiGreen">#A6E22E</color>
     <color name="monokaiDarkGreen">#202d06</color>
+    <color name="backgroundGreen">#50700f</color>
     <color name="accent">#88cc00</color>
     <color name="monokaiBlue">#66D9EF</color>
     <color name="greenWhite">#e2f2d9</color>

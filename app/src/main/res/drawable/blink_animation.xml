@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list
+    android:oneshot="false"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:drawable="@drawable/character_icon_0"
+        android:duration="5000" />
+    <item
+        android:drawable="@drawable/character_icon_1"
+        android:duration="80" />
+    <item
+        android:drawable="@drawable/character_icon_2"
+        android:duration="80" />
+    <item
+        android:drawable="@drawable/character_icon_3"
+        android:duration="100" />
+    <item
+        android:drawable="@drawable/character_icon_4"
+        android:duration="100" />
+    <item
+        android:drawable="@drawable/character_icon_5"
+        android:duration="150" />
+    <item
+        android:drawable="@drawable/character_icon_4"
+        android:duration="60" />
+    <item
+        android:drawable="@drawable/character_icon_3"
+        android:duration="16" />
+    <item
+        android:drawable="@drawable/character_icon_2"
+        android:duration="30" />
+    <item
+        android:drawable="@drawable/character_icon_1"
+        android:duration="15" />
+</animation-list>

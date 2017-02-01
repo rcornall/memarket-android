@@ -12,21 +12,27 @@
         android:layout_height="match_parent">
         <LinearLayout
             android:id="@+id/TopBar"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:layout_marginLeft="@dimen/activity_horizontal_margin"
-            android:layout_marginTop="@dimen/activity_vertical_margin"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/spinnerHeight"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_height="69dp"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            >
+            android:layout_alignParentTop="true">
+            <android.support.v7.widget.AppCompatImageButton
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:scaleType="fitXY"
+                android:id="@+id/character_icon"
+                android:background="@drawable/blink_animation" />
             <TextView
                 android:id="@+id/username_text"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:maxLines="1"
                 android:text="Loading..."
                 android:textColor="@color/greenWhite"
-                android:textSize="30sp"/>
+                android:textSize="25sp"/>
             <View
                 android:layout_width="0dp"
                 android:layout_height="0dp"
@@ -34,238 +40,283 @@
             <TextView
                 android:id="@+id/money_text"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:text="Loading..."
                 android:textColor="@color/greenWhite"
                 android:textSize="20sp"/>
             <Button
                 android:id="@+id/settings_button"
-                android:layout_gravity="center"
                 android:minWidth="5dp"
                 android:gravity="center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="1dp"
+                android:layout_marginTop="5dp"
                 android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
                 android:background="@android:color/transparent"
                 android:drawableTop="@mipmap/ic_action_settings"
                 />
+        </LinearLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_below="@id/TopBar"
+            android:id="@+id/TopBarSeperator">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:alpha="0.3"
+                android:background="@color/backgroundGreen"/>
+        </RelativeLayout>
+        <LinearLayout
+            android:id="@+id/linearLayoutTabButtons"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:clickable="true"
+            android:layout_alignParentBottom="true"
+            >
+            <Button
+                android:text="Find memes"
+                style="@style/switch_tab_button_style"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="33.333333"/>
+            <View
+                android:layout_width="1dp"
+                android:layout_height="wrap_content"
+                android:background="@color/colorMyBetweenGrey"/>
+            <Button
+                android:text="STORE"
+                style="@style/switch_tab_button_style"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="33.333333"/>
+            <View
+                android:layout_width="1dp"
+                android:layout_height="wrap_content"
+                android:background="@color/colorMyBetweenGrey"/>
+            <Button
+                android:text="CHAT"
+                style="@style/switch_tab_button_style"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="33.333333"/>
+
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/TopBarSeperator"
+            android:layout_above="@id/linearLayoutTabButtons">
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/meme_details_fragment">
+
+            </FrameLayout>
+            <EditText
+                android:id="@+id/search_meme_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:hint="Search"
+                android:drawableLeft="@mipmap/search_icon"
+                android:drawablePadding="7dp"
+                android:textColorHint="#50700f"
+                android:maxLines="1"
+                />
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/meme_list_fragment">
+
+            </FrameLayout>
+
+
 
         </LinearLayout>
 
-        <RelativeLayout
-            android:id="@+id/content_menu"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingBottom="@dimen/activity_vertical_margin"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin"
-            android:layout_below="@id/TopBar"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            tools:context="com.robthecornallgmail.memarket.Activities.MenuActivity"
-            tools:showIn="@layout/activity_menu">
-
-            <Spinner
-                android:spinnerMode="dropdown"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/spinnerHeight"
-                android:id="@+id/memeChoicesSpinner"
-                />
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:alpha="0.8"
-                android:layout_alignBottom="@id/memeChoicesSpinner"
-                android:background="@android:color/darker_gray"/>
-            <View
-                android:layout_width="1dp"
-                android:layout_height="@dimen/spinnerHeight"
-                android:alpha="0.8"
-                android:layout_alignRight="@id/memeChoicesSpinner"
-                android:background="@android:color/darker_gray"/>
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginLeft="2dp"
-                android:layout_marginRight="5dp"
-                android:alpha="0.5"
-                android:layout_alignTop="@id/memeChoicesSpinner"
-                android:background="@color/colorMyOffGrey"
-                android:id="@+id/view" />
-            <View
-                android:layout_width="1dp"
-                android:layout_height="33dp"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="5dp"
-                android:alpha="0.5"
-                android:layout_alignLeft="@id/memeChoicesSpinner"
-                android:background="@color/colorMyOffGrey"/>
-            <GridLayout
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/image_and_description_height"
-                android:layout_marginTop="@dimen/activity_vertical_margin"
-                android:layout_below="@+id/memeChoicesSpinner"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:rowCount="1"
-                android:columnCount="2"
-                android:id="@+id/gridLayout">
-
-                <TextView
-                    android:id="@+id/dataFromServer"
-                    android:layout_columnWeight="0"
-                    android:layout_height="match_parent"
-                    android:layout_width="wrap_content"
-                    android:text="Loading..."
-                    android:ems="10"
-                    android:minLines="2"
-                    android:maxLines="6"
-                    android:ellipsize="none"
-                    android:scrollHorizontally="false"/>
+        <!--<RelativeLayout-->
+            <!--android:id="@+id/content_menu"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:paddingBottom="@dimen/activity_vertical_margin"-->
+            <!--android:paddingLeft="@dimen/activity_horizontal_margin"-->
+            <!--android:paddingRight="@dimen/activity_horizontal_margin"-->
+            <!--android:paddingTop="@dimen/activity_vertical_margin"-->
+            <!--android:layout_below="@id/TopBar"-->
+            <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
+            <!--tools:context="com.robthecornallgmail.memarket.Activities.MenuActivity"-->
+            <!--tools:showIn="@layout/activity_menu">-->
 
 
-                <android.support.v7.widget.AppCompatImageButton
-                    android:id="@+id/memeIcon"
-                    app:srcCompat="@drawable/icon_high_guy_meme"
-                    android:background="@android:drawable/picture_frame"
-                    android:backgroundTint="@color/pictureFrame"
-                    android:layout_width="130dp"
-                    android:layout_columnWeight="0"
-                    android:layout_gravity="right"
-                    android:scaleType="centerCrop"/>
-            </GridLayout>
+            <!--<GridLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="@dimen/image_and_description_height"-->
+                <!--android:layout_marginTop="@dimen/activity_vertical_margin"-->
+                <!--android:layout_below="@+id/memeChoicesSpinner"-->
+                <!--android:layout_alignParentLeft="true"-->
+                <!--android:layout_alignParentStart="true"-->
+                <!--android:rowCount="1"-->
+                <!--android:columnCount="2"-->
+                <!--android:id="@+id/gridLayout">-->
 
-            <TextView
-                android:id="@+id/circle_stock_thing"
-                android:layout_below="@id/gridLayout"
-                android:layout_width="100dp"
-                android:layout_height="60dp"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_centerHorizontal="true"
-                android:layout_gravity="center"
-                android:background="@drawable/stock_circle"
-                android:gravity="center"
-                android:shadowColor="@color/monokaiGreen"
-                android:text="@string/question_mark"
-                android:fontFamily="sans-serif"
-                android:textStyle="bold"
-                android:minHeight="14dp" android:minWidth="14dp" android:maxHeight="14dp"
-                android:textColor="@color/monokaiBlue"
-                android:textSize="34sp" />
+                <!--<TextView-->
+                    <!--android:id="@+id/dataFromServer"-->
+                    <!--android:layout_columnWeight="0"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:text="Loading..."-->
+                    <!--android:ems="10"-->
+                    <!--android:minLines="2"-->
+                    <!--android:maxLines="6"-->
+                    <!--android:ellipsize="none"-->
+                    <!--android:scrollHorizontally="false"/>-->
 
-            <Button
-                android:id="@+id/sell_stock_button"
-                android:text="SELL"
-                style="@style/login_button_style"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignLeft="@+id/view"
-                android:layout_alignStart="@+id/view"
-                android:layout_marginLeft="13dp"
-                android:layout_marginStart="13dp"
-                android:layout_toLeftOf="@+id/circle_stock_thing"
-                android:layout_toStartOf="@+id/circle_stock_thing"
-                android:layout_alignBottom="@+id/circle_stock_thing"
-                android:layout_below="@+id/gridLayout" />
 
-            <Button
-                android:id="@+id/buy_stock_button"
-                android:text="BUY"
-                style="@style/login_button_style"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="12dp"
-                android:layout_marginEnd="12dp"
-                android:layout_alignBottom="@+id/circle_stock_thing"
-                android:layout_alignRight="@+id/view"
-                android:layout_alignEnd="@+id/view"
-                android:layout_below="@+id/gridLayout"
-                android:layout_toRightOf="@+id/circle_stock_thing"
-                android:layout_toEndOf="@+id/circle_stock_thing" />
+                <!--<android.support.v7.widget.AppCompatImageButton-->
+                    <!--android:id="@+id/memeIcon"-->
+                    <!--app:srcCompat="@drawable/icon_high_guy_meme"-->
+                    <!--android:background="@android:drawable/picture_frame"-->
+                    <!--android:backgroundTint="@color/pictureFrame"-->
+                    <!--android:layout_width="130dp"-->
+                    <!--android:layout_columnWeight="0"-->
+                    <!--android:layout_gravity="right"-->
+                    <!--android:scaleType="centerCrop"/>-->
+            <!--</GridLayout>-->
 
-            <TextView
-                android:text="Loading..."
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
-                android:id="@+id/graphTitle"
-                android:layout_below="@+id/circle_stock_thing"
-                android:layout_alignRight="@+id/circle_stock_thing"
-                android:layout_alignEnd="@+id/circle_stock_thing" />
+            <!--<TextView-->
+                <!--android:id="@+id/circle_stock_thing"-->
+                <!--android:layout_below="@id/gridLayout"-->
+                <!--android:layout_width="100dp"-->
+                <!--android:layout_height="60dp"-->
+                <!--android:layout_marginLeft="5dp"-->
+                <!--android:layout_marginRight="5dp"-->
+                <!--android:layout_centerHorizontal="true"-->
+                <!--android:layout_gravity="center"-->
+                <!--android:background="@drawable/stock_circle"-->
+                <!--android:gravity="center"-->
+                <!--android:shadowColor="@color/monokaiGreen"-->
+                <!--android:text="@string/question_mark"-->
+                <!--android:fontFamily="sans-serif"-->
+                <!--android:textStyle="bold"-->
+                <!--android:minHeight="14dp" android:minWidth="14dp" android:maxHeight="14dp"-->
+                <!--android:textColor="@color/monokaiBlue"-->
+                <!--android:textSize="34sp" />-->
 
-            <ToggleButton
-                android:textOn="DAY"
-                android:textOff="DAY"
-                android:layout_width="30dp"
-                android:layout_height="wrap_content"
-                style="@style/graph_button_style"
-                android:id="@+id/DayButton"
-                android:background="@drawable/button_with_border"
+            <!--<Button-->
+                <!--android:id="@+id/sell_stock_button"-->
+                <!--android:text="SELL"-->
+                <!--style="@style/login_button_style"-->
+                <!--android:textStyle="bold"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_alignLeft="@+id/view"-->
+                <!--android:layout_alignStart="@+id/view"-->
+                <!--android:layout_marginLeft="13dp"-->
+                <!--android:layout_marginStart="13dp"-->
+                <!--android:layout_toLeftOf="@+id/circle_stock_thing"-->
+                <!--android:layout_toStartOf="@+id/circle_stock_thing"-->
+                <!--android:layout_alignBottom="@+id/circle_stock_thing"-->
+                <!--android:layout_below="@+id/gridLayout" />-->
 
-                android:layout_alignTop="@+id/graph"
-                android:layout_alignLeft="@+id/sell_stock_button"
-                />
-            <ToggleButton
-                android:textOn="WEEK"
-                android:textOff="WEEK"
-                android:layout_width="30dp"
-                android:layout_height="wrap_content"
-                style="@style/graph_button_style"
-                android:id="@+id/WeekButton"
-                android:background="@drawable/button_with_border"
+            <!--<Button-->
+                <!--android:id="@+id/buy_stock_button"-->
+                <!--android:text="BUY"-->
+                <!--style="@style/login_button_style"-->
+                <!--android:textStyle="bold"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginRight="12dp"-->
+                <!--android:layout_marginEnd="12dp"-->
+                <!--android:layout_alignBottom="@+id/circle_stock_thing"-->
+                <!--android:layout_alignRight="@+id/view"-->
+                <!--android:layout_alignEnd="@+id/view"-->
+                <!--android:layout_below="@+id/gridLayout"-->
+                <!--android:layout_toRightOf="@+id/circle_stock_thing"-->
+                <!--android:layout_toEndOf="@+id/circle_stock_thing" />-->
 
-                android:layout_below="@+id/DayButton"
-                android:layout_alignLeft="@+id/sell_stock_button"
-                />
-            <ToggleButton
-                android:textOn="MONTH"
-                android:textOff="MONTH"
-                android:layout_width="30dp"
-                android:layout_height="wrap_content"
-                style="@style/graph_button_style"
-                android:textSize="8sp"
-                android:id="@+id/MonthButton"
-                android:background="@drawable/button_with_border"
+            <!--<TextView-->
+                <!--android:text="Loading..."-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginTop="28dp"-->
+                <!--android:id="@+id/graphTitle"-->
+                <!--android:layout_below="@+id/circle_stock_thing"-->
+                <!--android:layout_alignRight="@+id/circle_stock_thing"-->
+                <!--android:layout_alignEnd="@+id/circle_stock_thing" />-->
 
-                android:layout_below="@+id/WeekButton"
-                android:layout_alignLeft="@+id/sell_stock_button"
-                />
-            <ToggleButton
-                android:text="YEAR"
-                android:layout_width="30dp"
-                android:layout_height="wrap_content"
-                style="@style/graph_button_style"
-                android:id="@+id/YearButton"
-                android:background="@drawable/button_with_border"
+            <!--<ToggleButton-->
+                <!--android:textOn="DAY"-->
+                <!--android:textOff="DAY"-->
+                <!--android:layout_width="30dp"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--style="@style/graph_button_style"-->
+                <!--android:id="@+id/DayButton"-->
+                <!--android:background="@drawable/button_with_border"-->
 
-                android:layout_below="@+id/MonthButton"
-                android:layout_alignLeft="@+id/sell_stock_button"
-                />
+                <!--android:layout_alignTop="@+id/graph"-->
+                <!--android:layout_alignLeft="@+id/sell_stock_button"-->
+                <!--/>-->
+            <!--<ToggleButton-->
+                <!--android:textOn="WEEK"-->
+                <!--android:textOff="WEEK"-->
+                <!--android:layout_width="30dp"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--style="@style/graph_button_style"-->
+                <!--android:id="@+id/WeekButton"-->
+                <!--android:background="@drawable/button_with_border"-->
 
-            <com.jjoe64.graphview.GraphView
-                android:layout_width="match_parent"
-                android:layout_height="200dip"
-                android:id="@+id/graph"
-                android:layout_alignParentBottom="true"
-                android:layout_below="@+id/circle_stock_thing"
-                android:layout_alignLeft="@+id/DayButton"
-                android:layout_marginLeft="33dp"
-                android:layout_marginStart="33dp"
-                android:layout_marginTop="50dp" />
+                <!--android:layout_below="@+id/DayButton"-->
+                <!--android:layout_alignLeft="@+id/sell_stock_button"-->
+                <!--/>-->
+            <!--<ToggleButton-->
+                <!--android:textOn="MONTH"-->
+                <!--android:textOff="MONTH"-->
+                <!--android:layout_width="30dp"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--style="@style/graph_button_style"-->
+                <!--android:textSize="8sp"-->
+                <!--android:id="@+id/MonthButton"-->
+                <!--android:background="@drawable/button_with_border"-->
 
-            <TextView
-                android:text="Shares owned: "
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/circle_stock_thing"
-                android:layout_centerHorizontal="true"
-                android:id="@+id/shares_owned" />
+                <!--android:layout_below="@+id/WeekButton"-->
+                <!--android:layout_alignLeft="@+id/sell_stock_button"-->
+                <!--/>-->
+            <!--<ToggleButton-->
+                <!--android:text="YEAR"-->
+                <!--android:layout_width="30dp"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--style="@style/graph_button_style"-->
+                <!--android:id="@+id/YearButton"-->
+                <!--android:background="@drawable/button_with_border"-->
 
-        </RelativeLayout>
+                <!--android:layout_below="@+id/MonthButton"-->
+                <!--android:layout_alignLeft="@+id/sell_stock_button"-->
+                <!--/>-->
+
+            <!--<com.jjoe64.graphview.GraphView-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="200dip"-->
+                <!--android:id="@+id/graph"-->
+                <!--android:layout_alignParentBottom="true"-->
+                <!--android:layout_below="@+id/circle_stock_thing"-->
+                <!--android:layout_alignLeft="@+id/DayButton"-->
+                <!--android:layout_marginLeft="33dp"-->
+                <!--android:layout_marginStart="33dp"-->
+                <!--android:layout_marginTop="50dp" />-->
+
+            <!--<TextView-->
+                <!--android:text="Shares owned: "-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_below="@+id/circle_stock_thing"-->
+                <!--android:layout_centerHorizontal="true"-->
+                <!--android:id="@+id/shares_owned" />-->
+
+        <!--</RelativeLayout>-->
     </RelativeLayout>
 </android.support.design.widget.CoordinatorLayout>
