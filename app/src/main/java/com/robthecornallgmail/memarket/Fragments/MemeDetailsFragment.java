@@ -24,6 +24,8 @@ import com.robthecornallgmail.memarket.Activities.MainActivity;
 import com.robthecornallgmail.memarket.R;
 import com.robthecornallgmail.memarket.Util.MyApplication;
 
+import org.apache.commons.lang3.text.WordUtils;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -130,7 +132,9 @@ public class MemeDetailsFragment extends Fragment {
             mMonthButton = (ToggleButton) mView.findViewById(R.id.MonthButton);
             mYearButton = (ToggleButton) mView.findViewById(R.id.YearButton);
 
-            mMemeTitleView.setText(mMemeName);
+            String nameToDisplay = mMemeName.replace("meme", "");
+            nameToDisplay = WordUtils.capitalize(nameToDisplay);
+            mMemeTitleView.setText(nameToDisplay);
             mMoneyView.setText("$"+mMemePrice.toString());
 
             mStocksOwnedView.setText(mStocksOwned.toString());
@@ -138,6 +142,7 @@ public class MemeDetailsFragment extends Fragment {
 
             String iconName = "icon_" + mMemeName.replaceAll(" ", "_").toLowerCase();
             int iconId = getResources().getIdentifier(iconName, "drawable", MainActivity.PACKAGE_NAME);
+            Log.e(TAG, mImageView.toString());
             mImageView.setImageResource(iconId);
 
             mDayButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

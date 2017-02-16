@@ -2,6 +2,7 @@ package com.robthecornallgmail.memarket.Util;
 
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 
 
@@ -17,7 +18,7 @@ import android.view.View;
 /**
  * Created by rob on 30/01/17.
  */
-public class DividerItemDecoration extends RecyclerView.ItemDecoration {
+public class MyDividerItemDecoration extends RecyclerView.ItemDecoration {
     private Paint paint;
 
     private static final int[] ATTRS = new int[]{
@@ -32,14 +33,23 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration {
 
     private int mOrientation;
 
-    public DividerItemDecoration(Context context, int orientation) {
+//    public MyDividerItemDecoration(Context context, int orientation) {
+//        final TypedArray a = context.obtainStyledAttributes(ATTRS);
+//        mDivider = a.getDrawable(0);
+//        a.recycle();
+//        setOrientation(orientation);
+//
+//        paint = new Paint();
+//        paint.setColor(Color.rgb(77,83,70));
+//    }
+    /**
+     * Custom divider will be used
+     */
+    public MyDividerItemDecoration(Context context, int orientation, int resId) {
         final TypedArray a = context.obtainStyledAttributes(ATTRS);
-        mDivider = a.getDrawable(0);
+        mDivider = ContextCompat.getDrawable(context, resId);
         a.recycle();
         setOrientation(orientation);
-
-        paint = new Paint();
-        paint.setColor(Color.rgb(77,83,70));
     }
 
     public void setOrientation(int orientation) {

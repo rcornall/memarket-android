@@ -67,6 +67,7 @@ import com.robthecornallgmail.memarket.R;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
+
 import org.w3c.dom.Text;
 
 import com.robthecornallgmail.memarket.Util.Defines;
@@ -111,8 +112,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         {
             e.printStackTrace();
         }
-        Log.e(TAG, mSelectedMemeID.toString() + " " + amountOwned.toString());
-        mMemeDetailsFragment = MemeDetailsFragment.newInstance(mSelectedName, row.getPrice(), amountOwned);
+        mMemeDetailsFragment = MemeDetailsFragment.newInstance(mSelectedName, row.getPrice(), (amountOwned != null ? amountOwned:0));
         Log.v(TAG, "onListFragmentInteraction called" + mSelectedName);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.anim.enter_from_bottom, 0);

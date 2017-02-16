@@ -1,48 +1,74 @@
 package com.robthecornallgmail.memarket.Activities;
 
+import android.content.Context;
+import android.content.res.AssetManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.PixelFormat;
+import android.graphics.Typeface;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.AttributeSet;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.content.Intent;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.robthecornallgmail.memarket.R;
+import com.robthecornallgmail.memarket.Sprites.Clouds;
+import com.robthecornallgmail.memarket.Threads.MainThread;
+import com.robthecornallgmail.memarket.Views.OurView;
 
 public class MainActivity extends AppCompatActivity
 {
     public static String PACKAGE_NAME;
+    OurView surfaceView;
+    Bitmap movingClouds;
+    Clouds spriteClouds;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        PACKAGE_NAME = getApplicationContext().getPackageName();
-//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
+//        OurView ov = new OurView(this);
+//        setContentView(ov);
+        AssetManager am = getApplicationContext().getAssets();
+        TextView title = (TextView) findViewById(R.id.titleText);
+        Typeface pixelFont = Typeface.createFromAsset(getAssets(), "fonts/ARCADECLASSIC.TTF");
 
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener()
-//        {
+        Typeface pixelStartFont = Typeface.createFromAsset(getAssets(), "fonts/PressStart2P-Regular.ttf");
+        title.setTypeface(pixelFont);
+        Float alpha = 0.8f;
+        title.setAlpha(0.8f);
+
+//        final ImageView walkingFrog = (ImageView) findViewById(R.id.mainFrogWalking);
+//        walkingFrog.bringToFront();
+//        walkingFrog.post(new Runnable() {
 //            @Override
-//            public void onClick(View view)
-//            {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
+//            public void run() {
+//                // start the blinking animation..
+//                ((AnimationDrawable) walkingFrog.getBackground()).start();
 //            }
-//
-//
 //        });
-        // Locate the button in activity_main.xml
+        PACKAGE_NAME = getApplicationContext().getPackageName();
+
         Button button = (Button) findViewById(R.id.startButton);
-        // Capture button clicks
+        button.bringToFront();
+        button.setTypeface(pixelStartFont);
+        button.getBackground().setAlpha(129);
         button.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View view)
             {
-                // Start NewActivity.class
                 Intent myIntent = new Intent(MainActivity.this,
                 LoginActivity.class);
                 startActivity(myIntent);
@@ -50,9 +76,7 @@ public class MainActivity extends AppCompatActivity
         });
 
 
-    // Example of a call to a native method
-    //    TextView tv = (TextView) findViewById(R.id.sample_text);
-    //    tv.setText(stringFromJNI());
+
     }
 
     @Override
@@ -79,15 +103,12 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
-    public native String stringFromJNI();
 
     // Used to load the 'native-lib' library on application startup.
     static
     {
         System.loadLibrary("native-lib");
     }
+
+
 }

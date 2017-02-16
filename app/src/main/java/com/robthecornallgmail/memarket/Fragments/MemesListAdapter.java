@@ -16,6 +16,8 @@ import com.robthecornallgmail.memarket.Util.MemeRow;
 import com.squareup.picasso.Picasso;
 
 
+import org.apache.commons.lang3.text.WordUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,12 +53,13 @@ public class MemesListAdapter extends RecyclerView.Adapter<MemesListAdapter.View
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mRows.get(position);
         String name = mRows.get(position).getName();
-        holder.mNameView.setText(mRows.get(position).getName());
+        String nameToDisplay = name.replace("meme", "");
+        nameToDisplay = WordUtils.capitalize(nameToDisplay);
+        holder.mNameView.setText(nameToDisplay);
         holder.mPriceView.setText("$" + mRows.get(position).getPrice().toString());
         String iconName = "icon_" + name.replaceAll(" ", "_").toLowerCase();
         int iconId = holder.mView.getResources().getIdentifier(iconName, "drawable", MainActivity.PACKAGE_NAME);
 //        holder.mImageView.setImageResource(iconId);
-
         Picasso.with(holder.mView.getContext()).load(iconId).centerCrop().fit().into(holder.mImageView);
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override

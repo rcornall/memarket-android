@@ -3,7 +3,6 @@ package com.robthecornallgmail.memarket.Fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import com.robthecornallgmail.memarket.Util.MyDividerItemDecoration;
 
 import com.robthecornallgmail.memarket.R;
 import com.robthecornallgmail.memarket.Util.MemeRow;
@@ -83,7 +83,7 @@ public class ListMemesFragment extends Fragment {
             recyclerView.setItemViewCacheSize(20);
             recyclerView.setDrawingCacheEnabled(true);
             recyclerView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
-            recyclerView.addItemDecoration(new DividerItemDecoration(view.getContext(), LinearLayoutManager.VERTICAL));
+            recyclerView.addItemDecoration(new MyDividerItemDecoration(view.getContext(), LinearLayoutManager.VERTICAL, R.drawable.recycler_divider));
             recyclerView.setAdapter(mAdapter);
         }
 

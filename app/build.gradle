@@ -42,5 +42,6 @@ dependencies {
     compile 'com.jjoe64:graphview:4.2.1'
     compile 'com.android.support:recyclerview-v7:25.1.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'org.apache.commons:commons-lang3:3.4'
     testCompile 'junit:junit:4.12'
 }

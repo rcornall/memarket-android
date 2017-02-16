@@ -12,15 +12,18 @@
         android:layout_height="match_parent">
         <LinearLayout
             android:id="@+id/TopBar"
+            android:background="#0d0e0c"
             android:layout_width="match_parent"
-            android:layout_marginTop="2dp"
-            android:layout_marginBottom="2dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp"
             android:layout_height="69dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true">
             <android.support.v7.widget.AppCompatImageButton
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
+                android:layout_width="69dp"
+                android:layout_marginBottom="2dp"
+                android:layout_marginTop="2dp"
+                android:layout_height="match_parent"
                 android:scaleType="fitXY"
                 android:id="@+id/character_icon"
                 android:background="@drawable/blink_animation" />
@@ -66,10 +69,11 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:alpha="0.3"
-                android:background="@color/backgroundGreen"/>
+                android:layout_height="20dp"
+                android:alpha="1"
+                android:background="@color/monokaiGreen"/>
         </RelativeLayout>
+
         <LinearLayout
             android:id="@+id/linearLayoutTabButtons"
             android:layout_width="match_parent"
@@ -128,6 +132,19 @@
                 android:textColorHint="#50700f"
                 android:maxLines="1"
                 />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_below="@id/search_meme_view"
+                android:id="@+id/SearchBarSeperator">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp"
+                    android:alpha="0.1"
+                    android:background="@color/monokaiGreen"/>
+            </RelativeLayout>
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

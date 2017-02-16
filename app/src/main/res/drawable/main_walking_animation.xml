@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list
+    android:oneshot="false"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:drawable="@drawable/main_frog_business_walking_0"
+        android:duration="94" />
+    <item
+        android:drawable="@drawable/main_frog_business_walking_1"
+        android:duration="94" />
+    <item
+        android:drawable="@drawable/main_frog_business_walking_2"
+        android:duration="94" />
+    <item
+        android:drawable="@drawable/main_frog_business_walking_3"
+        android:duration="94" />
+    <item
+        android:drawable="@drawable/main_frog_business_walking_4"
+        android:duration="94" />
+    <item
+        android:drawable="@drawable/main_frog_business_walking_5"
+        android:duration="94" />
+    <item
+        android:drawable="@drawable/main_frog_business_walking_6"
+        android:duration="94" />
+    <item
+        android:drawable="@drawable/main_frog_business_walking_7"
+        android:duration="94" />
+    <item
+        android:drawable="@drawable/main_frog_business_walking_8"
+        android:duration="94" />
+    <item
+        android:drawable="@drawable/main_frog_business_walking_9"
+        android:duration="94" />
+    <item
+        android:drawable="@drawable/main_frog_business_walking_10"
+        android:duration="94" />
+</animation-list>
