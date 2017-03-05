@@ -12,30 +12,33 @@
         android:layout_height="match_parent">
         <LinearLayout
             android:id="@+id/TopBar"
-            android:background="#0d0e0c"
+            android:background="#1a1c17"
             android:layout_width="match_parent"
             android:layout_marginTop="0dp"
             android:layout_marginBottom="0dp"
-            android:layout_height="69dp"
+            android:layout_height="68dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true">
             <android.support.v7.widget.AppCompatImageButton
-                android:layout_width="69dp"
+                android:layout_width="68dp"
                 android:layout_marginBottom="2dp"
                 android:layout_marginTop="2dp"
                 android:layout_height="match_parent"
                 android:scaleType="fitXY"
                 android:id="@+id/character_icon"
-                android:background="@drawable/blink_animation" />
+                android:background="@drawable/blink_animation2" />
             <TextView
                 android:id="@+id/username_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_gravity="top"
+                android:gravity="top"
                 android:maxLines="1"
                 android:text="Loading..."
                 android:textColor="@color/greenWhite"
-                android:textSize="25sp"/>
+                android:layout_marginTop="-18dp"
+                android:layout_marginBottom="-18dp"
+                android:textSize="18sp"/>
             <View
                 android:layout_width="0dp"
                 android:layout_height="0dp"
@@ -44,19 +47,21 @@
                 android:id="@+id/money_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:gravity="top"
                 android:text="Loading..."
                 android:textColor="@color/greenWhite"
-                android:textSize="20sp"/>
+                android:layout_marginTop="-18dp"
+                android:layout_marginBottom="-18dp"
+                android:textSize="18sp"/>
             <Button
                 android:id="@+id/settings_button"
                 android:minWidth="5dp"
                 android:gravity="center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
                 android:background="@android:color/transparent"
                 android:drawableTop="@mipmap/ic_action_settings"
                 />
@@ -74,6 +79,11 @@
                 android:background="@color/monokaiGreen"/>
         </RelativeLayout>
 
+        <com.robthecornallgmail.memarket.Views.HouseSurfaceView
+            android:id="@+id/house_surface_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/TopBarSeperator"/>
         <LinearLayout
             android:id="@+id/linearLayoutTabButtons"
             android:layout_width="match_parent"
@@ -82,7 +92,19 @@
             android:layout_alignParentBottom="true"
             >
             <Button
+                android:id="@+id/find_memes_button"
                 android:text="Find memes"
+                style="@style/switch_tab_button_style"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="33.333333"/>
+            <View
+                android:layout_width="1dp"
+                android:layout_height="wrap_content"
+                android:background="@color/colorMyBetweenGrey"/>
+            <Button
+                android:id="@+id/home_button"
+                android:text="HOME"
                 style="@style/switch_tab_button_style"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -97,18 +119,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="33.333333"/>
-            <View
-                android:layout_width="1dp"
-                android:layout_height="wrap_content"
-                android:background="@color/colorMyBetweenGrey"/>
-            <Button
-                android:text="CHAT"
-                style="@style/switch_tab_button_style"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="33.333333"/>
 
         </LinearLayout>
+
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
@@ -151,6 +164,7 @@
                 android:id="@+id/meme_list_fragment">
 
             </FrameLayout>
+
 
 
 

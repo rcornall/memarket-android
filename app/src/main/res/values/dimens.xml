@@ -7,4 +7,5 @@
     <dimen name="image_and_description_height">120dp</dimen>
     <dimen name="spinnerHeight">40dp</dimen>
     <dimen name="text_margin">16dp</dimen>
+    <dimen name="text_margin_small">12dp</dimen>
 </resources>

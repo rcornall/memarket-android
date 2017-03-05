@@ -1,6 +1,7 @@
 package com.robthecornallgmail.memarket.Fragments;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
@@ -43,6 +44,7 @@ public class ListMemesFragment extends Fragment {
      * fragment (e.g. upon screen orientation changes).
      */
     public ListMemesFragment() {
+        memeRowList = new ArrayList<>();
     }
 
     // TODO: Customize parameter initialization
@@ -59,6 +61,8 @@ public class ListMemesFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
+
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
@@ -68,9 +72,9 @@ public class ListMemesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_meme_list, container, false);
-        memeRowList = new ArrayList<>();
+
         // Set the adapter
-        mAdapter = new MemesListAdapter(memeRowList, mListener);
+        mAdapter = new MemesListAdapter(memeRowList, mListener, Typeface.createFromAsset(getActivity().getAssets(), "fonts/PressStart2P-Regular.ttf"));
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
             RecyclerView recyclerView = (RecyclerView) view;
@@ -112,7 +116,9 @@ public class ListMemesFragment extends Fragment {
     }
 
     public void updateList(Map<String, Integer> map) {
-        memeRowList.clear();
+        if(memeRowList != null && !memeRowList.isEmpty()) {
+            memeRowList.clear();
+        }
         for (Map.Entry<String , Integer> entry: map.entrySet()) {
             MemeRow meme = new MemeRow(entry.getKey(), entry.getValue());
             memeRowList.add(meme);

@@ -1,53 +1,75 @@
 package com.robthecornallgmail.memarket.Activities;
 
-import android.content.Context;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.content.Intent;
 import android.content.res.AssetManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.PixelFormat;
 import android.graphics.Typeface;
-import android.graphics.drawable.AnimationDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.AttributeSet;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
-import android.content.Intent;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.robthecornallgmail.memarket.R;
-import com.robthecornallgmail.memarket.Sprites.Clouds;
-import com.robthecornallgmail.memarket.Threads.MainThread;
-import com.robthecornallgmail.memarket.Views.OurView;
+import com.robthecornallgmail.memarket.Util.Defines;
+import com.robthecornallgmail.memarket.Util.MyApplication;
+import com.robthecornallgmail.memarket.Util.MyHelper;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.net.URLEncoder;
 
 public class MainActivity extends AppCompatActivity
 {
     public static String PACKAGE_NAME;
-    OurView surfaceView;
-    Bitmap movingClouds;
-    Clouds spriteClouds;
+    static final String TAG = "MainActivity";
+
+    private MainActivity.UserLoginTask mAuthTask = null;
+    private MyApplication mApplication;
+
+    Button mStartButton, mLoginButton, mRegisterButton;
+    EditText mEmail, mPassword;
+    View mProgressView;
+
+    View mBlackFog;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mBlackFog = findViewById(R.id.black_fog);
 //        OurView ov = new OurView(this);
 //        setContentView(ov);
+        mApplication = (MyApplication) getApplicationContext();
+        mApplication.pixelFont  = Typeface.createFromAsset(getAssets(), "fonts/ARCADECLASSIC.TTF");
+        mApplication.pixelStartFont = Typeface.createFromAsset(getAssets(), "fonts/PressStart2P-Regular.ttf");
+
         AssetManager am = getApplicationContext().getAssets();
         TextView title = (TextView) findViewById(R.id.titleText);
-        Typeface pixelFont = Typeface.createFromAsset(getAssets(), "fonts/ARCADECLASSIC.TTF");
-
-        Typeface pixelStartFont = Typeface.createFromAsset(getAssets(), "fonts/PressStart2P-Regular.ttf");
-        title.setTypeface(pixelFont);
+//        Typeface pixelFont = Typeface.createFromAsset(getAssets(), "fonts/ARCADECLASSIC.TTF");
+//
+//        Typeface pixelStartFont = Typeface.createFromAsset(getAssets(), "fonts/PressStart2P-Regular.ttf");
+        title.setTypeface(mApplication.pixelFont);
         Float alpha = 0.8f;
-        title.setAlpha(0.8f);
+//        title.setAlpha(0.8f);
 
 //        final ImageView walkingFrog = (ImageView) findViewById(R.id.mainFrogWalking);
 //        walkingFrog.bringToFront();
@@ -60,20 +82,69 @@ public class MainActivity extends AppCompatActivity
 //        });
         PACKAGE_NAME = getApplicationContext().getPackageName();
 
-        Button button = (Button) findViewById(R.id.startButton);
-        button.bringToFront();
-        button.setTypeface(pixelStartFont);
-        button.getBackground().setAlpha(129);
-        button.setOnClickListener(new View.OnClickListener()
+        mStartButton = (Button) findViewById(R.id.startButton);
+        mLoginButton = (Button) findViewById(R.id.login_button);
+        mEmail = (EditText) findViewById(R.id.login_email);
+        mPassword = (EditText) findViewById(R.id.login_password);
+
+        mLoginButton.setVisibility(View.GONE);
+        mEmail.setVisibility(View.GONE);
+        mPassword.setVisibility(View.GONE);
+
+        mLoginButton.setTypeface(mApplication.pixelStartFont);
+        mLoginButton.getBackground().setAlpha(129);
+        mStartButton.setTypeface(mApplication.pixelStartFont);
+        mStartButton.getBackground().setAlpha(129);
+        mEmail.setTypeface(mApplication.pixelStartFont);
+        mEmail.getBackground().setAlpha(129);
+        mPassword.setTypeface(mApplication.pixelStartFont);
+        mPassword.getBackground().setAlpha(129);
+
+        mEmail.setText("test@gmail.com");
+        mPassword.setText("swagger");
+
+        mStartButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View view)
             {
-                Intent myIntent = new Intent(MainActivity.this,
-                LoginActivity.class);
-                startActivity(myIntent);
+//                Intent myIntent = new Intent(MainActivity.this,
+//                MainActivity.class);
+//                startActivity(myIntent);
+                mStartButton.setVisibility(View.GONE);
+                mLoginButton.setVisibility(View.VISIBLE);
+                mEmail.setVisibility(View.VISIBLE);
+                mPassword.setVisibility(View.VISIBLE);
+
             }
         });
+
+        mLoginButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                view.startAnimation(Defines.buttonClick);
+                attemptLogin();
+            }
+        });
+
+        //get rid of error box if touched.
+        mEmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEmail.setError(null);
+            }
+        });
+        mPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEmail.setError(null);
+            }
+        });
+
+        mProgressView = findViewById(R.id.login_progress);
+
 
 
 
@@ -91,7 +162,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item)
     {
         // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
+        // automatically handle clicks on the Home/Up startButton, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
@@ -109,6 +180,311 @@ public class MainActivity extends AppCompatActivity
     {
         System.loadLibrary("native-lib");
     }
+
+
+    private boolean isEmailValid(String email)
+    {
+        //TODO: Replace this with your own logic
+        return email.contains("@");
+    }
+
+    private boolean isPasswordValid(String password)
+    {
+        //TODO: Replace this with your own logic
+        return password.length() > 4;
+    }
+
+    private void attemptLogin()
+    {
+        if (mAuthTask != null)
+        {
+            return;
+        }
+
+        // Reset errors.
+        mEmail.setError(null);
+        mPassword.setError(null);
+
+        // Store values at the time of the login attempt.
+        String email = mEmail.getText().toString();
+        String password = mPassword.getText().toString();
+
+        boolean cancel = false;
+        View focusView = null;
+
+        // Check for a valid email address.
+        if (TextUtils.isEmpty(email))
+        {
+            mEmail.setError(getString(R.string.error_field_required));
+            focusView = mEmail;
+            cancel = true;
+        }
+        else if (!isEmailValid(email))
+        {
+            mEmail.setError(getString(R.string.error_invalid_email));
+            focusView = mEmail;
+            cancel = true;
+        }
+        // Check for a valid password, if the user entered one.
+        else if (TextUtils.isEmpty(password))
+        {
+            mPassword.setError(getString(R.string.error_field_required));
+            focusView = mPassword;
+            cancel = true;
+        }
+        else if (!isPasswordValid(password))
+        {
+            mPassword.setError(getString(R.string.error_invalid_password));
+            focusView = mPassword;
+            cancel = true;
+        }
+
+
+        if (cancel) {
+            // There was an error; don't attempt login and focus the first
+            // form field with an error.
+            focusView.requestFocus();
+        } else {
+            // Show a progress spinner, and kick off a background task to
+            // perform the user login attempt.
+            mBlackFog.setVisibility(View.VISIBLE);
+            mProgressView.setVisibility(View.VISIBLE);
+            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+            mProgressView.animate().setDuration(shortAnimTime).alpha(1).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mProgressView.setVisibility(View.VISIBLE);
+                }
+            });
+            mAuthTask = new UserLoginTask(email, password);
+            mAuthTask.execute((Void) null);
+        }
+    }
+
+
+
+
+    /**
+     * Represents an asynchronous login/registration task used to authenticate
+     * the user.
+     */
+    public class UserLoginTask extends AsyncTask<Void, Void, MyHelper.results>
+    {
+
+        private final String mEmailString;
+        private final String mPasswordString;
+
+        private String serverResponse;
+
+        private MyHelper.results Result;
+
+        UserLoginTask(String email, String password)
+        {
+            mEmailString = email;
+            mPasswordString = password;
+        }
+
+        @Override
+        protected MyHelper.results doInBackground(Void... params)
+        {
+            // attempt authentication against a network service.
+            String charset = "UTF-8";
+            Result = new MyHelper.results();
+            // hardcoded user for testing purposes
+            Log.v(TAG,mEmailString);
+            if (mEmailString.equalsIgnoreCase("@@@"))
+            {
+                Log.v(TAG, "@@@ logged in");
+                Result.success = true; Result.httpResponse = MyHelper.HttpResponses.SUCCESS; return Result;
+            }
+            URL url;
+            HttpURLConnection urlConnection;
+            int responseCode;
+            try {
+                url = new URL(Defines.SERVER_ADDRESS + "/loginUser.php");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setConnectTimeout(6000);
+                urlConnection.setReadTimeout(6000);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=" + charset);
+                OutputStream out = urlConnection.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(out, "UTF-8"));
+
+                String query = String.format("Content-Type: application/json&charset=%s&password=%s&email=%s",
+                        URLEncoder.encode(charset, charset),
+                        URLEncoder.encode(mPasswordString, charset),
+                        URLEncoder.encode(mEmailString, charset));
+                writer.write(query);
+
+                writer.flush();
+                writer.close();
+                out.close();
+                Log.v(TAG, "did we make it here.");
+                try {
+                    responseCode = urlConnection.getResponseCode();
+                } catch (IOException e)
+                {
+                    responseCode = urlConnection.getResponseCode();
+                }
+
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    Log.v(TAG, "we got 200");
+                    Result.httpResponse = MyHelper.HttpResponses.SUCCESS;
+                    serverResponse = MyHelper.readHttpStream(urlConnection.getInputStream());
+                    Log.v(TAG, serverResponse);
+                } else {
+                    Result.httpResponse = MyHelper.HttpResponses.FAILURE;
+                    Result.success = false;
+//                    serverResponse = MyHelper.readHttpStream(urlConnection.getInputStream());
+                    Log.v(TAG, "Server request failed, Response (" + responseCode+")");
+                    Result.response = "Server request failed, Response (" + responseCode+")";
+                }
+            } catch (SocketTimeoutException e) {
+                e.printStackTrace();
+                Log.e(TAG, "http timeout.. probably no internet:" + e);
+                Result.httpResponse = MyHelper.HttpResponses.TIMEOUT;
+                Result.success = false;
+                Result.response = e.toString();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                Log.e(TAG, "malformed url exception: " + e);
+                Result.httpResponse = MyHelper.HttpResponses.FAILURE;
+                Result.success = false;
+                Result.response = e.toString();
+            } catch (IOException e) {
+                Log.e(TAG, "IOException: " + e);
+                e.printStackTrace();
+                Result.httpResponse = MyHelper.HttpResponses.FAILURE;
+                Result.success = false;
+                Result.response = e.toString();
+            }
+            if (Result.httpResponse != MyHelper.HttpResponses.SUCCESS)
+            {
+                Log.e(TAG, "response was a failure");
+                return Result;
+            }
+            String result = null;
+            String username = null;
+            try {
+                JSONObject jsonObject = new JSONObject(serverResponse);
+                Log.v(TAG, jsonObject.getString("result"));
+                result = jsonObject.getString("result");
+                if (result == "true")
+                {
+                    mApplication.userData.setID(jsonObject.getInt("id"));
+                    mApplication.userData.setUsername(jsonObject.getString("username"));
+                    mApplication.userData.setEmail(jsonObject.getString("email"));
+                    mApplication.userData.setMoney(jsonObject.getInt("money"));
+                    Log.e(TAG, "memarket  " + jsonObject.getInt("money") + jsonObject.getInt("id"));
+                    Result.success = true;
+                    Result.response = jsonObject.toString();
+                }
+                else
+                {
+                    Result.success = false;
+                    Result.response = jsonObject.getString("error");
+                    Result.code = jsonObject.getInt("code");
+                }
+
+            } catch (JSONException e) {
+                Log.e(TAG, "Error parsing data " + e.toString());
+                e.printStackTrace();
+                Result.success = false;
+                Result.response = e.toString();
+            }
+
+            if (!Result.success)
+            {
+                return Result;
+            }
+            else if (result == "true")
+            {
+                Result.success = true;
+            }
+            else // (result == null || result == "false")
+            {
+                Result.success = false;
+            }
+            return Result;
+        }
+
+        @Override
+        protected void onPostExecute(final MyHelper.results Result)
+        {
+            mAuthTask = null;
+
+
+
+            Log.v(TAG,"Response is: " + Result.response);
+            if (Result.success)
+            {
+                Toast.makeText(getBaseContext(), "Success - hi " + mApplication.userData.getUsername() +"!",
+                        Toast.LENGTH_SHORT).show();
+                // Start NewActivity.class
+                Intent myIntent = new Intent(MainActivity.this, MenuActivity.class);
+                // these flags would clear the task stack..
+                // myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                // myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(myIntent);
+            }
+            else if (Result.httpResponse == MyHelper.HttpResponses.TIMEOUT)
+            {
+                mPassword.setError(getString(R.string.error_http_timeout));
+                MyHelper.AlertBox(MainActivity.this, "Timed out, check your Internet Connection.\n 600ms timeout ERROR (101)");
+            }
+            else
+            {
+                try {
+                    if (Result.code.equals(401))
+                    {
+                        mEmail.setError(Result.response);
+                        mEmail.requestFocus();
+                    }
+                    else if(Result.code.equals(403))
+                    {
+                        mPassword.setError(Result.response);
+                        mPassword.requestFocus();
+                    }
+                    else
+                    {
+                        MyHelper.AlertBox(MainActivity.this, Result.response);
+                    }
+
+                } catch (NullPointerException e) {
+                    MyHelper.AlertBox(MainActivity.this, Result.response);
+                }
+            }
+            mProgressView.setVisibility(View.GONE);
+            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+            mProgressView.animate().setDuration(shortAnimTime).alpha(0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mProgressView.setVisibility(View.GONE);
+                }
+            });
+            mBlackFog.setVisibility(View.GONE);
+        }
+
+        @Override
+        protected void onCancelled()
+        {
+            mAuthTask = null;
+            mBlackFog.setVisibility(View.GONE);
+            mProgressView.setVisibility(View.GONE);
+            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+            mProgressView.animate().setDuration(shortAnimTime).alpha(0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mProgressView.setVisibility(View.GONE);
+                }
+            });
+        }
+    }
+
+
+
+
 
 
 }

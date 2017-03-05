@@ -3,27 +3,24 @@ package com.robthecornallgmail.memarket.Threads;
 import android.graphics.Canvas;
 import android.view.SurfaceHolder;
 
+import com.robthecornallgmail.memarket.Views.HouseSurfaceView;
 import com.robthecornallgmail.memarket.Views.MainSurfaceView;
 
-
 /**
- * Created by rob on 15/02/17.
+ * Created by rob on 03/03/17.
  */
 
-public class MainThread extends  Thread {
-
-    private static final int FRAMERATE = 10; //10 fps for pixel animations
-    private static Canvas canvas;
+public class HouseThread extends Thread {
     private SurfaceHolder surfaceHolder;
+    private HouseSurfaceView houseSurfaceView;
+    private Canvas canvas;
     private boolean running;
-    private MainSurfaceView mainSurfaceView;
 
-    public MainThread(SurfaceHolder surfaceHolder, MainSurfaceView mainSurfaceView) {
+    public HouseThread(SurfaceHolder surfaceHolder, HouseSurfaceView houseSurfaceView) {
         super();
         this.surfaceHolder = surfaceHolder;
-        this.mainSurfaceView = mainSurfaceView;
+        this.houseSurfaceView = houseSurfaceView;
     }
-
     @Override
     public void run() {
         long startTime, doneTime;
@@ -33,7 +30,7 @@ public class MainThread extends  Thread {
             try {
                 canvas = this.surfaceHolder.lockCanvas();
                 synchronized (surfaceHolder) {
-                    this.mainSurfaceView.draw(canvas);
+                    this.houseSurfaceView.draw(canvas);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -48,8 +45,7 @@ public class MainThread extends  Thread {
                 }
             }
 
-            // sleep the remaining amount of time left after processing
-            // to get 90ms framerate, or 11 ish fps
+            // sleep the remaining amount to get 90ms framerate, or 11 ish fps
             try {
                 doneTime = System.currentTimeMillis();
                 long timeDelta = doneTime-startTime;
@@ -61,6 +57,8 @@ public class MainThread extends  Thread {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
+
         }
 
     }

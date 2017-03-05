@@ -9,6 +9,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
@@ -114,9 +116,10 @@ public class MemeDetailsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
 
+        // Inflate the  layout for this fragment
         try {
+            getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
             mView = inflater.inflate(R.layout.fragment_meme_details, container, false);
             mApplication = (MyApplication) getActivity().getApplicationContext();
             mMemeTitleView = (TextView) mView.findViewById(R.id.detail_meme_title);
@@ -281,7 +284,13 @@ public class MemeDetailsFragment extends Fragment {
             return null;
         }
     }
-
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        // hide that annoying keyboard
+        final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(mView.getWindowToken(), 0);
+    }
     // TODO: Rename method, update argument and hook method into UI event
 
 

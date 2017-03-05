@@ -1,11 +1,10 @@
-package com.robthecornallgmail.memarket.Sprites;
+package com.robthecornallgmail.memarket.Canvas;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 
-import com.robthecornallgmail.memarket.Activities.MainActivity;
-import com.robthecornallgmail.memarket.Views.OurView;
+import com.robthecornallgmail.memarket.Views.MainSurfaceView;
 
 /**
  * Created by rob on 13/02/17.
@@ -17,10 +16,10 @@ public class WalkingFrog {
     int currentFrame = 0;
     int x, y;
     Bitmap b;
-    OurView ov;
-    public WalkingFrog(OurView ourView, Bitmap walkingFrog) {
+    MainSurfaceView ov;
+    public WalkingFrog(MainSurfaceView mainSurfaceView, Bitmap walkingFrog) {
         b = walkingFrog;
-        ov = ourView;
+        ov = mainSurfaceView;
         height = b.getHeight();
         width = b.getWidth() / 11;
     }

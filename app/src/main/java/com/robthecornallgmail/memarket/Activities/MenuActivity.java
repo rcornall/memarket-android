@@ -23,6 +23,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
@@ -71,6 +72,7 @@ import org.json.JSONException;
 import org.w3c.dom.Text;
 
 import com.robthecornallgmail.memarket.Util.Defines;
+import com.robthecornallgmail.memarket.Views.HouseSurfaceView;
 
 public class MenuActivity extends AppCompatActivity implements ListMemesFragment.OnListFragmentInteractionListener, MemeDetailsFragment.OnFragmentInteractionListener
 {
@@ -94,7 +96,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     private Integer mSelectedMemeID;
     EditText mSearchView;
 
-    final ListMemesFragment mMemeListFragment  = new ListMemesFragment();
+    private ListMemesFragment mMemeListFragment;
     MemeDetailsFragment mMemeDetailsFragment;
 
     // map meme IDs to their respective past Data from server.
@@ -158,6 +160,8 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
         mApplication = (MyApplication) getApplicationContext();
+
+        mMemeListFragment = new ListMemesFragment();
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
 
@@ -199,17 +203,50 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         });
 
         TextView username = (TextView) findViewById(R.id.username_text);
+        username.setTypeface(mApplication.pixelStartFont);
         username.setText(mApplication.userData.getUsername());
 
         final TextView money = (TextView) findViewById(R.id.money_text);
         money.setText("$" + mApplication.userData.getMoney().toString());
+        money.setTypeface(mApplication.pixelStartFont);
+
+        mSearchView = (EditText) findViewById(R.id.search_meme_view);
+        mSearchView.setVisibility(View.GONE);
+        final FrameLayout flListFragment = (FrameLayout) findViewById(R.id.meme_list_fragment);
+        final FrameLayout flDetailsFragment = (FrameLayout) findViewById(R.id.meme_details_fragment);
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-
         transaction.add(R.id.meme_list_fragment, mMemeListFragment);
         transaction.addToBackStack(null);
         transaction.commit();
-        mSearchView = (EditText) findViewById(R.id.search_meme_view);
+        flListFragment.setVisibility(View.GONE);
+        final HouseSurfaceView hsv = (HouseSurfaceView) findViewById(R.id.house_surface_view);
+
+        Button searchMemesButton = (Button) findViewById(R.id.find_memes_button);
+        searchMemesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hsv.setVisibility(View.GONE);
+                mSearchView.setVisibility(View.VISIBLE);
+                flListFragment.setVisibility(View.VISIBLE);
+                flDetailsFragment.setVisibility(View.VISIBLE);
+//                try {
+//                    mMemeListFragment.updateList(mMemeNametoStockMap);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+            }
+        });
+        Button homeButton = (Button) findViewById(R.id.home_button);
+        homeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                flDetailsFragment.setVisibility(View.GONE);
+                flListFragment.setVisibility(View.GONE);
+                mSearchView.setVisibility(View.GONE);
+                hsv.setVisibility(View.VISIBLE);
+            }
+        });
 
         mSearchView.addTextChangedListener(new TextWatcher() {
             @Override
@@ -590,6 +627,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 //            newTextView.setText(mMemeNametoStockMap.get("10 guy") + " --- ");
 
             Log.v(TAG,"Response is: " + Result.response);
+            Log.v(TAG, mMemeNametoIDMap.toString());
 
             if (Result.success) {
 //                mFraLgment = (ListMemesFragment) getSupportFragmentManager().findFragmentById(R.id.meme_list_fragment);

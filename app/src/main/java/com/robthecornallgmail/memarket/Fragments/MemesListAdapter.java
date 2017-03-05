@@ -1,5 +1,6 @@
 package com.robthecornallgmail.memarket.Fragments;
 
+import android.graphics.Typeface;
 import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -32,14 +33,16 @@ public class MemesListAdapter extends RecyclerView.Adapter<MemesListAdapter.View
     private final List<MemeRow> mRows;
     public List<MemeRow> mItemsCopy;
     private final OnListFragmentInteractionListener mListener;
+    private Typeface pixelStartFont;
 
     ListMemesFragment mListMemesFragment;
 
-    public MemesListAdapter(List<MemeRow> items, OnListFragmentInteractionListener listener) {
+    public MemesListAdapter(List<MemeRow> items, OnListFragmentInteractionListener listener, Typeface pixelStartFont) {
         mRows = items;
         mItemsCopy = new ArrayList<>();
         mListener = listener;
         mListMemesFragment = new ListMemesFragment();
+        this.pixelStartFont = pixelStartFont;
     }
 
     @Override
@@ -111,7 +114,9 @@ public class MemesListAdapter extends RecyclerView.Adapter<MemesListAdapter.View
             super(view);
             mView = view;
             mNameView = (TextView) view.findViewById(R.id.MemeName);
+            mNameView.setTypeface(pixelStartFont);
             mPriceView = (TextView) view.findViewById(R.id.MemePrice);
+            mPriceView.setTypeface(pixelStartFont);
             mImageView = (AppCompatImageButton) view.findViewById(R.id.MemeImage);
         }
 
