@@ -1,0 +1,36 @@
+fixing memory issues:
+  scaling down images before decoding (helps with huge images)
+  recycling bitmaps, and freeing imageviews when activities destroyed
+  should probably make the homeSurfaceView its own fragment.
+
+scrollable canvase houseview
+
+
+
+
+
+
+**********leaderboard************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+***view other players houses***
+
+
+*****Chat system*****
+
+

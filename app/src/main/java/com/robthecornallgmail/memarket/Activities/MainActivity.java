@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Typeface;
+import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +23,7 @@ import com.robthecornallgmail.memarket.R;
 import com.robthecornallgmail.memarket.Util.Defines;
 import com.robthecornallgmail.memarket.Util.MyApplication;
 import com.robthecornallgmail.memarket.Util.MyHelper;
+import com.robthecornallgmail.memarket.Views.MainSurfaceView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,12 +50,20 @@ public class MainActivity extends AppCompatActivity
     EditText mEmail, mPassword;
     View mProgressView;
 
+    MediaPlayer mp3Player;
+
     View mBlackFog;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        //start the dank
+
+        mp3Player = MediaPlayer.create(this, R.raw.roccow_pumped);
+
         setContentView(R.layout.activity_main);
+
+        mp3Player.start();
 
         mBlackFog = findViewById(R.id.black_fog);
 //        OurView ov = new OurView(this);
@@ -145,9 +155,31 @@ public class MainActivity extends AppCompatActivity
 
         mProgressView = findViewById(R.id.login_progress);
 
+    }
 
 
 
+    @Override
+    public void onBackPressed() {
+        this.moveTaskToBack(true);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mp3Player.pause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mp3Player.start();
+    }
+
+    @Override
+    protected void onDestroy() {
+        mp3Player.release(); //prob redundant
+        super.onDestroy();
     }
 
     @Override
@@ -427,6 +459,9 @@ public class MainActivity extends AppCompatActivity
                 // myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 // myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(myIntent);
+                MainSurfaceView msv = (MainSurfaceView) findViewById(R.id.mainSurfaceView);
+                finish();
+                msv.free();
             }
             else if (Result.httpResponse == MyHelper.HttpResponses.TIMEOUT)
             {

@@ -101,6 +101,44 @@ public class MainSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             }
             retry = false;
         }
+
+        //free memory
+//
+//        if(background!=null) {
+//            background.recycle();
+//            background =null;
+//        }
+//        if(moon!=null) {
+//            moon.recycle();
+//            moon = null;
+//        }
+//        if(stars!=null) {
+//            stars.recycle();
+//            stars = null;
+//        }
+//        if(clouds_front!=null) {
+//            clouds_front.recycle();
+//            clouds_front = null;
+//        }
+//        if(clouds_back!=null) {
+//            clouds_back.recycle();
+//            clouds_back = null;
+//        }
+//        if(mountains!=null) {
+//            mountains.recycle();
+//            mountains = null;
+//        }
+//        if(bushes!=null) {
+//            bushes.recycle();
+//            bushes = null;
+//        }
+//        if(walkingFrog!=null) {
+//            walkingFrog.recycle();
+//            walkingFrog = null;
+//        }
+
+        mainCanvasDrawer = null;
+
     }
 
     @Override
@@ -160,6 +198,44 @@ public class MainSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     public void draw(Canvas canvas) {
         if (canvas != null) {
             mainCanvasDrawer.onDraw(canvas);
+        }
+    }
+
+
+    public void free() {
+        // fix memory leak issues..
+
+        if(background!=null) {
+            background.recycle();
+            background =null;
+        }
+        if(moon!=null) {
+            moon.recycle();
+            moon = null;
+        }
+        if(stars!=null) {
+            stars.recycle();
+            stars = null;
+        }
+        if(clouds_front!=null) {
+            clouds_front.recycle();
+            clouds_front = null;
+        }
+        if(clouds_back!=null) {
+            clouds_back.recycle();
+            clouds_back = null;
+        }
+        if(mountains!=null) {
+            mountains.recycle();
+            mountains = null;
+        }
+        if(bushes!=null) {
+            bushes.recycle();
+            bushes = null;
+        }
+        if(walkingFrog!=null) {
+            walkingFrog.recycle();
+            walkingFrog = null;
         }
     }
 }

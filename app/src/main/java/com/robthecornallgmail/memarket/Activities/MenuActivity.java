@@ -1,6 +1,7 @@
 package com.robthecornallgmail.memarket.Activities;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
@@ -114,6 +115,10 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         {
             e.printStackTrace();
         }
+        if(mMemeDetailsFragment != null) {
+            mMemeDetailsFragment = null;
+            System.gc();
+        }
         mMemeDetailsFragment = MemeDetailsFragment.newInstance(mSelectedName, row.getPrice(), (amountOwned != null ? amountOwned:0));
         Log.v(TAG, "onListFragmentInteraction called" + mSelectedName);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -179,6 +184,8 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 finish();
+                                Intent myIntent = new Intent(MenuActivity.this, MainActivity.class);
+                                startActivity(myIntent);
                             }
                         });
                 alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No",

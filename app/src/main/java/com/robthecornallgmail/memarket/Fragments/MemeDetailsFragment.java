@@ -1,18 +1,22 @@
 package com.robthecornallgmail.memarket.Fragments;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatImageButton;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -78,6 +82,8 @@ public class MemeDetailsFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
+    private  MotionEvent mMotionEvent;
+
     public MemeDetailsFragment() {
         // Required empty public constructor
     }
@@ -102,6 +108,12 @@ public class MemeDetailsFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        Log.v(TAG, "SWAGER STARTED");
+        super.onStart();
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
@@ -111,6 +123,21 @@ public class MemeDetailsFragment extends Fragment {
             Log.e(TAG, "memename: " + mMemeName);
             Log.e(TAG, "memename: " + mMemePrice.toString());
         }
+
+        //create motion event for hacky fix graphview bug
+        long downTime = SystemClock.uptimeMillis();
+        long eventTime = SystemClock.uptimeMillis() + 50;
+        float x = 2.0f;
+        float y = 30f;
+        int metaState = 0;
+        mMotionEvent = MotionEvent.obtain(
+                downTime,
+                eventTime,
+                MotionEvent.ACTION_MOVE,
+                x,
+                y,
+                metaState
+        );
     }
 
     @Override
@@ -148,6 +175,7 @@ public class MemeDetailsFragment extends Fragment {
             Log.e(TAG, mImageView.toString());
             mImageView.setImageResource(iconId);
 
+
             mDayButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -167,10 +195,7 @@ public class MemeDetailsFragment extends Fragment {
                         mGraphView.getViewport().setMaxX(start.getTime());
                         mGraphView.getViewport().setMinX(end.getTime());
                         // refresh graph (its glitchy)
-                        mGraphView.refreshDrawableState();
-                        mGraphView.removeAllSeries();
-                        mGraphView.addSeries(mCurrentSeries);
-                        mGraphView.refreshDrawableState();
+                        mGraphView.dispatchTouchEvent(mMotionEvent);
                     } else {
 
                     }
@@ -195,10 +220,7 @@ public class MemeDetailsFragment extends Fragment {
                         mGraphView.getViewport().setMaxX(start.getTime());
                         mGraphView.getViewport().setMinX(end.getTime());
                         // refresh graph (its glitchy)
-                        mGraphView.refreshDrawableState();
-                        mGraphView.removeAllSeries();
-                        mGraphView.addSeries(mCurrentSeries);
-                        mGraphView.refreshDrawableState();
+                        mGraphView.dispatchTouchEvent(mMotionEvent);
 
 
                     } else {
@@ -225,10 +247,7 @@ public class MemeDetailsFragment extends Fragment {
                         mGraphView.getViewport().setMaxX(start.getTime());
                         mGraphView.getViewport().setMinX(end.getTime());
                         // refresh graph (its glitchy)
-                        mGraphView.refreshDrawableState();
-                        mGraphView.removeAllSeries();
-                        mGraphView.addSeries(mCurrentSeries);
-                        mGraphView.refreshDrawableState();
+                        mGraphView.dispatchTouchEvent(mMotionEvent);
                     } else {
 
                     }
@@ -253,10 +272,7 @@ public class MemeDetailsFragment extends Fragment {
                         mGraphView.getViewport().setMaxX(start.getTime());
                         mGraphView.getViewport().setMinX(end.getTime());
                         // refresh graph (its glitchy)
-                        mGraphView.refreshDrawableState();
-                        mGraphView.removeAllSeries();
-                        mGraphView.addSeries(mCurrentSeries);
-                        mGraphView.refreshDrawableState();
+                        mGraphView.dispatchTouchEvent(mMotionEvent);
                     } else {
 
                     }
@@ -314,48 +330,54 @@ public class MemeDetailsFragment extends Fragment {
     public void updateGraph(LineGraphSeries<DataPoint> dataPointLineGraphSeries, DateRange dateRange) {
         // remove old mMemeIDtoSeriesMap.get(mMemeID)(line)
         mDateRange = dateRange;
-                mGraphView.removeAllSeries();
-                mCurrentSeries = dataPointLineGraphSeries;
-                mGraphView.addSeries(dataPointLineGraphSeries);
-                // set date label formatter
+        mGraphView.removeAllSeries();
+        mCurrentSeries = dataPointLineGraphSeries;
+        mGraphView.addSeries(dataPointLineGraphSeries);
+        // set date label formatter
 
-                mGraphView.getViewport().setScalable(true);
-                mGraphView.getViewport().setScrollable(true);
+        mGraphView.getViewport().setScalable(true);
+        mGraphView.getViewport().setScrollable(true);
 
-                mGraphView.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(getContext()));
-                mGraphView.getGridLabelRenderer().setNumHorizontalLabels(6); // only 4 because of the space
-                mGraphView.getGridLabelRenderer().setTextSize(33);
-                mGraphView.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
-                    @Override
-                    public String formatLabel(double value, boolean isValueX) {
-                        // TODO Auto-generated method stub
-                        if (isValueX) {
-                            Date date = new Date((long) (value));
-                            Calendar calendar = Calendar.getInstance();
-                            calendar.setTime(date);
-                            Log.v(TAG, date.toString());
-                            SimpleDateFormat sdf = new SimpleDateFormat();
-                            if (mDateRange == DateRange.DAY) {
-                                sdf.applyPattern("h:mma");
-                            } else if (mDateRange == DateRange.WEEK) {
-                                sdf.applyPattern("E h:mma");
-                            } else if (mDateRange == DateRange.MONTH) {
-                                sdf.applyPattern("MMM dd, ha");
-                            } else /*(mDateRange == DateRange.YEAR)*/ {
-                                sdf.applyPattern("MMM d, ''yy");
-                            }
-                            return (sdf.format(date));
-                        } else {
-                            return "$" + (int) value;
-                        }
+
+
+        mGraphView.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(getContext()));
+        mGraphView.getGridLabelRenderer().setNumHorizontalLabels(6); // only 4 because of the space
+        mGraphView.getGridLabelRenderer().setTextSize(33);
+        mGraphView.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
+            @Override
+            public String formatLabel(double value, boolean isValueX) {
+                // TODO Auto-generated method stub
+                if (isValueX) {
+                    Date date = new Date((long) (value));
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(date);
+                    Log.v(TAG, date.toString());
+                    SimpleDateFormat sdf = new SimpleDateFormat();
+                    if (mDateRange == DateRange.DAY) {
+                        sdf.applyPattern("h:mma");
+                    } else if (mDateRange == DateRange.WEEK) {
+                        sdf.applyPattern("E h:mma");
+                    } else if (mDateRange == DateRange.MONTH) {
+                        sdf.applyPattern("MMM dd, ha");
+                    } else /*(mDateRange == DateRange.YEAR)*/ {
+                        sdf.applyPattern("MMM d, ''yy");
                     }
-                });
-                Calendar cal = Calendar.getInstance();
-                Date start = cal.getTime();
-                cal.add(Calendar.HOUR, -24);
-                Date end = cal.getTime();
-                mGraphView.getViewport().setMaxX(start.getTime());
-                mGraphView.getViewport().setMinX(end.getTime());
+                    return (sdf.format(date));
+                } else {
+                    return "$" + (int) value;
+                }
+            }
+        });
+        Calendar cal = Calendar.getInstance();
+        Date start = cal.getTime();
+        cal.add(Calendar.HOUR, -24);
+        Date end = cal.getTime();
+        mGraphView.getViewport().setMaxX(start.getTime());
+        mGraphView.getViewport().setMinX(end.getTime());
+
+        mGraphView.getViewport().setBackgroundColor(Color.argb(11, 230, 255, 255));
+
+        mGraphView.dispatchTouchEvent(mMotionEvent);
     }
 
     public void updateOwned(Map<Integer, Integer> owned, Map<String , Integer> nametoID) {
@@ -367,6 +389,20 @@ public class MemeDetailsFragment extends Fragment {
         mStocksOwnedView.setText(owned.toString());
     }
 
+    @Override
+    public void onStop() {
+        Log.v(TAG, "SWAGGER STOPED");
+        //free sum of that juicy memory
+        mImageView.setImageResource(0);
+        mGraphView.removeAllSeries();
+
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
 
     /**
      * This interface must be implemented by activities that contain this
