@@ -45,14 +45,14 @@ public class HouseThread extends Thread {
                 }
             }
 
-            // sleep the remaining amount to get 90ms framerate, or 11 ish fps
+            // sleep the remaining amount to get 33ms framerate, or 30 fps
             try {
                 doneTime = System.currentTimeMillis();
                 long timeDelta = doneTime-startTime;
-                if (timeDelta >= 90) {
+                if (timeDelta >= 16) {
                     continue;
                 } else {
-                    this.sleep(90-timeDelta);
+                    this.sleep(16-timeDelta);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();

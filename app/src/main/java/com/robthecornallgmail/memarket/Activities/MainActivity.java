@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity
         //start the dank
 
         mp3Player = MediaPlayer.create(this, R.raw.roccow_pumped);
+        mp3Player.setLooping(true);
 
         setContentView(R.layout.activity_main);
 
