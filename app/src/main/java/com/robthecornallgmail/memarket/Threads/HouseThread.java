@@ -49,10 +49,10 @@ public class HouseThread extends Thread {
             try {
                 doneTime = System.currentTimeMillis();
                 long timeDelta = doneTime-startTime;
-                if (timeDelta >= 16) {
+                if (timeDelta >= 20) {
                     continue;
                 } else {
-                    this.sleep(16-timeDelta);
+                    this.sleep(20-timeDelta);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();

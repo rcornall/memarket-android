@@ -83,7 +83,8 @@
             android:id="@+id/house_surface_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/TopBarSeperator"/>
+            android:layout_below="@+id/TopBarSeperator"
+            android:layout_above="@+id/linearLayoutTabButtons" />
         <LinearLayout
             android:id="@+id/linearLayoutTabButtons"
             android:layout_width="match_parent"
