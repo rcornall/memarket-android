@@ -121,7 +121,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         tmpGuy.recycle();
         tmpGuy = null;
 
-        newheight = SCREEN_HEIGHT/7 + SCREEN_HEIGHT/6;
+        newheight = SCREEN_HEIGHT/2;
         Bitmap tmpHouse = BitmapFactory.decodeResource(getResources(), R.drawable.house1);
         scaleFactor = (float)newheight/(float)tmpHouse.getHeight();
         house = Bitmap.createScaledBitmap(tmpHouse,(int)(((float)tmpHouse.getWidth())*scaleFactor),newheight,true);
@@ -129,7 +129,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         tmpHouse = null;
 
 
-        newheight = SCREEN_HEIGHT/7;
+        newheight = SCREEN_HEIGHT/8;
         Bitmap tmpCloud = BitmapFactory.decodeResource(getResources(), R.drawable.cloud_houseview);
         scaleFactor = (float)newheight/(float)tmpCloud.getHeight();
         cloud1 = Bitmap.createScaledBitmap(tmpCloud,(int)(((float)tmpCloud.getWidth())*scaleFactor),newheight,true);
@@ -156,7 +156,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         houseCoordinates.lastX = SCREEN_WIDTH/2 - guy.getWidth()/5;
         houseCoordinates.lastY = SCREEN_HEIGHT-ground.getHeight()-100 - house.getHeight();
         cloud1Coordinates.lastX = SCREEN_WIDTH-SCREEN_WIDTH/3;
-        cloud1Coordinates.lastY = SCREEN_HEIGHT/8;
+        cloud1Coordinates.lastY = SCREEN_HEIGHT/18;
         Log.v(TAG, String.format("backgroundheight = %d, screenheight = %d", background.getHeight(), SCREEN_HEIGHT));
         Log.v(TAG, String.format("we place background initially at x = %f, y = %f", backgroundCoordinates.lastX, backgroundCoordinates.lastY));
 

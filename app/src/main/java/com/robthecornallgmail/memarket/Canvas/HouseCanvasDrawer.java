@@ -6,6 +6,8 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.util.Log;
 
+import com.robthecornallgmail.memarket.Views.MainSurfaceView;
+
 /**
  * Created by rob on 03/03/17.
  */
@@ -25,6 +27,8 @@ public class HouseCanvasDrawer {
 
     private int SCREEN_WIDTH, SCREEN_HEIGHT;
     private int VIEW_HEIGHT;
+
+    private int cloud1_dx = 0;
     Bitmap test1;
     Bitmap test2;
     Bitmap test3;
@@ -80,8 +84,10 @@ public class HouseCanvasDrawer {
             }
             nextX+=groundWidth;
         }
-
-        canvas.drawBitmap(cloud1, cloudLastX, cloudLastY,null);
+        if(cloud1_dx<-(SCREEN_WIDTH*2+SCREEN_WIDTH/2)) {
+            cloud1_dx=2*SCREEN_WIDTH;
+        }
+        canvas.drawBitmap(cloud1, cloudLastX+cloud1_dx, cloudLastY, null);
         canvas.drawBitmap(house, houseLastX, houseLastY, null);
 
 
@@ -104,6 +110,7 @@ public class HouseCanvasDrawer {
         canvas.drawBitmap(guy,guySrc,guyDst,null);
 
         guyFrame = ++guyFrame % 30;
+        cloud1_dx += -1;
 //        canvas.drawBitmap(test1,background_lastX,background_lastY,null);
 //        canvas.drawBitmap(test2,background_lastX,background_lastY,null);
 //        canvas.drawBitmap(test3,background_lastX,background_lastY,null);
