@@ -29,6 +29,7 @@ import com.robthecornallgmail.memarket.Activities.DateRange;
 import com.robthecornallgmail.memarket.Activities.MainActivity;
 import com.robthecornallgmail.memarket.R;
 import com.robthecornallgmail.memarket.Util.MyApplication;
+import com.squareup.picasso.Picasso;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -173,8 +174,9 @@ public class MemeDetailsFragment extends Fragment {
             String iconName = "icon_" + mMemeName.replaceAll(" ", "_").toLowerCase();
             int iconId = getResources().getIdentifier(iconName, "drawable", MainActivity.PACKAGE_NAME);
             Log.e(TAG, mImageView.toString());
-            mImageView.setImageResource(iconId);
-
+//            mImageView.setImageResource(iconId);
+            // use picasso to scale down image, saves ram
+            Picasso.with(mView.getContext()).load(iconId).centerCrop().fit().into(mImageView);
 
             mDayButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
