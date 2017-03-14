@@ -104,12 +104,10 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         // scale the background to 1.5 times the height, this makes for a scrollable up/down screen
         background = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.house_background), SKY_SIZE_X/100, SKY_SIZE_Y, true);
 
+        // creating a scaled Bitmap reduces means reduced memory, since you dont decode the original full bitmap
         int newheight = SCREEN_HEIGHT/8;
         Bitmap tmpGround = BitmapFactory.decodeResource(getResources(), R.drawable.ground1);
         float scaleFactor = (float)newheight/(float)tmpGround.getHeight();
-//        Log.v(TAG, String.format("scaling stuff, newheight=%d, tmpGround.getHeight=%d", newheight,tmpGround.getHeight()));
-//        Log.v(TAG, String.format("scaling stuff, scalefactor=%f, tmpgroundwidth*scalefactor=%d", scaleFactor, (int) (tmpGround.getWidth()*scaleFactor)));
-//        ground = Bitmap.createScaledBitmap(tmpGround,(int)(((float)tmpGround.getWidth())*scaleFactor),newheight,true);
         ground = Bitmap.createScaledBitmap(tmpGround,(int)(((float)tmpGround.getWidth())*scaleFactor),newheight,true);
         tmpGround.recycle();
         tmpGround = null;
@@ -156,7 +154,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         houseCoordinates.lastX = SCREEN_WIDTH/2 - guy.getWidth()/5;
         houseCoordinates.lastY = SCREEN_HEIGHT-ground.getHeight()-100 - house.getHeight();
         cloud1Coordinates.lastX = SCREEN_WIDTH-SCREEN_WIDTH/3;
-        cloud1Coordinates.lastY = SCREEN_HEIGHT/18;
+        cloud1Coordinates.lastY = SCREEN_HEIGHT/181;
         Log.v(TAG, String.format("backgroundheight = %d, screenheight = %d", background.getHeight(), SCREEN_HEIGHT));
         Log.v(TAG, String.format("we place background initially at x = %f, y = %f", backgroundCoordinates.lastX, backgroundCoordinates.lastY));
 
