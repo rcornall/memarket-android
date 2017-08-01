@@ -210,12 +210,12 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         });
 
         TextView username = (TextView) findViewById(R.id.username_text);
-        username.setTypeface(mApplication.pixelStartFont);
+//        username.setTypeface(mApplication.pixelStartFont);
         username.setText(mApplication.userData.getUsername());
 
         final TextView money = (TextView) findViewById(R.id.money_text);
         money.setText("$" + mApplication.userData.getMoney().toString());
-        money.setTypeface(mApplication.pixelStartFont);
+//        money.setTypeface(mApplication.pixelStartFont);
 
         mSearchView = (EditText) findViewById(R.id.search_meme_view);
         mSearchView.setVisibility(View.GONE);

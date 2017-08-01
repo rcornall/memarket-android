@@ -114,9 +114,9 @@ public class MemesListAdapter extends RecyclerView.Adapter<MemesListAdapter.View
             super(view);
             mView = view;
             mNameView = (TextView) view.findViewById(R.id.MemeName);
-            mNameView.setTypeface(pixelStartFont);
+//            mNameView.setTypeface(pixelStartFont);
             mPriceView = (TextView) view.findViewById(R.id.MemePrice);
-            mPriceView.setTypeface(pixelStartFont);
+//            mPriceView.setTypeface(pixelStartFont);
             mImageView = (AppCompatImageButton) view.findViewById(R.id.MemeImage);
         }
 

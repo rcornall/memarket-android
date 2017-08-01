@@ -232,7 +232,8 @@
                 android:layout_weight="1"
                 android:background="@color/colorMyBetweenGrey"/>
             <ToggleButton
-                android:text="YEAR"
+                android:textOn="YEAR"
+                android:textOff="YEAR"
                 android:layout_width="30dp"
                 android:layout_height="wrap_content"
                 style="@style/graph_button_style"

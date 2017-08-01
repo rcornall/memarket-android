@@ -106,9 +106,9 @@ public class MainActivity extends AppCompatActivity
         mLoginButton.getBackground().setAlpha(129);
         mStartButton.setTypeface(mApplication.pixelStartFont);
         mStartButton.getBackground().setAlpha(129);
-        mEmail.setTypeface(mApplication.pixelStartFont);
+//        mEmail.setTypeface(mApplication.pixelStartFont);
         mEmail.getBackground().setAlpha(129);
-        mPassword.setTypeface(mApplication.pixelStartFont);
+//        mPassword.setTypeface(mApplication.pixelStartFont);
         mPassword.getBackground().setAlpha(129);
 
         mEmail.setText("test@gmail.com");
