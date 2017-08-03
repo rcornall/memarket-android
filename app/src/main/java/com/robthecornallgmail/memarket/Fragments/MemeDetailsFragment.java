@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.jjoe64.graphview.DefaultLabelFormatter;
@@ -27,7 +28,9 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.robthecornallgmail.memarket.Activities.DateRange;
 import com.robthecornallgmail.memarket.Activities.MainActivity;
+import com.robthecornallgmail.memarket.Activities.MenuActivity;
 import com.robthecornallgmail.memarket.R;
+import com.robthecornallgmail.memarket.Util.Defines;
 import com.robthecornallgmail.memarket.Util.MyApplication;
 import com.squareup.picasso.Picasso;
 
@@ -280,28 +283,28 @@ public class MemeDetailsFragment extends Fragment {
                     }
                 }
             });
-//            mBuyButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//                if (mApplication.userData.getMoney() < mMemeNametoStockMap.get(mSelectedName) + 5)
-//                {
-//                    Toast.makeText(getBaseContext(), "Not enough money!",
-//                            Toast.LENGTH_SHORT).show();
-//                }
-//                else
-//                {
-//                    new PurchaseStockFromServer(mApplication.userData.getID(), mMemeNametoIDMap.get(mSelectedName), 1).execute(Defines.SERVER_ADDRESS + "/purchaseStock.php");
-//                }
-//
-//            }
-//            });
+            mBuyButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.v(TAG, "Buying Stock");
+                    mListener.onMemeDetailsFragmentInteraction("buy");
+                }
+            });
+
+            mSellButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.v(TAG, "Selling Stock");
+                    mListener.onMemeDetailsFragmentInteraction("sell");
+                }
+            });
             return mView;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -418,6 +421,6 @@ public class MemeDetailsFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onMemeDetailsFragmentInteraction(Uri uri);
+        void onMemeDetailsFragmentInteraction(String arg);
     }
 }

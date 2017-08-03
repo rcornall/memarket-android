@@ -83,11 +83,11 @@ public class MainSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-//        try {
-//            sleep(5000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         Log.v(TAG, "MainSurfaceView surfaceCreated()");
         background = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.start_background, SCREEN_HEIGHT);
         background = Bitmap.createScaledBitmap(background,SCREEN_WIDTH,SCREEN_HEIGHT, true);

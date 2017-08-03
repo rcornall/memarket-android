@@ -46,6 +46,8 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
     private HouseCanvasDrawer houseCanvasDrawer;
     private HouseThread houseThread;
 
+    private static int GROUND_HEIGHT, GUY_HEIGHT, HOUSE_HEIGHT, CLOUD_HEIGHT;
+    private static float GROUND_SCALE_FACTOR, GUY_SCALE_FACTOR, HOUSE_SCALE_FACTOR, CLOUD_SCALE_FACTOR;
     private Bitmap background, ground, guy;
     private Bitmap house;
     private Bitmap cloud1;
@@ -99,8 +101,8 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
         SCREEN_WIDTH = displaymetrics.widthPixels;
         SCREEN_HEIGHT = displaymetrics.heightPixels;
-        SKY_SIZE_X = SCREEN_WIDTH*3;
-        SKY_SIZE_Y = (int)(SCREEN_HEIGHT*1.5);
+        SKY_SIZE_X = SCREEN_WIDTH*2;
+        SKY_SIZE_Y = (int)(SCREEN_HEIGHT*1.25);
         MAX_X = 0;
         MIN_X = -(SKY_SIZE_X - SCREEN_WIDTH);
         MAX_Y = 0;
@@ -115,28 +117,28 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
 
         // creating a scaled Bitmap reduces means reduced memory, since you dont decode the original full bitmap
-        int newheight = SCREEN_HEIGHT/8;
-        ground = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.ground1, newheight);
-        float scaleFactor = (float)newheight/(float)ground.getHeight();
-        ground = Bitmap.createScaledBitmap(ground,(int)((float)ground.getWidth()*scaleFactor), newheight, true);
+        GROUND_HEIGHT = SCREEN_HEIGHT/14;
+        ground = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.ground1, HouseSurfaceView.GROUND_HEIGHT);
+        GROUND_SCALE_FACTOR = (float)HouseSurfaceView.GROUND_HEIGHT/(float)ground.getHeight();
+        ground = Bitmap.createScaledBitmap(ground,(int)((float)ground.getWidth()*GROUND_SCALE_FACTOR), GROUND_HEIGHT, true);
 
 
-        newheight = SCREEN_HEIGHT/6;
-        guy = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.ground_frog, newheight);
-        scaleFactor = (float)newheight/(float)guy.getHeight();
-        guy = Bitmap.createScaledBitmap(guy,(int)((float)guy.getWidth()*scaleFactor), newheight, true);
+        GUY_HEIGHT = SCREEN_HEIGHT/8;
+        guy = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.ground_frog, GUY_HEIGHT);
+        GUY_SCALE_FACTOR = (float)GUY_HEIGHT/(float)guy.getHeight();
+        guy = Bitmap.createScaledBitmap(guy,(int)((float)guy.getWidth()*GUY_SCALE_FACTOR), GUY_HEIGHT, true);
 
 
-        newheight = SCREEN_HEIGHT/2;
-        house = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.house1, newheight);
-        scaleFactor = (float)newheight/(float)house.getHeight();
-        house = Bitmap.createScaledBitmap(house,(int)((float)house.getWidth()*scaleFactor), newheight, true);
+        HOUSE_HEIGHT = (int)((float)SCREEN_HEIGHT/2.5);
+        house = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.house1, HOUSE_HEIGHT);
+        HOUSE_SCALE_FACTOR = (float)HOUSE_HEIGHT/(float)house.getHeight();
+        house = Bitmap.createScaledBitmap(house,(int)((float)house.getWidth()*HOUSE_SCALE_FACTOR), HOUSE_HEIGHT, true);
 
 
-        newheight = SCREEN_HEIGHT/8;
-        cloud1 = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.cloud_houseview, newheight);
-        scaleFactor = (float)newheight/(float)cloud1.getHeight();
-        cloud1 = Bitmap.createScaledBitmap(cloud1,(int)((float)cloud1.getWidth()*scaleFactor), newheight, true);
+        CLOUD_HEIGHT = SCREEN_HEIGHT/10;
+        cloud1 = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.cloud_houseview, CLOUD_HEIGHT);
+        CLOUD_SCALE_FACTOR = (float)CLOUD_HEIGHT/(float)cloud1.getHeight();
+        cloud1 = Bitmap.createScaledBitmap(cloud1,(int)((float)cloud1.getWidth()*CLOUD_SCALE_FACTOR), CLOUD_HEIGHT, true);
 
 
 
@@ -170,7 +172,6 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
     public void surfaceCreated(SurfaceHolder holder) {
         Log.v(TAG, "SufaceCreated");
         float scaleFactor = 1.0f;
-        int newheight = SCREEN_HEIGHT/8;
 
         if(background == null)
         {   Log.v(TAG, "bitmaps are getting reloaded");
@@ -178,30 +179,23 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         }
         if(ground == null)
         {
-            ground = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.ground1, newheight);
-            scaleFactor = (float)newheight/(float)ground.getHeight();
-            ground = Bitmap.createScaledBitmap(ground,(int)((float)ground.getWidth()*scaleFactor), newheight, true);
+            ground = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.ground1, GROUND_HEIGHT);
+            ground = Bitmap.createScaledBitmap(ground,(int)((float)ground.getWidth()*GROUND_SCALE_FACTOR), GROUND_HEIGHT, true);
         }
-        newheight = SCREEN_HEIGHT/6;
         if(guy == null)
         {
-            guy = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.ground_frog, newheight);
-            scaleFactor = (float)newheight/(float)guy.getHeight();
-            guy = Bitmap.createScaledBitmap(guy,(int)((float)guy.getWidth()*scaleFactor), newheight, true);
+            guy = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.ground_frog, GUY_HEIGHT);
+            guy = Bitmap.createScaledBitmap(guy,(int)((float)guy.getWidth()*GUY_SCALE_FACTOR), GUY_HEIGHT, true);
         }
-        newheight = SCREEN_HEIGHT/2;
         if(house == null)
         {
-            house = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.house1, newheight);
-            scaleFactor = (float)newheight/(float)house.getHeight();
-            house = Bitmap.createScaledBitmap(house,(int)((float)house.getWidth()*scaleFactor), newheight, true);
+            house = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.house1, HOUSE_HEIGHT);
+            house = Bitmap.createScaledBitmap(house,(int)((float)house.getWidth()*HOUSE_SCALE_FACTOR), HOUSE_HEIGHT, true);
         }
-        newheight = SCREEN_HEIGHT/8;
         if(cloud1 == null)
         {
-            cloud1 = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.cloud_houseview, newheight);
-            scaleFactor = (float)newheight/(float)cloud1.getHeight();
-            cloud1 = Bitmap.createScaledBitmap(cloud1,(int)((float)cloud1.getWidth()*scaleFactor), newheight, true);
+            cloud1 = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.cloud_houseview, CLOUD_HEIGHT);
+            cloud1 = Bitmap.createScaledBitmap(cloud1,(int)((float)cloud1.getWidth()*CLOUD_SCALE_FACTOR), CLOUD_HEIGHT, true);
         }
         Log.v(TAG, "Done reloading bitmaps into ram");
 
@@ -396,7 +390,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
     public void free() {
         // fix memory leak issues..
-
+        Log.v(TAG, "free() bitmaps called");
         if(background!=null) {
             background.recycle();
             background =null;

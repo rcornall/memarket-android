@@ -153,12 +153,6 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         }
     }
     @Override
-    public void onMemeDetailsFragmentInteraction(Uri uri)
-    {
-        Log.v(TAG, "onListFragmentInteraction called");
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         Log.v(TAG, "MenuActivity onCreate()");
@@ -172,6 +166,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 //        mGraphView = (GraphView) findViewById(R.id.graph);
+        final HouseSurfaceView hsv = (HouseSurfaceView) findViewById(R.id.house_surface_view);
 
         mSettingsWheelButton = (Button) findViewById(R.id.settings_button);
         mSettingsWheelButton.setOnClickListener(new View.OnClickListener() {
@@ -183,7 +178,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                finish();
+                                hsv.free();
                                 Intent myIntent = new Intent(MenuActivity.this, MainActivity.class);
                                 startActivity(myIntent);
                                 finish();
@@ -226,14 +221,17 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         transaction.addToBackStack(null);
         transaction.commit();
         flListFragment.setVisibility(View.GONE);
-        final HouseSurfaceView hsv = (HouseSurfaceView) findViewById(R.id.house_surface_view);
+
 
         Button searchMemesButton = (Button) findViewById(R.id.find_memes_button);
         searchMemesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.v(TAG, "FIND MEMES PRESSED");
+
+                /* Manually freeing Bitmaps because java sucks? */
                 hsv.free();
+
                 hsv.setVisibility(View.INVISIBLE);
                 Log.v(TAG, "SET TO INVISIBLE DONE");
                 mSearchView.setVisibility(View.VISIBLE);
@@ -279,6 +277,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getUserStocks.php?user=" + mApplication.userData.getID(), "GETTING_USER_STOCKS");
 
     }
+
     @Override
     public void onBackPressed() {
         FragmentManager fm = getSupportFragmentManager();
@@ -290,10 +289,48 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
             moveTaskToBack(true);
         }
     }
-    public void done() {
-        HouseSurfaceView hsv = (HouseSurfaceView) findViewById(R.id.house_surface_view);
-        hsv.free();
+
+
+
+
+
+    @Override
+    public void onMemeDetailsFragmentInteraction(String arg)
+    {
+
+        Log.v(TAG, "onListFragmentInteraction called: " + arg);
+        if (arg.equals("buy"))
+        {
+            if (mApplication.userData.getMoney() < mMemeNametoStockMap.get(mSelectedName) + 5)
+            {
+                Toast.makeText(getBaseContext(), "Not enough money!",
+                        Toast.LENGTH_SHORT).show();
+            }
+            else
+            {
+                new MenuActivity.PurchaseStockFromServer(mApplication.userData.getID(), mMemeNametoIDMap.get(mSelectedName), 1).execute(Defines.SERVER_ADDRESS + "/purchaseStock.php");
+            }
+        }
+        else
+        {
+            // TODO: 03/08/17 mMemeIDtoAmountHeld is not
+            if (mMemeIDtoAmountHeld.get(mSelectedMemeID) == null)
+                Toast.makeText(getBaseContext(), "Still loading, Try again",
+                        Toast.LENGTH_SHORT).show();
+            if (mMemeIDtoAmountHeld.get(mSelectedMemeID) == 0)
+            {
+                Toast.makeText(getBaseContext(), "Not enough Stocks!",
+                        Toast.LENGTH_SHORT).show();
+            }
+            else
+            {
+                new MenuActivity.PurchaseStockFromServer(mApplication.userData.getID(), mMemeNametoIDMap.get(mSelectedName), 1).execute(Defines.SERVER_ADDRESS + "/sellStock.php");
+            }
+        }
     }
+
+
+
 
 
     public class PurchaseStockFromServer extends AsyncTask<String,Void,Boolean>
@@ -394,17 +431,22 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         {
             if (Result)
             {
-//                TextView moneyTextView = (TextView) findViewById(R.id.money_text);
-//                Animation shrinkAnim = AnimationUtils.loadAnimation(MenuActivity.this, R.anim.shrink_money);
-//                Animation growAnim = AnimationUtils.loadAnimation(MenuActivity.this, R.anim.shrink_money);
-//
-//                moneyTextView.clearAnimation();
-//                moneyTextView.startAnimation(shrinkAnim);
-//                moneyTextView.setText("$" + mNewMoney.toString());
-//                moneyTextView.startAnimation(growAnim);
-//
-//                TextView sharesOwnedView = (TextView) findViewById(R.id.shares_owned);
-//                sharesOwnedView.setText("Shares Currently Held = " + mNewStocks);
+                Log.v(TAG, "newStocks:" + mNewStocks);
+                TextView moneyTextView = (TextView) findViewById(R.id.money_text);
+                Animation shrinkAnim = AnimationUtils.loadAnimation(MenuActivity.this, R.anim.shrink_money);
+                Animation growAnim = AnimationUtils.loadAnimation(MenuActivity.this, R.anim.shrink_money);
+
+                moneyTextView.clearAnimation();
+                moneyTextView.startAnimation(shrinkAnim);
+                moneyTextView.setText("$" + mNewMoney.toString());
+                moneyTextView.startAnimation(growAnim);
+
+                TextView sharesOwnedView = (TextView) findViewById(R.id.stocks_owned);
+                sharesOwnedView.setText(mNewStocks.toString());
+
+                mMemeIDtoAmountHeld.put(mMemeID, mNewStocks);
+                mApplication.userData.setMoney(mNewMoney);
+
             }
             return;
         }

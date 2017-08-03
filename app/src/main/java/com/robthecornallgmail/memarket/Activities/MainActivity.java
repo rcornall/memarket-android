@@ -279,6 +279,7 @@ public class MainActivity extends AppCompatActivity implements TaskCallback
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     mProgressView.setVisibility(View.GONE);
+                    mBlackFog.setVisibility(View.GONE);
                 }
             });
             mAuthTask = new UserLoginTask(email, password, this);
@@ -493,30 +494,16 @@ public class MainActivity extends AppCompatActivity implements TaskCallback
                     MyHelper.AlertBox(MainActivity.this, Result.response);
                 }
             }
-//            mProgressView.setVisibility(View.GONE);
-//            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-//            mProgressView.animate().setDuration(shortAnimTime).alpha(0).setListener(new AnimatorListenerAdapter() {
-//                @Override
-//                public void onAnimationEnd(Animator animation) {
-//                    mProgressView.setVisibility(View.GONE);
-//                }
-//            });
-//            mBlackFog.setVisibility(View.GONE);
+            mBlackFog.setVisibility(View.GONE);
+            mProgressView.setVisibility(View.GONE);
         }
 
         @Override
         protected void onCancelled()
         {
-            mAuthTask = null;
-            mBlackFog.setVisibility(View.GONE);
-            mProgressView.setVisibility(View.GONE);
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(View.GONE);
-                }
-            });
+//            mAuthTask = null;
+//            mBlackFog.setVisibility(View.GONE);
+//            mProgressView.setVisibility(View.GONE);
         }
     }
 
