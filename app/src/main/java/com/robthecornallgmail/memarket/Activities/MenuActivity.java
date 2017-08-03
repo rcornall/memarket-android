@@ -161,7 +161,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-
+        Log.v(TAG, "MenuActivity onCreate()");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
         mApplication = (MyApplication) getApplicationContext();
@@ -186,6 +186,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                                 finish();
                                 Intent myIntent = new Intent(MenuActivity.this, MainActivity.class);
                                 startActivity(myIntent);
+                                finish();
                             }
                         });
                 alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No",
@@ -210,12 +211,10 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         });
 
         TextView username = (TextView) findViewById(R.id.username_text);
-//        username.setTypeface(mApplication.pixelStartFont);
         username.setText(mApplication.userData.getUsername());
 
         final TextView money = (TextView) findViewById(R.id.money_text);
         money.setText("$" + mApplication.userData.getMoney().toString());
-//        money.setTypeface(mApplication.pixelStartFont);
 
         mSearchView = (EditText) findViewById(R.id.search_meme_view);
         mSearchView.setVisibility(View.GONE);
@@ -233,7 +232,10 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         searchMemesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                hsv.setVisibility(View.GONE);
+                Log.v(TAG, "FIND MEMES PRESSED");
+                hsv.free();
+                hsv.setVisibility(View.INVISIBLE);
+                Log.v(TAG, "SET TO INVISIBLE DONE");
                 mSearchView.setVisibility(View.VISIBLE);
                 flListFragment.setVisibility(View.VISIBLE);
                 flDetailsFragment.setVisibility(View.VISIBLE);
@@ -248,6 +250,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         homeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.v(TAG, "HOME PRESSED");
                 flDetailsFragment.setVisibility(View.GONE);
                 flListFragment.setVisibility(View.GONE);
                 mSearchView.setVisibility(View.GONE);
@@ -275,123 +278,6 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getData.php?action", "GETTING_DATA");
         new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getUserStocks.php?user=" + mApplication.userData.getID(), "GETTING_USER_STOCKS");
 
-
-
-
-//        memeChoicesSpinner = (Spinner) findViewById(R.id.memeChoicesSpinner);
-//        memeChoicesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id)
-//            {
-////                Log.v(TAG, "wut");
-////                if (initialDisplay == true)
-////                {
-////                    Log.v(TAG",TAGcalled INITIALLYYYYYYYY........");
-////                    initialDisplay = false;
-////                    return;
-////                }
-//                mSelectedName = parentView.getItemAtPosition(position).toString();
-//                try {
-//                    mSelectedMemeID = mMemeNametoIDMap.get(mSelectedName);
-//                } catch (NullPointerException e)
-//                {
-//                    e.printStackTrace();
-//                }
-//                Log.v(TAG, "test:10 guy. " + "real:" + mSelectedName + ".");
-//                TextView stockTextView = (TextView) findViewById(R.id.dataFromServer);
-//                String stockView = mSelectedName + String.format(Locale.US, "'s current stock is %d", mMemeNametoStockMap.get(mSelectedName));
-//                stockTextView.setText(stockView);
-//
-//                TextView circleStockView = (TextView) findViewById(R.id.circle_stock_thing);
-//                circleStockView.setText("$" + mMemeNametoStockMap.get(mSelectedName).toString());
-//
-//                TextView sharesOwnedView = (TextView) findViewById(R.id.shares_owned);
-//                try {
-//                    sharesOwnedView.setText("Shares Currently Held = " + mMemeIDtoAmountHeld.get(mSelectedMemeID).toString());
-//                } catch (NullPointerException e) {
-//                    sharesOwnedView.setText("Shares Currently Held = 0");
-//                            e.printStackTrace();
-//                }
-//
-//                TextView graphTitle = (TextView) findViewById(R.id.graphTitle);
-//                graphTitle.setText(mSelectedName);
-//
-//                // get mSelectedName of icon jpg or png
-//                String iconName = "icon_" + mSelectedName.replaceAll(" ", "_").toLowerCase();
-//                int iconId = getResources().getIdentifier(iconName, "drawable", getPackageName());
-//                AppCompatImageButton memeIcon = (AppCompatImageButton) findViewById(R.id.memeIcon);
-//                memeIcon.setImageResource(iconId);
-//
-//                // fill graph with data of past (day, month?)
-//                try {
-//                    if (!mGraphDataObjectMap.get(mMemeNametoIDMap.get(mSelectedName)).isDoneAlready()) {
-//                        mGetGraphTask = new GetGraphData(mMemeNametoIDMap.get(mSelectedName));
-//                        mGetGraphTask.execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
-//                    }
-//                    else
-//                    {
-//                        //still need to refresh graph with newly selected meme's data previously stored
-//                        mGraphView.removeAllSeries();
-//                        mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
-//                    }
-//                } catch (NullPointerException e) {
-//                    //we didnt load data into that mMemeNametoIDMap.get(mSelectedName) yet.
-//                    mGetGraphTask = new GetGraphData(mMemeNametoIDMap.get(mSelectedName));
-//                    mGetGraphTask.execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
-//                }
-//
-////                mGraphDataObjectMap.get(3).pastMonthData
-//
-//                return;
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parentView) {
-//                // your code here
-//                return;
-//            }
-//        });
-//
-
-//
-//        Button buyStock = (Button) findViewById(R.id.buy_stock_button);
-//        buyStock.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (mApplication.userData.getMoney() < mMemeNametoStockMap.get(mSelectedName) + 5)
-//                {
-//                    Toast.makeText(getBaseContext(), "Not enough money!",
-//                            Toast.LENGTH_SHORT).show();
-//                }
-//                else
-//                {
-//                    new PurchaseStockFromServer(mApplication.userData.getID(), mMemeNametoIDMap.get(mSelectedName), 1).execute(Defines.SERVER_ADDRESS + "/purchaseStock.php");
-//                }
-//
-//            }
-//        });
-//        Button sellStock = (Button) findViewById(R.id.sell_stock_button);
-//        sellStock.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Integer memeID = mMemeNametoIDMap.get(mSelectedName);
-//                try {
-//                    Integer currentAmount = mMemeIDtoAmountHeld.get(memeID);
-//                    if (currentAmount > 0)
-//                        new PurchaseStockFromServer(mApplication.userData.getID(), memeID, 1).execute(Defines.SERVER_ADDRESS + "/sellStock.php");
-//                } catch (NullPointerException e) {
-//                    // cannot sell if the user doesnt own any stock to sell.
-//                    e.printStackTrace();
-//                    Toast.makeText(getBaseContext(), "No Shares to Sell!",
-//                            Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        });
-//
-//        new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getData.php?action", "GETTING_DATA");
-//
-//        new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getUserStocks.php?user=" + mApplication.userData.getID(), "GETTING_USER_STOCKS");
-//
     }
     @Override
     public void onBackPressed() {
@@ -403,6 +289,10 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         } else {
             moveTaskToBack(true);
         }
+    }
+    public void done() {
+        HouseSurfaceView hsv = (HouseSurfaceView) findViewById(R.id.house_surface_view);
+        hsv.free();
     }
 
 
@@ -689,16 +579,6 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
             HttpURLConnection urlConnection;
             Result = new MyHelper.results();
             int responseCode;
-//            Integer range;
-//            if (mDateRange == DateRange.DAY) {
-//                range = 1;
-//            } else if (mDateRange == DateRange.WEEK) {
-//                range = 7;
-//            } else if (mDateRange == DateRange.MONTH) {
-//                range = 30;
-//            } else if (mDateRange == DateRange.YEAR) {
-//                range = 365;
-//            }
 
             try {
                 url = new URL(strings[0] + "meme=" + mMemeID.toString());
@@ -799,9 +679,6 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         protected void onPostExecute(MyHelper.results Result)
         {
 
-//            TextView newTextView = (TextView) findViewById(R.id.dataFromServer);
-//            newTextView.setText(mMemeNametoStockMap.get("10 guy") + " --- ");
-
             Log.v(TAG,"Response is: " + Result.response);
             if (Result.success)
             {
@@ -822,99 +699,9 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 }
             }
 
-//            {
-//                mMemeIDtoSeriesMap.put(mMemeID, new LineGraphSeries<DataPoint>());
-////                populateSpinner();
-//                Log.v(TAG, "graph data was got??.......");
-//
-//                for(Map.Entry<Date, Integer> entry : mGraphDataObjectMap.get(mMemeID).pastYearData.entrySet()) {
-//                    mMemeIDtoSeriesMap.get(mMemeID).appendData(new DataPoint(entry.getKey(),entry.getValue()), true, 35040);
-//                    Log.v(TAG , entry.getKey().toString());
-//                    Log.v(TAG , entry.getValue().toString());
-//                }
-//                mMemeIDtoSeriesMap.get(mMemeID).setColor(ContextCompat.getColor(MenuActivity.this, R.color.monokaiBlue));
-//                mMemeIDtoSeriesMap.get(mMemeID).setDrawDataPoints(true);
-//                mMemeIDtoSeriesMap.get(mMemeID).setDataPointsRadius(10);
-//                mMemeIDtoSeriesMap.get(mMemeID).setThickness(8);
-//                // remove old mMemeIDtoSeriesMap.get(mMemeID)(line)
-//                mGraphView.removeAllSeries();
-//                mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeID));
-//                // set date label formatter
-//
-//                mGraphView.getViewport().setScalable(true);
-//                mGraphView.getViewport().setScrollable(true);
-//
-//                mGraphView.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(MenuActivity.this));
-//                mGraphView.getGridLabelRenderer().setNumHorizontalLabels(6); // only 4 because of the space
-//                mGraphView.getGridLabelRenderer().setTextSize(33);
-//                mGraphView.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
-//                    @Override
-//                    public String formatLabel(double value, boolean isValueX) {
-//                        // TODO Auto-generated method stub
-//                        if (isValueX) {
-//                            Date date = new Date((long) (value));
-//                            Calendar calendar = Calendar.getInstance();
-//                            calendar.setTime(date);
-//                            Log.v(TAG, date.toString());
-//                            SimpleDateFormat sdf = new SimpleDateFormat();
-//                            if (mDateRange == DateRange.DAY) {
-//                                sdf.applyPattern("h:mma");
-//                            } else if (mDateRange == DateRange.WEEK) {
-//                                sdf.applyPattern("E h:mma");
-//                            } else if (mDateRange == DateRange.MONTH) {
-//                                sdf.applyPattern("MMM dd, ha");
-//                            } else /*(mDateRange == DateRange.YEAR)*/ {
-//                                sdf.applyPattern("MMM d, ''yy");
-//                            }
-//                            return (sdf.format(date));
-//                        } else {
-//                            return "$" + (int) value;
-//                        }
-//                    }
-//                });
-//                Calendar cal = Calendar.getInstance();
-//                Date start = cal.getTime();
-//                cal.add(Calendar.HOUR, -24);
-//                Date end = cal.getTime();
-//                mGraphView.getViewport().setMaxX(start.getTime());
-//                mGraphView.getViewport().setMinX(end.getTime());
-//
-//            }
-//            else
-//            {
-//                Log.e(TAG, "failed to get data for graph");
-//
-//                AlertDialog alertDialog = new AlertDialog.Builder(MenuActivity.this, android.R.style.Theme_Holo_Dialog).create();
-//                alertDialog.setTitle("Alert");
-//                alertDialog.setMessage(Result.response);
-//                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-//                        new DialogInterface.OnClickListener() {
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                dialog.dismiss();
-//                            }
-//                        });
-//                alertDialog.show();
-//            }
         }
 
 
     }
-//    private void populateSpinner()
-//    {
-//        List<String> spinnerLables = new ArrayList<>();
-//        for (String key : mMemeNametoStockMap.keySet()) {
-//            spinnerLables.add(key);
-//        }
-//
-//        //            Spinner memeChoicesSpinner = (Spinner) findViewById(R.id.memeChoicesSpinner);
-//        // Creating adapter for spinner
-//        Collections.sort(spinnerLables);
-//        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, spinnerLables);
-//        // Drop down layout style - list view with radio button
-//        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//
-//        // attaching data adapter to spinner
-//        memeChoicesSpinner.setAdapter(spinnerAdapter);
-//    }
 
 }

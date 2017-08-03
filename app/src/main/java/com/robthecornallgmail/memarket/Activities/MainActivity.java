@@ -23,6 +23,7 @@ import com.robthecornallgmail.memarket.R;
 import com.robthecornallgmail.memarket.Util.Defines;
 import com.robthecornallgmail.memarket.Util.MyApplication;
 import com.robthecornallgmail.memarket.Util.MyHelper;
+import com.robthecornallgmail.memarket.Util.TaskCallback;
 import com.robthecornallgmail.memarket.Views.MainSurfaceView;
 
 import org.json.JSONException;
@@ -38,7 +39,9 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLEncoder;
 
-public class MainActivity extends AppCompatActivity
+import static java.lang.Thread.sleep;
+
+public class MainActivity extends AppCompatActivity implements TaskCallback
 {
     public static String PACKAGE_NAME;
     static final String TAG = "MainActivity";
@@ -80,17 +83,6 @@ public class MainActivity extends AppCompatActivity
 //        Typeface pixelStartFont = Typeface.createFromAsset(getAssets(), "fonts/PressStart2P-Regular.ttf");
         title.setTypeface(mApplication.pixelFont);
         Float alpha = 0.8f;
-//        title.setAlpha(0.8f);
-
-//        final ImageView walkingFrog = (ImageView) findViewById(R.id.mainFrogWalking);
-//        walkingFrog.bringToFront();
-//        walkingFrog.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                // start the blinking animation..
-//                ((AnimationDrawable) walkingFrog.getBackground()).start();
-//            }
-//        });
         PACKAGE_NAME = getApplicationContext().getPackageName();
 
         mStartButton = (Button) findViewById(R.id.startButton);
@@ -106,9 +98,7 @@ public class MainActivity extends AppCompatActivity
         mLoginButton.getBackground().setAlpha(129);
         mStartButton.setTypeface(mApplication.pixelStartFont);
         mStartButton.getBackground().setAlpha(129);
-//        mEmail.setTypeface(mApplication.pixelStartFont);
         mEmail.getBackground().setAlpha(129);
-//        mPassword.setTypeface(mApplication.pixelStartFont);
         mPassword.getBackground().setAlpha(129);
 
         mEmail.setText("test@gmail.com");
@@ -119,9 +109,6 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View view)
             {
-//                Intent myIntent = new Intent(MainActivity.this,
-//                MainActivity.class);
-//                startActivity(myIntent);
                 mStartButton.setVisibility(View.GONE);
                 mLoginButton.setVisibility(View.VISIBLE);
                 mEmail.setVisibility(View.VISIBLE);
@@ -179,7 +166,12 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
+        Log.v(TAG, "MainActivity onDestroy()");
         mp3Player.release(); //prob redundant
+//        MainSurfaceView msv = (MainSurfaceView) findViewById(R.id.mainSurfaceView);
+//        msv.surfaceDestroyed();
+//        msv.free();
+
         super.onDestroy();
     }
 
@@ -282,19 +274,25 @@ public class MainActivity extends AppCompatActivity
             // perform the user login attempt.
             mBlackFog.setVisibility(View.VISIBLE);
             mProgressView.setVisibility(View.VISIBLE);
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(1).setListener(new AnimatorListenerAdapter() {
+            int shortAnimTime = getResources().getInteger(android.R.integer.config_longAnimTime);
+            mProgressView.animate().setDuration(6000).alpha(1).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(View.VISIBLE);
+                    mProgressView.setVisibility(View.GONE);
                 }
             });
-            mAuthTask = new UserLoginTask(email, password);
+            mAuthTask = new UserLoginTask(email, password, this);
             mAuthTask.execute((Void) null);
         }
     }
 
-
+    @Override
+    public void done() {
+        Log.v(TAG, "Done() called, finish called");
+        MainSurfaceView msv = (MainSurfaceView) findViewById(R.id.mainSurfaceView);
+        msv.free();
+        this.finish();
+    }
 
 
     /**
@@ -303,7 +301,7 @@ public class MainActivity extends AppCompatActivity
      */
     public class UserLoginTask extends AsyncTask<Void, Void, MyHelper.results>
     {
-
+        private TaskCallback mCallback;
         private final String mEmailString;
         private final String mPasswordString;
 
@@ -311,10 +309,12 @@ public class MainActivity extends AppCompatActivity
 
         private MyHelper.results Result;
 
-        UserLoginTask(String email, String password)
+
+        UserLoginTask(String email, String password, TaskCallback callback)
         {
             mEmailString = email;
             mPasswordString = password;
+            mCallback = callback;
         }
 
         @Override
@@ -454,15 +454,17 @@ public class MainActivity extends AppCompatActivity
             {
                 Toast.makeText(getBaseContext(), "Success - hi " + mApplication.userData.getUsername() +"!",
                         Toast.LENGTH_SHORT).show();
+                Log.v(TAG, "About to start a new activity MenuActivity");
                 // Start NewActivity.class
                 Intent myIntent = new Intent(MainActivity.this, MenuActivity.class);
                 // these flags would clear the task stack..
                 // myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 // myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(myIntent);
-                MainSurfaceView msv = (MainSurfaceView) findViewById(R.id.mainSurfaceView);
-                finish();
-                msv.free();
+                Log.v(TAG, "Hello? next thing to do is call finish after starting menuactivity");
+//                MainSurfaceView msv = (MainSurfaceView) findViewById(R.id.mainSurfaceView);
+//                msv.free();
+                mCallback.done();
             }
             else if (Result.httpResponse == MyHelper.HttpResponses.TIMEOUT)
             {
@@ -491,15 +493,15 @@ public class MainActivity extends AppCompatActivity
                     MyHelper.AlertBox(MainActivity.this, Result.response);
                 }
             }
-            mProgressView.setVisibility(View.GONE);
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(View.GONE);
-                }
-            });
-            mBlackFog.setVisibility(View.GONE);
+//            mProgressView.setVisibility(View.GONE);
+//            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+//            mProgressView.animate().setDuration(shortAnimTime).alpha(0).setListener(new AnimatorListenerAdapter() {
+//                @Override
+//                public void onAnimationEnd(Animator animation) {
+//                    mProgressView.setVisibility(View.GONE);
+//                }
+//            });
+//            mBlackFog.setVisibility(View.GONE);
         }
 
         @Override

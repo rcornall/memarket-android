@@ -14,13 +14,16 @@ import android.view.SurfaceView;
 import com.robthecornallgmail.memarket.R;
 import com.robthecornallgmail.memarket.Canvas.MainCanvasDrawer;
 import com.robthecornallgmail.memarket.Threads.MainThread;
+import com.robthecornallgmail.memarket.Util.MyHelper;
+
+import static java.lang.Thread.sleep;
 
 /**
  * Created by rob on 16/02/17.
  */
 
 public class MainSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
-    private static final String TAG = "OurView";
+    private static final String TAG = "MainSurfaceView";
     public static final int WIDTH = 512;
     public static final int HEIGHT = 768;
     public static int SCREEN_WIDTH;
@@ -50,48 +53,18 @@ public class MainSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
 //        setting bitmaps:
 
-//        we want:
-//        image-screen for width/heights,
-//        scale by smallest
-//        image sizes - that value
-//        Log.v (TAG, "the widthimage and widthscreen: " + background.getWidth() + ", " + SCREEN_WIDTH);
-//        Log.v (TAG, "the widthimage and widthscreen: " + background.getHeight() + ", " + SCREEN_HEIGHT);
-//        int dx = background.getWidth()-SCREEN_WIDTH;
-//        int dy = background.getHeight()-SCREEN_HEIGHT;
-//        int x_scale, y_scale;
-//
-//        if(dx<dy)
-//        {
-//            x_scale = dx;
-//            y_scale = (background.getHeight()/background.getWidth())*x_scale;
-//            Log.v (TAG, "the dx and yscale: " + dx + ", " + y_scale);
-//        } else {
-//            y_scale = dy;
-//            x_scale = (background.getWidth()/background.getHeight())*y_scale;
-//        }
-        background = BitmapFactory.decodeResource(getResources(), R.drawable.start_background);
-
-        int stars_x = (int) (SCREEN_WIDTH*2.9);
-        int stars_y = (int) (SCREEN_HEIGHT*0.9);
-
-        background = Bitmap.createScaledBitmap(background,SCREEN_WIDTH,SCREEN_HEIGHT, true);
-        moon = BitmapFactory.decodeResource(getResources(), R.drawable.moon);
-        stars = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.moving_stars_cutoff),stars_x,stars_y, true);
-        clouds_front = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.clouds),SCREEN_WIDTH,SCREEN_HEIGHT, true);
-        clouds_back = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.clouds_back),SCREEN_WIDTH,SCREEN_HEIGHT, true);
-        mountains = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.moving_mountains),SCREEN_WIDTH,SCREEN_HEIGHT, true);
-        bushes = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.moving_bushes),SCREEN_WIDTH,SCREEN_HEIGHT, true);
-        walkingFrog = BitmapFactory.decodeResource(getResources(), R.drawable.main_frog_business_walking_10_frames);
     }
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {}
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
+        Log.v(TAG, "MainSurfaceView surfaceDestroyed()");
         boolean retry = true;
         while(retry) {
             try {
                 thread.setRunning(false);
+                Log.v(TAG,"calling join");
                 thread.join();
                 thread = null;
                 Log.v(TAG, "thread has joined");
@@ -103,46 +76,41 @@ public class MainSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         }
 
         //free memory
-//
-//        if(background!=null) {
-//            background.recycle();
-//            background =null;
-//        }
-//        if(moon!=null) {
-//            moon.recycle();
-//            moon = null;
-//        }
-//        if(stars!=null) {
-//            stars.recycle();
-//            stars = null;
-//        }
-//        if(clouds_front!=null) {
-//            clouds_front.recycle();
-//            clouds_front = null;
-//        }
-//        if(clouds_back!=null) {
-//            clouds_back.recycle();
-//            clouds_back = null;
-//        }
-//        if(mountains!=null) {
-//            mountains.recycle();
-//            mountains = null;
-//        }
-//        if(bushes!=null) {
-//            bushes.recycle();
-//            bushes = null;
-//        }
-//        if(walkingFrog!=null) {
-//            walkingFrog.recycle();
-//            walkingFrog = null;
-//        }
-
+        free();
         mainCanvasDrawer = null;
 
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+//        try {
+//            sleep(5000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+        Log.v(TAG, "MainSurfaceView surfaceCreated()");
+        background = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.start_background, SCREEN_HEIGHT);
+        background = Bitmap.createScaledBitmap(background,SCREEN_WIDTH,SCREEN_HEIGHT, true);
+
+        final int MOON_HEIGHT = SCREEN_HEIGHT/9;
+        moon = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.moon,MOON_HEIGHT);
+        float SCALE_FACTOR = (float)MOON_HEIGHT/(float)moon.getHeight();
+        moon = Bitmap.createScaledBitmap(moon, (int)((float)moon.getWidth()*SCALE_FACTOR), MOON_HEIGHT, true);
+
+        final int STARS_HEIGHT = (int) (SCREEN_HEIGHT*0.9);
+        stars = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.moving_stars_cutoff, STARS_HEIGHT);
+        SCALE_FACTOR = (float)STARS_HEIGHT/(float)stars.getHeight();
+        stars = Bitmap.createScaledBitmap(stars, (int)((float)stars.getWidth()*SCALE_FACTOR), STARS_HEIGHT, true);
+
+        clouds_front = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.clouds, SCREEN_HEIGHT);
+        clouds_front = Bitmap.createScaledBitmap(clouds_front, SCREEN_WIDTH, SCREEN_HEIGHT, true);
+        clouds_front = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.clouds),SCREEN_WIDTH,SCREEN_HEIGHT, true);
+
+
+        clouds_back = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.clouds_back),SCREEN_WIDTH,SCREEN_HEIGHT, true);
+        mountains = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.moving_mountains),SCREEN_WIDTH,SCREEN_HEIGHT, true);
+        bushes = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.moving_bushes),SCREEN_WIDTH,SCREEN_HEIGHT, true);
+        walkingFrog = BitmapFactory.decodeResource(getResources(), R.drawable.main_frog_business_walking_10_frames);
 
 
         mainCanvasDrawer = new MainCanvasDrawer(
@@ -159,6 +127,7 @@ public class MainSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         mainCanvasDrawer.setVector(-4);
         thread = new MainThread(holder, this);
         thread.start();
+        Log.v(TAG, "Thread has started");
         thread.setRunning(true);
     }
 
