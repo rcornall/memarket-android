@@ -7,10 +7,12 @@ import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.util.TimeUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageButton;
@@ -39,6 +41,7 @@ import java.net.URL;
 import java.net.MalformedURLException;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
@@ -48,6 +51,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import android.util.Log;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -75,17 +80,19 @@ import org.w3c.dom.Text;
 import com.robthecornallgmail.memarket.Util.Defines;
 import com.robthecornallgmail.memarket.Views.HouseSurfaceView;
 
+import static java.lang.Thread.sleep;
+
 public class MenuActivity extends AppCompatActivity implements ListMemesFragment.OnListFragmentInteractionListener, MemeDetailsFragment.OnFragmentInteractionListener
 {
+    private static long timeTillUpdate = 900000;
+    private static CountDownTimer mFifteenMinTimer;
     private MyApplication mApplication;
+    private static Calendar calendar;
 
     private static final String TAG = "Menu";
-    Boolean initialDisplay = true;
-    private Spinner memeChoicesSpinner;
+
     private Button mSettingsWheelButton;
     private GraphView mGraphView;
-    private TextView mMemeTitleView;
-    private TextView mMoneyView;
     private GetGraphData mGetGraphTask;
     private DateRange mDateRange = DateRange.DAY;
     private Map<String, Integer> mMemeNametoIDMap = new HashMap<>();
@@ -103,55 +110,9 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     // map meme IDs to their respective past Data from server.
     private Map<Integer, MemePastData> mGraphDataObjectMap = new HashMap<>();
 
-    @Override
-    public void onListFragmentInteraction(MemeRow row)
-    {
-        mSelectedName = row.getName();
-        Integer amountOwned = 0;
-        try {
-            mSelectedMemeID = mMemeNametoIDMap.get(mSelectedName);
-            amountOwned = mMemeIDtoAmountHeld.get(mSelectedMemeID);
-        } catch (NullPointerException e)
-        {
-            e.printStackTrace();
-        }
-        if(mMemeDetailsFragment != null) {
-            mMemeDetailsFragment = null;
-            System.gc();
-        }
-        mMemeDetailsFragment = MemeDetailsFragment.newInstance(mSelectedName, row.getPrice(), (amountOwned != null ? amountOwned:0));
-        Log.v(TAG, "onListFragmentInteraction called" + mSelectedName);
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(R.anim.enter_from_bottom, 0);
-        transaction.addToBackStack(null);
-        transaction.add(R.id.meme_details_fragment, mMemeDetailsFragment);
-        transaction.commit();
-        mSearchView.setVisibility(View.GONE);
 
-//        try {
-//
-//            mMemeDetailsFragment.updateStocksOwned(amountOwned);
-//        } catch (NullPointerException e) {
-//            e.printStackTrace();
-//        }
 
-        try {
-            if (!mGraphDataObjectMap.get(mMemeNametoIDMap.get(mSelectedName)).isDoneAlready()) {
-                mGetGraphTask = new GetGraphData(mMemeNametoIDMap.get(mSelectedName));
-                mGetGraphTask.execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
-            }
-            else
-            {
-                //still need to refresh graph with newly selected meme's data previously stored
-                mGraphView.removeAllSeries();
-                mGraphView.addSeries(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)));
-            }
-        } catch (NullPointerException e) {
-            //we didnt load data into that mMemeNametoIDMap.get(mSelectedName) yet.
-            mGetGraphTask = new GetGraphData(mMemeNametoIDMap.get(mSelectedName));
-            mGetGraphTask.execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
-        }
-    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -258,25 +219,152 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
         mSearchView.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void afterTextChanged(Editable s) {}
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 mMemeListFragment.filter(s.toString());
             }
+        });
+
+        final TextView countdownTimer = (TextView) findViewById(R.id.timer_text);
+        final String FORMAT = "%2d:%02d";
+
+        mFifteenMinTimer = new CountDownTimer(900000, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                countdownTimer.setText(String.format(FORMAT,TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished),
+                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(
+                                TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))));
+            }
 
             @Override
-            public void afterTextChanged(Editable s) {
+            public void onFinish() {
+                //refresh stock values:
+                new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getData.php?action", "GETTING_DATA");
+                try{
+                    new GetGraphData(mMemeNametoIDMap.get(mSelectedName)).execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
+                } catch (NullPointerException e) {
+                    Log.v(TAG, e.toString());
+                }
+                try{
+                    mMemeDetailsFragment.updateStockPrice(mMemeNametoStockMap.get(mSelectedName));
+                } catch (NullPointerException e) {
+                    Log.v(TAG, e.toString());
+                }
+                //clear old graph data so we forced to get new ones
+                for(MemePastData it : mGraphDataObjectMap.values())
+                {
+                    it.setNotDone();
+                }
+                this.cancel();
+                this.start();
+            }
+        };
+        //countdown timer, figure out when next 15 min interval is
+        calendar = Calendar.getInstance();
+        long minutes = calendar.get(Calendar.MINUTE);
+        long seconds = calendar.get(Calendar.SECOND);
+        Log.v(TAG, "mins is: " + minutes + " seconds: " + seconds);
+        long minsRemain = (15 - minutes%15) -1;
+        long secsRemain = (60 - seconds);
+        Log.v(TAG, "minsrenain is: " + minsRemain+ " seconds: " + secsRemain);
+
+        timeTillUpdate = (minsRemain*60 + secsRemain)*1000;
+        new CountDownTimer(timeTillUpdate, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+
+                countdownTimer.setText(String.format(FORMAT,TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished),
+                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(
+                                TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))));
+            }
+
+            @Override
+            public void onFinish() {
+                //refresh stock values:
+                new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getData.php?action", "GETTING_DATA");
+                try{
+                    new GetGraphData(mMemeNametoIDMap.get(mSelectedName)).execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
+                } catch (NullPointerException e) {
+                    Log.v(TAG, e.toString());
+                }
+                try{
+                    mMemeDetailsFragment.updateStockPrice(mMemeNametoStockMap.get(mSelectedName));
+                } catch (NullPointerException e) {
+                    Log.v(TAG, e.toString());
+                }
+                //clear old graph data so we forced to get new ones
+                for(MemePastData it : mGraphDataObjectMap.values())
+                {
+                    it.setNotDone();
+                }
+                this.cancel();
+                MenuActivity.mFifteenMinTimer.start();
 
             }
-        });
+        }.start();
+
 
         new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getData.php?action", "GETTING_DATA");
         new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getUserStocks.php?user=" + mApplication.userData.getID(), "GETTING_USER_STOCKS");
 
     }
+
+
+
+
+
+
+    @Override
+    public void onListFragmentInteraction(MemeRow row)
+    {
+        mSelectedName = row.getName();
+        Integer amountOwned = 0;
+        try {
+            mSelectedMemeID = mMemeNametoIDMap.get(mSelectedName);
+            amountOwned = mMemeIDtoAmountHeld.get(mSelectedMemeID);
+        } catch (NullPointerException e)
+        {
+            e.printStackTrace();
+        }
+        if(mMemeDetailsFragment != null) {
+            mMemeDetailsFragment = null;
+            System.gc();
+        }
+        mMemeDetailsFragment = MemeDetailsFragment.newInstance(mSelectedName, row.getPrice(), (amountOwned != null ? amountOwned:0));
+        Log.v(TAG, "onListFragmentInteraction called" + mSelectedName);
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(R.anim.enter_from_bottom, 0);
+        transaction.addToBackStack(null);
+        transaction.add(R.id.meme_details_fragment, mMemeDetailsFragment);
+        transaction.commit();
+        mSearchView.setVisibility(View.GONE);
+
+        try {
+            if (!mGraphDataObjectMap.get(mMemeNametoIDMap.get(mSelectedName)).isDoneAlready()) {
+                Log.v(TAG, "done already? " + mGraphDataObjectMap.get(mMemeNametoIDMap.get(mSelectedName)).isDoneAlready().toString());
+                mGetGraphTask = new GetGraphData(mMemeNametoIDMap.get(mSelectedName));
+                mGetGraphTask.execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
+            }
+            else
+            {
+                Log.v(TAG, "AlreadyDone is true, adding existing series to graph");
+                //still need to refresh graph, need to use a new thread so that this UI thread can finish.
+                updateGraph ug = new updateGraph(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)),mDateRange,mMemeDetailsFragment);
+                ug.execute("");
+
+            }
+        } catch (NullPointerException e) {
+            Log.v(TAG, "exception, getting graph data");
+            mGetGraphTask = new GetGraphData(mMemeNametoIDMap.get(mSelectedName));
+            mGetGraphTask.execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
+        } catch (Exception e) {Log.e(TAG, e.toString());}
+    }
+
+
+
 
     @Override
     public void onBackPressed() {
@@ -313,7 +401,6 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         }
         else
         {
-            // TODO: 03/08/17 mMemeIDtoAmountHeld is not
             if (mMemeIDtoAmountHeld.get(mSelectedMemeID) == null)
                 Toast.makeText(getBaseContext(), "Still loading, Try again",
                         Toast.LENGTH_SHORT).show();
@@ -330,8 +417,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     }
 
 
-
-
+// TODO: 03/08/17 NEED TO MAKE SURE ONLY ONE INSTANCE OF THIS THREAD IS RUNNING AT ONCE BEFORE STARTING A NEW ONE 
 
     public class PurchaseStockFromServer extends AsyncTask<String,Void,Boolean>
     {
@@ -663,6 +749,11 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 Result.httpResponse = MyHelper.HttpResponses.FAILURE;
                 Result.success = false;
                 Result.response = e.toString();
+            } catch (NullPointerException e) {
+                Log.v(TAG, "cant get graph data, meme not selected yet");
+                Log.v(TAG, e.toString());
+                Result.success = false;
+                Result.response = e.toString();
             }
             if (Result.httpResponse != MyHelper.HttpResponses.SUCCESS)
             {
@@ -728,8 +819,6 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                     mMemeIDtoSeriesMap.put(mMemeID, new LineGraphSeries<DataPoint>());
                     for(Map.Entry<Date, Integer> entry : mGraphDataObjectMap.get(mMemeID).pastYearData.entrySet()) {
                         mMemeIDtoSeriesMap.get(mMemeID).appendData(new DataPoint(entry.getKey(),entry.getValue()), true, 35040);
-                        Log.v(TAG , entry.getKey().toString());
-                        Log.v(TAG , entry.getValue().toString());
                     }
                     mMemeIDtoSeriesMap.get(mMemeID).setColor(ContextCompat.getColor(MenuActivity.this, R.color.monokaiBlue));
                     mMemeIDtoSeriesMap.get(mMemeID).setDrawDataPoints(true);
@@ -737,13 +826,57 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                     mMemeIDtoSeriesMap.get(mMemeID).setThickness(8);
                     mMemeDetailsFragment.updateGraph(mMemeIDtoSeriesMap.get(mMemeID),mDateRange);
                 } catch (Exception e) {
+                    Log.e(TAG, e.toString());
                     e.printStackTrace();
                 }
             }
+        }
+    }
 
+    private class updateGraph extends AsyncTask<String, Void, Boolean>
+    {
+        private LineGraphSeries<DataPoint> mDataPointLineGraphSeries;
+        private DateRange mDateRange;
+        private MemeDetailsFragment mMemeDetailsFragment;
+        public updateGraph(LineGraphSeries<DataPoint> dplgs, DateRange dr, MemeDetailsFragment mdf) {
+            this.mDataPointLineGraphSeries = dplgs;
+            this.mDateRange = dr;
+            this.mMemeDetailsFragment = mdf;
         }
 
+        @Override
+        protected Boolean doInBackground(String... strings) {
+            int i = 0;
+            while(true)
+            {
+                try {
+                    sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    this.mMemeDetailsFragment.updateGraph(this.mDataPointLineGraphSeries, this.mDateRange);
+                } catch (Exception e) {
+                    Log.e(TAG, e.toString());
+                    if(i >= 5)
+                    {
+                        return false;
+                    }
+                    i++;
+                    continue;
+                }
+                return true;
+            }
+        }
 
+        @Override
+        protected void onPostExecute(Boolean result) {
+            if(!result)
+            {
+                mGetGraphTask = new GetGraphData(mMemeNametoIDMap.get(mSelectedName));
+                mGetGraphTask.execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
+            }
+        }
     }
 
 }

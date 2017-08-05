@@ -12,21 +12,22 @@ import java.util.TreeMap;
 
 public class MemePastData
 {
+    // if we previously got the data before, then no need to request from the server again,
+    // just use the data.
+    private Boolean doneAlready = false;
     public MemePastData()
     {
         this.doneAlready = false;
         pastYearData = new TreeMap<>();
     }
-    // if we previously got the data before, then no need to request from the server again,
-    // just use the data.
-    private Boolean doneAlready;
 
     public void setDoneAlready()
     {
         this.doneAlready = true;
     }
+    public void setNotDone() { this.doneAlready = false; }
 
-    public Boolean isDoneAlready()
+    public Boolean  isDoneAlready()
     {
         return this.doneAlready;
     }

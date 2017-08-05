@@ -42,6 +42,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.lang.Thread.sleep;
+
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -65,7 +67,7 @@ public class MemeDetailsFragment extends Fragment {
     private Integer mMemePrice;
     private Integer mStocksOwned;
     private TextView mMemeTitleView;
-    private TextView mMoneyView;
+    private TextView mPriceView;
     private AppCompatImageButton mImageView;
     private TextView mStocksOwnedView;
     private Button mSellButton;
@@ -154,7 +156,7 @@ public class MemeDetailsFragment extends Fragment {
             mView = inflater.inflate(R.layout.fragment_meme_details, container, false);
             mApplication = (MyApplication) getActivity().getApplicationContext();
             mMemeTitleView = (TextView) mView.findViewById(R.id.detail_meme_title);
-            mMoneyView = (TextView) mView.findViewById(R.id.detail_meme_price);
+            mPriceView = (TextView) mView.findViewById(R.id.detail_meme_price);
             mImageView = (AppCompatImageButton) mView.findViewById(R.id.memeIcon);
             mStocksOwnedView = (TextView) mView.findViewById(R.id.stocks_owned);
             mSellButton = (Button) mView.findViewById(R.id.sell_stock_button);
@@ -169,7 +171,7 @@ public class MemeDetailsFragment extends Fragment {
             String nameToDisplay = mMemeName.replace("meme", "");
             nameToDisplay = WordUtils.capitalize(nameToDisplay);
             mMemeTitleView.setText(nameToDisplay);
-            mMoneyView.setText("$"+mMemePrice.toString());
+            mPriceView.setText("$"+mMemePrice.toString());
 
             mStocksOwnedView.setText(mStocksOwned.toString());
             mGraphTitle.setText(mMemeName + "'s stock trend" );
@@ -300,6 +302,7 @@ public class MemeDetailsFragment extends Fragment {
             });
             return mView;
         } catch (Exception e) {
+            Log.e(TAG , e.toString());
             e.printStackTrace();
             return null;
         }
@@ -334,8 +337,18 @@ public class MemeDetailsFragment extends Fragment {
 
     public void updateGraph(LineGraphSeries<DataPoint> dataPointLineGraphSeries, DateRange dateRange) {
         // remove old mMemeIDtoSeriesMap.get(mMemeID)(line)
+//        try {
+//            sleep(3000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+
         mDateRange = dateRange;
-        mGraphView.removeAllSeries();
+        try {
+            mGraphView.removeAllSeries();
+        } catch (Exception e) {
+            Log.e(TAG, e.toString());
+        }
         mCurrentSeries = dataPointLineGraphSeries;
         mGraphView.addSeries(dataPointLineGraphSeries);
         // set date label formatter
@@ -356,7 +369,6 @@ public class MemeDetailsFragment extends Fragment {
                     Date date = new Date((long) (value));
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTime(date);
-                    Log.v(TAG, date.toString());
                     SimpleDateFormat sdf = new SimpleDateFormat();
                     if (mDateRange == DateRange.DAY) {
                         sdf.applyPattern("h:mma");
@@ -407,6 +419,10 @@ public class MemeDetailsFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+
+    public void updateStockPrice(Integer price) {
+        mPriceView.setText("$" + price.toString());
     }
 
     /**

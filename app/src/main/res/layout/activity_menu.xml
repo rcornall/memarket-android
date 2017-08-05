@@ -10,14 +10,13 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/TopBar"
             android:background="#1a1c17"
             android:layout_width="match_parent"
             android:layout_marginTop="0dp"
             android:layout_marginBottom="0dp"
             android:layout_height="68dp"
-            android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true">
             <android.support.v7.widget.AppCompatImageButton
                 android:layout_width="68dp"
@@ -28,6 +27,7 @@
                 android:id="@+id/character_icon"
                 android:background="@drawable/blink_animation2" />
             <TextView
+                android:layout_toRightOf="@id/character_icon"
                 android:id="@+id/username_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -37,36 +37,85 @@
                 android:textStyle="bold"
                 android:text="Loading..."
                 android:textColor="@color/greenWhite"
-                android:layout_marginTop="-18dp"
-                android:layout_marginBottom="-18dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="0dp"
                 android:textSize="22sp"/>
             <View
+                android:layout_toRightOf="@id/character_icon"
+                android:id="@+id/view1"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_weight="1"/>
-            <TextView
-                android:id="@+id/money_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="top"
-                android:text="Loading..."
-                android:textColor="@color/greenWhite"
-                android:layout_marginTop="-18dp"
-                android:layout_marginBottom="-18dp"
-                android:textSize="18sp"/>
-            <Button
-                android:id="@+id/settings_button"
-                android:minWidth="5dp"
-                android:gravity="center_vertical"
+
+
+            <LinearLayout
+                android:id="@+id/money_and_settings"
+                android:layout_toRightOf="@id/view1"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:layout_marginLeft="4dp"
-                android:layout_marginRight="4dp"
-                android:background="@android:color/transparent"
-                android:drawableTop="@mipmap/ic_action_settings"
-                />
-        </LinearLayout>
+                android:gravity="right">
+
+                <TextView
+                    android:id="@+id/money_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Loading..."
+                    android:textColor="@color/greenWhite"
+                    android:textSize="18sp"/>
+
+                <Button
+
+                    android:id="@+id/settings_button"
+                    android:minWidth="5dp"
+                    android:minHeight="5dp"
+                    android:maxHeight="25sp"
+                    android:gravity="center_vertical"
+                    android:layout_gravity="end"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="4dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:background="@android:color/transparent"
+                    android:drawableTop="@mipmap/ic_action_settings"/>
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_below="@+id/money_and_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true">
+
+                <TextView
+                    android:id="@+id/timer_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="next update:"
+                    android:textColor="@color/greenWhite"
+                    android:layout_marginBottom="2dp"
+                    android:textSize="18sp"/>
+                <TextView
+                    android:id="@+id/timer_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:text="15:00"
+                    android:textColor="@color/monokaiGreen"
+                    android:layout_marginBottom="2dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:textSize="18sp"
+
+                    />
+            </LinearLayout>
+
+        </RelativeLayout>
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="2dp"
@@ -86,6 +135,13 @@
             android:layout_height="match_parent"
             android:layout_below="@+id/TopBarSeperator"
             android:layout_above="@+id/linearLayoutTabButtons" />
+        <View
+            android:id="@+id/line_above_bottom_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:alpha="1"
+            android:background="@color/monokaiDarkGreen"
+            android:layout_above="@id/linearLayoutTabButtons"/>
         <LinearLayout
             android:id="@+id/linearLayoutTabButtons"
             android:layout_width="match_parent"
@@ -129,7 +185,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@id/TopBarSeperator"
-            android:layout_above="@id/linearLayoutTabButtons">
+            android:layout_above="@id/line_above_bottom_buttons">
+
+
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -172,184 +230,5 @@
 
         </LinearLayout>
 
-        <!--<RelativeLayout-->
-            <!--android:id="@+id/content_menu"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:paddingBottom="@dimen/activity_vertical_margin"-->
-            <!--android:paddingLeft="@dimen/activity_horizontal_margin"-->
-            <!--android:paddingRight="@dimen/activity_horizontal_margin"-->
-            <!--android:paddingTop="@dimen/activity_vertical_margin"-->
-            <!--android:layout_below="@id/TopBar"-->
-            <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
-            <!--tools:context="com.robthecornallgmail.memarket.Activities.MenuActivity"-->
-            <!--tools:showIn="@layout/activity_menu">-->
-
-
-            <!--<GridLayout-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="@dimen/image_and_description_height"-->
-                <!--android:layout_marginTop="@dimen/activity_vertical_margin"-->
-                <!--android:layout_below="@+id/memeChoicesSpinner"-->
-                <!--android:layout_alignParentLeft="true"-->
-                <!--android:layout_alignParentStart="true"-->
-                <!--android:rowCount="1"-->
-                <!--android:columnCount="2"-->
-                <!--android:id="@+id/gridLayout">-->
-
-                <!--<TextView-->
-                    <!--android:id="@+id/dataFromServer"-->
-                    <!--android:layout_columnWeight="0"-->
-                    <!--android:layout_height="match_parent"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:text="Loading..."-->
-                    <!--android:ems="10"-->
-                    <!--android:minLines="2"-->
-                    <!--android:maxLines="6"-->
-                    <!--android:ellipsize="none"-->
-                    <!--android:scrollHorizontally="false"/>-->
-
-
-                <!--<android.support.v7.widget.AppCompatImageButton-->
-                    <!--android:id="@+id/memeIcon"-->
-                    <!--app:srcCompat="@drawable/icon_high_guy_meme"-->
-                    <!--android:background="@android:drawable/picture_frame"-->
-                    <!--android:backgroundTint="@color/pictureFrame"-->
-                    <!--android:layout_width="130dp"-->
-                    <!--android:layout_columnWeight="0"-->
-                    <!--android:layout_gravity="right"-->
-                    <!--android:scaleType="centerCrop"/>-->
-            <!--</GridLayout>-->
-
-            <!--<TextView-->
-                <!--android:id="@+id/circle_stock_thing"-->
-                <!--android:layout_below="@id/gridLayout"-->
-                <!--android:layout_width="100dp"-->
-                <!--android:layout_height="60dp"-->
-                <!--android:layout_marginLeft="5dp"-->
-                <!--android:layout_marginRight="5dp"-->
-                <!--android:layout_centerHorizontal="true"-->
-                <!--android:layout_gravity="center"-->
-                <!--android:background="@drawable/stock_circle"-->
-                <!--android:gravity="center"-->
-                <!--android:shadowColor="@color/monokaiGreen"-->
-                <!--android:text="@string/question_mark"-->
-                <!--android:fontFamily="sans-serif"-->
-                <!--android:textStyle="bold"-->
-                <!--android:minHeight="14dp" android:minWidth="14dp" android:maxHeight="14dp"-->
-                <!--android:textColor="@color/monokaiBlue"-->
-                <!--android:textSize="34sp" />-->
-
-            <!--<Button-->
-                <!--android:id="@+id/sell_stock_button"-->
-                <!--android:text="SELL"-->
-                <!--style="@style/login_button_style"-->
-                <!--android:textStyle="bold"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_alignLeft="@+id/view"-->
-                <!--android:layout_alignStart="@+id/view"-->
-                <!--android:layout_marginLeft="13dp"-->
-                <!--android:layout_marginStart="13dp"-->
-                <!--android:layout_toLeftOf="@+id/circle_stock_thing"-->
-                <!--android:layout_toStartOf="@+id/circle_stock_thing"-->
-                <!--android:layout_alignBottom="@+id/circle_stock_thing"-->
-                <!--android:layout_below="@+id/gridLayout" />-->
-
-            <!--<Button-->
-                <!--android:id="@+id/buy_stock_button"-->
-                <!--android:text="BUY"-->
-                <!--style="@style/login_button_style"-->
-                <!--android:textStyle="bold"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_marginRight="12dp"-->
-                <!--android:layout_marginEnd="12dp"-->
-                <!--android:layout_alignBottom="@+id/circle_stock_thing"-->
-                <!--android:layout_alignRight="@+id/view"-->
-                <!--android:layout_alignEnd="@+id/view"-->
-                <!--android:layout_below="@+id/gridLayout"-->
-                <!--android:layout_toRightOf="@+id/circle_stock_thing"-->
-                <!--android:layout_toEndOf="@+id/circle_stock_thing" />-->
-
-            <!--<TextView-->
-                <!--android:text="Loading..."-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_marginTop="28dp"-->
-                <!--android:id="@+id/graphTitle"-->
-                <!--android:layout_below="@+id/circle_stock_thing"-->
-                <!--android:layout_alignRight="@+id/circle_stock_thing"-->
-                <!--android:layout_alignEnd="@+id/circle_stock_thing" />-->
-
-            <!--<ToggleButton-->
-                <!--android:textOn="DAY"-->
-                <!--android:textOff="DAY"-->
-                <!--android:layout_width="30dp"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--style="@style/graph_button_style"-->
-                <!--android:id="@+id/DayButton"-->
-                <!--android:background="@drawable/button_with_border"-->
-
-                <!--android:layout_alignTop="@+id/graph"-->
-                <!--android:layout_alignLeft="@+id/sell_stock_button"-->
-                <!--/>-->
-            <!--<ToggleButton-->
-                <!--android:textOn="WEEK"-->
-                <!--android:textOff="WEEK"-->
-                <!--android:layout_width="30dp"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--style="@style/graph_button_style"-->
-                <!--android:id="@+id/WeekButton"-->
-                <!--android:background="@drawable/button_with_border"-->
-
-                <!--android:layout_below="@+id/DayButton"-->
-                <!--android:layout_alignLeft="@+id/sell_stock_button"-->
-                <!--/>-->
-            <!--<ToggleButton-->
-                <!--android:textOn="MONTH"-->
-                <!--android:textOff="MONTH"-->
-                <!--android:layout_width="30dp"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--style="@style/graph_button_style"-->
-                <!--android:textSize="8sp"-->
-                <!--android:id="@+id/MonthButton"-->
-                <!--android:background="@drawable/button_with_border"-->
-
-                <!--android:layout_below="@+id/WeekButton"-->
-                <!--android:layout_alignLeft="@+id/sell_stock_button"-->
-                <!--/>-->
-            <!--<ToggleButton-->
-                <!--android:text="YEAR"-->
-                <!--android:layout_width="30dp"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--style="@style/graph_button_style"-->
-                <!--android:id="@+id/YearButton"-->
-                <!--android:background="@drawable/button_with_border"-->
-
-                <!--android:layout_below="@+id/MonthButton"-->
-                <!--android:layout_alignLeft="@+id/sell_stock_button"-->
-                <!--/>-->
-
-            <!--<com.jjoe64.graphview.GraphView-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="200dip"-->
-                <!--android:id="@+id/graph"-->
-                <!--android:layout_alignParentBottom="true"-->
-                <!--android:layout_below="@+id/circle_stock_thing"-->
-                <!--android:layout_alignLeft="@+id/DayButton"-->
-                <!--android:layout_marginLeft="33dp"-->
-                <!--android:layout_marginStart="33dp"-->
-                <!--android:layout_marginTop="50dp" />-->
-
-            <!--<TextView-->
-                <!--android:text="Shares owned: "-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_below="@+id/circle_stock_thing"-->
-                <!--android:layout_centerHorizontal="true"-->
-                <!--android:id="@+id/shares_owned" />-->
-
-        <!--</RelativeLayout>-->
     </RelativeLayout>
 </android.support.design.widget.CoordinatorLayout>
