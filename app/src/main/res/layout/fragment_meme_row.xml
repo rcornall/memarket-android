@@ -9,7 +9,7 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="0.47"
+        android:layout_weight="0.17"
         android:gravity="center_vertical">
         <TextView
             android:id="@+id/MemeName"
@@ -17,25 +17,41 @@
             android:layout_height="wrap_content"
             android:maxLines="4"
             android:textStyle=""
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:text="hi"
-            android:layout_marginLeft="@dimen/text_margin"
+            android:layout_marginLeft="13dp"
             android:textColor="@color/greenWhite"
             android:textAppearance="?attr/textAppearanceListItem" />
     </LinearLayout>
 
-    <LinearLayout
+    1<LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="0.24"
+        android:layout_weight="0.30"
         android:gravity="center_vertical|end">
+        <ImageView
+            android:id="@+id/UpDownArrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@mipmap/ic_action_arrow_drop_up"
+            />
+        <TextView
+            android:id="@+id/MemePriceDifference"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:text="hi"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="10dp"
+            android:textAppearance="?attr/textAppearanceListItem"
+            />
         <TextView
             android:id="@+id/MemePrice"
-            android:textSize="16sp"
+            android:textSize="15sp"
             android:text="hi"
             android:textStyle=""
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginLeft="6dp"
+            android:layout_marginRight="6dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?attr/textAppearanceListItem" />
@@ -46,7 +62,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="end"
         android:gravity="end"
-        android:layout_weight="0.29">
+        android:layout_weight="0.22">
         <android.support.v7.widget.AppCompatImageButton
             android:id="@+id/MemeImage"
 

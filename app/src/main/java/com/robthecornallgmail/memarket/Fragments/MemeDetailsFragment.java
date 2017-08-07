@@ -342,7 +342,7 @@ public class MemeDetailsFragment extends Fragment {
 //        } catch (InterruptedException e) {
 //            e.printStackTrace();
 //        }
-
+//ih
         mDateRange = dateRange;
         try {
             mGraphView.removeAllSeries();

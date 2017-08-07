@@ -84,7 +84,7 @@ public class MainSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         try {
-            sleep(5000);
+            sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

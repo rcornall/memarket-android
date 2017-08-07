@@ -18,9 +18,12 @@ import com.squareup.picasso.Picasso;
 
 
 import org.apache.commons.lang3.text.WordUtils;
+import org.w3c.dom.Text;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -35,31 +38,54 @@ public class MemesListAdapter extends RecyclerView.Adapter<MemesListAdapter.View
     private final OnListFragmentInteractionListener mListener;
     private Typeface pixelStartFont;
 
-    ListMemesFragment mListMemesFragment;
 
     public MemesListAdapter(List<MemeRow> items, OnListFragmentInteractionListener listener, Typeface pixelStartFont) {
         mRows = items;
         mItemsCopy = new ArrayList<>();
         mListener = listener;
-        mListMemesFragment = new ListMemesFragment();
         this.pixelStartFont = pixelStartFont;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_meme_row, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_meme_row, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
+        Log.v("memelistadapter", "sldfksdlfkjsldfk");
+        if( position%2 == 0) {
+            holder.mView.setBackgroundColor(holder.mView.getResources().getColor(R.color.colorMyBetweenGrey));
+        }
+
+        DecimalFormat df = new DecimalFormat("#0.0#");
         holder.mItem = mRows.get(position);
         String name = mRows.get(position).getName();
         String nameToDisplay = name.replace("meme", "");
         nameToDisplay = WordUtils.capitalize(nameToDisplay);
         holder.mNameView.setText(nameToDisplay);
         holder.mPriceView.setText("$" + mRows.get(position).getPrice().toString());
+        float priceDiff = mRows.get(position).getPrice() - mRows.get(position).getLastPrice();
+        if(priceDiff != 0)
+        {
+            priceDiff = (priceDiff/(float)mRows.get(position).getPrice())*100;
+        }
+
+        if(priceDiff>=0)
+        {
+            holder.mPriceDifferenceView.setText("+" + df.format(priceDiff) + "%");
+            holder.mUpDownArrowView.setBackgroundResource(R.mipmap.ic_action_arrow_drop_up);
+            holder.mPriceDifferenceView.setTextColor(holder.mView.getResources().getColor(R.color.accent));
+            holder.mPriceView.setTextColor(holder.mView.getResources().getColor(R.color.accent));
+        }
+        else
+        {
+            holder.mPriceDifferenceView.setText(df.format(priceDiff) + "%");
+            holder.mUpDownArrowView.setBackgroundResource(R.mipmap.ic_action_arrow_drop_down);
+            holder.mPriceDifferenceView.setTextColor(holder.mView.getResources().getColor(R.color.myRed));
+            holder.mPriceView.setTextColor(holder.mView.getResources().getColor(R.color.myRed));
+        }
         String iconName = "icon_" + name.replaceAll(" ", "_").toLowerCase();
         int iconId = holder.mView.getResources().getIdentifier(iconName, "drawable", MainActivity.PACKAGE_NAME);
 //        holder.mImageView.setImageResource(iconId);
@@ -107,6 +133,8 @@ public class MemesListAdapter extends RecyclerView.Adapter<MemesListAdapter.View
         public final View mView;
         public final TextView mNameView;
         public final TextView mPriceView;
+        public final TextView mPriceDifferenceView;
+        public final ImageView mUpDownArrowView;
         public final AppCompatImageButton mImageView;
         public MemeRow mItem;
 
@@ -116,8 +144,10 @@ public class MemesListAdapter extends RecyclerView.Adapter<MemesListAdapter.View
             mNameView = (TextView) view.findViewById(R.id.MemeName);
 //            mNameView.setTypeface(pixelStartFont);
             mPriceView = (TextView) view.findViewById(R.id.MemePrice);
+            mPriceDifferenceView = (TextView) view.findViewById(R.id.MemePriceDifference);
 //            mPriceView.setTypeface(pixelStartFont);
             mImageView = (AppCompatImageButton) view.findViewById(R.id.MemeImage);
+            mUpDownArrowView = (ImageView) view.findViewById(R.id.UpDownArrow);
         }
 
         @Override
@@ -127,9 +157,5 @@ public class MemesListAdapter extends RecyclerView.Adapter<MemesListAdapter.View
     }
 
 
-    public void updateListFragment(Map<String, Integer> map)
-    {
-        mListMemesFragment.updateList(map);
-    }
 
 }

@@ -9,14 +9,16 @@ import android.support.v7.widget.util.SortedListAdapterCallback;
 public class MemeRow{
     private String mName;
     private Integer mPrice;
+    private Integer mLastPrice;
 
 
     public MemeRow() {
     }
 
-    public MemeRow(String name, Integer price) {
+    public MemeRow(String name, Integer price, Integer lastPrice) {
         this.mName = name;
         this.mPrice = price;
+        this.mLastPrice = lastPrice;
     }
 
     public String getName() {
@@ -30,8 +32,8 @@ public class MemeRow{
     public Integer getPrice() {
         return mPrice;
     }
-
-    public void setPrice(Integer price) {
-        this.mPrice = price;
+    public Integer getLastPrice() {
+        return mLastPrice;
     }
+
 }

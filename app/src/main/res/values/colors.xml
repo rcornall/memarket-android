@@ -13,6 +13,9 @@
     <color name="monokaiDarkGreen">#202d06</color>
     <color name="backgroundGreen">#50700f</color>
     <color name="accent">#88cc00</color>
+    <color name="settingsColor">#748d43</color>
     <color name="monokaiBlue">#66D9EF</color>
-    <color name="greenWhite">#e2f2d9</color>
+    <color name="greenWhite">#bdcbb3</color>
+    <color name="lesserWhite">#bdcbb3</color>
+    <color name="myRed">#d81302</color>
 </resources>

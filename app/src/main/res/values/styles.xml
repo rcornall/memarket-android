@@ -3,9 +3,9 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@android:color/holo_green_light</item>
+        <item name="colorPrimary">@color/colorMyBetweenGrey</item>
         <item name="colorPrimaryDark">@android:color/holo_green_dark</item>
-        <item name="colorAccent">@color/accent</item>
+        <item name="colorAccent">@color/greenWhite</item>
         <item name="android:colorBackground">@color/colorMyGrey</item>
         <item name="android:textColorPrimary">@color/sublWhite</item>
         <item name="android:windowBackground">@color/colorMyGrey</item>

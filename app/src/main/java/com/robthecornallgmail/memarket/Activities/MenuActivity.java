@@ -2,34 +2,25 @@ package com.robthecornallgmail.memarket.Activities;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.AnimationDrawable;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.util.TimeUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatImageButton;
-import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.Spinner;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.io.BufferedWriter;
@@ -41,30 +32,22 @@ import java.net.URL;
 import java.net.MalformedURLException;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
-import java.util.Locale;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import android.util.Log;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
-import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.robthecornallgmail.memarket.Fragments.ListMemesFragment;
 import com.robthecornallgmail.memarket.Fragments.MemeDetailsFragment;
-import com.robthecornallgmail.memarket.Fragments.MemesListAdapter;
 import com.robthecornallgmail.memarket.Util.MemePastData;
 import com.robthecornallgmail.memarket.Util.MemeRow;
 import com.robthecornallgmail.memarket.Util.MyApplication;
@@ -75,14 +58,16 @@ import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import org.w3c.dom.Text;
-
 import com.robthecornallgmail.memarket.Util.Defines;
+import com.robthecornallgmail.memarket.Util.UserRow;
 import com.robthecornallgmail.memarket.Views.HouseSurfaceView;
+import com.robthecornallgmail.memarket.Fragments.LeaderboardDialogFragment;
 
 import static java.lang.Thread.sleep;
 
-public class MenuActivity extends AppCompatActivity implements ListMemesFragment.OnListFragmentInteractionListener, MemeDetailsFragment.OnFragmentInteractionListener
+public class MenuActivity extends AppCompatActivity implements ListMemesFragment.OnListFragmentInteractionListener,
+        MemeDetailsFragment.OnFragmentInteractionListener,
+        LeaderboardDialogFragment.OnLeaderboardFragmentInteractionListener
 {
     private static long timeTillUpdate = 900000;
     private static CountDownTimer mFifteenMinTimer;
@@ -91,7 +76,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
     private static final String TAG = "Menu";
 
-    private Button mSettingsWheelButton;
+    private Button mSettingsWheelButton, mLeaderboardButton;
     private GraphView mGraphView;
     private GetGraphData mGetGraphTask;
     private DateRange mDateRange = DateRange.DAY;
@@ -99,18 +84,19 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     private Map<Integer, LineGraphSeries<DataPoint>> mMemeIDtoSeriesMap = new HashMap<>();
     private Map<String, Integer> mMemeNametoStockMap = new HashMap<>();
     private Map<Integer, Integer> mMemeIDtoAmountHeld = new HashMap<>();
+    private Map<String, Integer> mMemeNametoLastStockMap= new HashMap<>();
+    private Map<String,Integer> mLeaderboardUsersToMoneyMap = new LinkedHashMap<>(); //preserves ordering in HashMap
 
     private String mSelectedName;
     private Integer mSelectedMemeID;
+
     EditText mSearchView;
-
     private ListMemesFragment mMemeListFragment;
-    MemeDetailsFragment mMemeDetailsFragment;
+    private LeaderboardDialogFragment mLeaderboardDialogFragment;
 
+    MemeDetailsFragment mMemeDetailsFragment;
     // map meme IDs to their respective past Data from server.
     private Map<Integer, MemePastData> mGraphDataObjectMap = new HashMap<>();
-
-
 
 
     @Override
@@ -122,6 +108,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         mApplication = (MyApplication) getApplicationContext();
 
         mMemeListFragment = new ListMemesFragment();
+        mLeaderboardDialogFragment = new LeaderboardDialogFragment();
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
 
@@ -155,6 +142,15 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 alertDialog.show();
             }
         });
+        mLeaderboardButton = (Button) findViewById(R.id.leaderboard_button);
+        mLeaderboardButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mLeaderboardUsersToMoneyMap.clear();
+                new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getLeaderboard.php?action", "GETTING_LEADERBOARD");
+                mLeaderboardDialogFragment.show(getFragmentManager(), TAG);
+            }
+        });
 
 
         final ImageView characterIcon = (ImageView) findViewById(R.id.character_icon);
@@ -173,6 +169,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         money.setText("$" + mApplication.userData.getMoney().toString());
 
         mSearchView = (EditText) findViewById(R.id.search_meme_view);
+        mSearchView.getBackground().setColorFilter(getResources().getColor(R.color.colorMyOffGrey), PorterDuff.Mode.SRC_IN);
         mSearchView.setVisibility(View.GONE);
         final FrameLayout flListFragment = (FrameLayout) findViewById(R.id.meme_list_fragment);
         final FrameLayout flDetailsFragment = (FrameLayout) findViewById(R.id.meme_details_fragment);
@@ -214,6 +211,8 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 flListFragment.setVisibility(View.GONE);
                 mSearchView.setVisibility(View.GONE);
                 hsv.setVisibility(View.VISIBLE);
+
+
             }
         });
 
@@ -267,7 +266,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         long minutes = calendar.get(Calendar.MINUTE);
         long seconds = calendar.get(Calendar.SECOND);
         Log.v(TAG, "mins is: " + minutes + " seconds: " + seconds);
-        long minsRemain = (15 - minutes%15) -1;
+        long minsRemain = (15 - minutes%15) - 1;
         long secsRemain = (60 - seconds);
         Log.v(TAG, "minsrenain is: " + minsRemain+ " seconds: " + secsRemain);
 
@@ -414,6 +413,11 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 new MenuActivity.PurchaseStockFromServer(mApplication.userData.getID(), mMemeNametoIDMap.get(mSelectedName), 1).execute(Defines.SERVER_ADDRESS + "/sellStock.php");
             }
         }
+    }
+
+    @Override
+    public void onLeaderboardFragmentInteraction(UserRow userRow) {
+        Log.v(TAG, "onLeaderboardFragmentInteractioncalled: ");
     }
 
 
@@ -609,12 +613,18 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                         Integer ID = jsonObject.getInt("ID");
                         String NAME = jsonObject.getString("NAME");
                         Integer CURRENT_STOCK = jsonObject.getInt("CURRENT_STOCK");
+                        Integer LAST_STOCK = jsonObject.getInt("LAST_STOCK");
                         mMemeNametoIDMap.put(NAME, ID);
                         mMemeNametoStockMap.put(NAME, CURRENT_STOCK);
+                        mMemeNametoLastStockMap.put(NAME, LAST_STOCK);
                     } else if (strings[1].equals("GETTING_USER_STOCKS")) {
                         Integer MEME_ID = jsonObject.getInt("MEME_ID");
                         Integer AMOUNT = jsonObject.getInt("AMOUNT");
                         mMemeIDtoAmountHeld.put(MEME_ID, AMOUNT);
+                    } else if (strings[1].equals("GETTING_LEADERBOARD")) {
+                        String NAME = jsonObject.getString("USER_DISPLAY_NAME");
+                        Integer MONEY = jsonObject.getInt("MONEY");
+                        mLeaderboardUsersToMoneyMap.put(NAME, MONEY);
                     } else {
                         Result.success = false;
                         Log.e(TAG, "params wrong..");
@@ -656,15 +666,20 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
             if (Result.success) {
 //                mFraLgment = (ListMemesFragment) getSupportFragmentManager().findFragmentById(R.id.meme_list_fragment);
-                if (mRequest == "GETTING_DATA")
-                {
+                if (mRequest == "GETTING_DATA") {
                     try {
-                        mMemeListFragment.updateList(mMemeNametoStockMap);
+                        mMemeListFragment.updateList(mMemeNametoStockMap, mMemeNametoLastStockMap);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else if(mRequest == "GETTING_LEADERBOARD") {
+                    try {
+                        mLeaderboardDialogFragment.updateList(mLeaderboardUsersToMoneyMap);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 } else {
-
+                    Log.v(TAG, "getting user stocks?? not updating any lists");
                 }
             }
             else
@@ -752,6 +767,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
             } catch (NullPointerException e) {
                 Log.v(TAG, "cant get graph data, meme not selected yet");
                 Log.v(TAG, e.toString());
+                Result.httpResponse = MyHelper.HttpResponses.FAILURE;
                 Result.success = false;
                 Result.response = e.toString();
             }

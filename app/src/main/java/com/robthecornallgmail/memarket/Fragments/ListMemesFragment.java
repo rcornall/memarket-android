@@ -115,12 +115,12 @@ public class ListMemesFragment extends Fragment {
         mListener = null;
     }
 
-    public void updateList(Map<String, Integer> map) {
+    public void updateList(Map<String, Integer> stocks, Map<String, Integer> lastStocks) {
         if(memeRowList != null && !memeRowList.isEmpty()) {
             memeRowList.clear();
         }
-        for (Map.Entry<String , Integer> entry: map.entrySet()) {
-            MemeRow meme = new MemeRow(entry.getKey(), entry.getValue());
+        for (Map.Entry<String , Integer> entry: stocks.entrySet()) {
+            MemeRow meme = new MemeRow(entry.getKey(), entry.getValue(), lastStocks.get(entry.getKey()));
             memeRowList.add(meme);
             mAdapter.mItemsCopy.add(meme);
         }

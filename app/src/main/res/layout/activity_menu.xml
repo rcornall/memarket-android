@@ -58,13 +58,18 @@
                 android:layout_marginTop="4dp"
                 android:gravity="right">
 
-                <TextView
-                    android:id="@+id/money_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Loading..."
-                    android:textColor="@color/greenWhite"
-                    android:textSize="18sp"/>
+
+
+                <Button
+                    android:id="@+id/leaderboard_button"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:scaleType="fitXY"
+                    android:layout_marginTop="-3dp"
+                    android:layout_marginBottom="4dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:background="@drawable/icons8_leaderboard_50"/>
 
                 <Button
 
@@ -83,14 +88,28 @@
                     android:background="@android:color/transparent"
                     android:drawableTop="@mipmap/ic_action_settings"/>
             </LinearLayout>
-
-
             <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/money_and_settings"
+                android:layout_toRightOf="@id/character_icon">
+
+                <TextView
+                    android:id="@+id/money_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Loading..."
+                    android:textColor="@color/greenWhite"
+                    android:textSize="18sp"/>
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/update_time_layout"
                 android:layout_below="@+id/money_and_settings"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true">
+
 
                 <TextView
                     android:id="@+id/timer_title"
@@ -106,7 +125,7 @@
                     android:layout_height="wrap_content"
                     android:textStyle="bold"
                     android:text="15:00"
-                    android:textColor="@color/monokaiGreen"
+                    android:textColor="@color/greenWhite"
                     android:layout_marginBottom="2dp"
                     android:layout_marginRight="4dp"
                     android:layout_marginLeft="4dp"
@@ -126,7 +145,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
                 android:alpha="1"
-                android:background="@color/monokaiGreen"/>
+                android:background="@color/greenWhite"/>
         </RelativeLayout>
 
         <com.robthecornallgmail.memarket.Views.HouseSurfaceView
@@ -201,10 +220,14 @@
                 android:layout_marginLeft="10dp"
                 android:hint="Search"
                 android:drawableLeft="@mipmap/search_icon"
+                android:textColor="@color/greenWhite"
+                android:backgroundTint="@color/greenWhite"
+                android:textCursorDrawable="@null"
                 android:drawablePadding="7dp"
-                android:textColorHint="#50700f"
                 android:maxLines="1"
-                />
+                android:textColorHint="@color/colorMyOffGrey"
+            />
+            <!--android:textColorHint="#50700f"-->
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -216,7 +239,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="10dp"
                     android:alpha="0.1"
-                    android:background="@color/monokaiGreen"/>
+                    android:background="@color/greenWhite"/>
             </RelativeLayout>
             <FrameLayout
                 android:layout_width="match_parent"
