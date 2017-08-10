@@ -4,7 +4,10 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorMyGrey">#272822</color>
     <color name="colorMyOffGrey">#4d5346</color>
+    <color name="mySlightlyOffGrey">#40453b</color>
     <color name="colorMyBetweenGrey">#33372f</color>
+    <color name="colorMySlightlyBetweenGreyDark">#262924</color>
+    <color name="colorMySlightlyBetweenGreylight">#2c2f29</color>
     <color name="pictureFrame">#0f1009</color>
     <color name="colorAccent">#ff4081</color>
     <color name="sublWhite">#d2d2ac</color>
@@ -18,4 +21,5 @@
     <color name="greenWhite">#bdcbb3</color>
     <color name="lesserWhite">#bdcbb3</color>
     <color name="myRed">#d81302</color>
+    <color name="backgroundGrey">#1a1c17</color>
 </resources>

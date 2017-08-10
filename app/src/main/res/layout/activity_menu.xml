@@ -12,15 +12,14 @@
         android:layout_height="match_parent">
         <RelativeLayout
             android:id="@+id/TopBar"
-            android:background="#1a1c17"
+            android:background="@color/backgroundGrey"
             android:layout_width="match_parent"
             android:layout_marginTop="0dp"
-            android:layout_marginBottom="0dp"
             android:layout_height="68dp"
             android:layout_alignParentTop="true">
             <android.support.v7.widget.AppCompatImageButton
-                android:layout_width="68dp"
-                android:layout_marginBottom="2dp"
+                android:layout_width="70dp"
+                android:layout_marginBottom="0dp"
                 android:layout_marginTop="2dp"
                 android:layout_height="match_parent"
                 android:scaleType="fitXY"
@@ -37,8 +36,9 @@
                 android:textStyle="bold"
                 android:text="Loading..."
                 android:textColor="@color/greenWhite"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="5dp"
                 android:layout_marginBottom="0dp"
+                android:layout_marginLeft="3dp"
                 android:textSize="22sp"/>
             <View
                 android:layout_toRightOf="@id/character_icon"
@@ -55,7 +55,8 @@
                 android:layout_alignParentRight="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="7dp"
+                android:layout_marginRight="3dp"
                 android:gravity="right">
 
 
@@ -64,12 +65,11 @@
                     android:id="@+id/leaderboard_button"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-                    android:scaleType="fitXY"
-                    android:layout_marginTop="-3dp"
-                    android:layout_marginBottom="4dp"
-                    android:layout_marginRight="4dp"
-                    android:layout_marginLeft="4dp"
-                    android:background="@drawable/icons8_leaderboard_50"/>
+                    android:layout_marginTop="-4dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginLeft="5dp"
+                    android:background="@drawable/crown_greenwhite"
+                    android:alpha="0.55"/>
 
                 <Button
 
@@ -81,16 +81,17 @@
                     android:layout_gravity="end"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:layout_marginRight="4dp"
-                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginLeft="5dp"
                     android:background="@android:color/transparent"
-                    android:drawableTop="@mipmap/ic_action_settings"/>
+                    android:drawableTop="@mipmap/ic_action_settings"
+                    android:alpha="0.55"/>
             </LinearLayout>
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:gravity="bottom"
+                android:layout_alignParentBottom="true"
                 android:layout_below="@+id/money_and_settings"
                 android:layout_toRightOf="@id/character_icon">
 
@@ -98,6 +99,8 @@
                     android:id="@+id/money_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp"
+                    android:layout_marginLeft="3dp"
                     android:text="Loading..."
                     android:textColor="@color/greenWhite"
                     android:textSize="18sp"/>
@@ -105,6 +108,8 @@
             <LinearLayout
                 android:id="@+id/update_time_layout"
                 android:layout_below="@+id/money_and_settings"
+                android:gravity="bottom"
+                android:layout_alignParentBottom="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
@@ -135,18 +140,6 @@
             </LinearLayout>
 
         </RelativeLayout>
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_below="@id/TopBar"
-            android:id="@+id/TopBarSeperator">
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="20dp"
-                android:alpha="1"
-                android:background="@color/greenWhite"/>
-        </RelativeLayout>
 
         <com.robthecornallgmail.memarket.Views.HouseSurfaceView
             android:id="@+id/house_surface_view"
@@ -157,14 +150,14 @@
         <View
             android:id="@+id/line_above_bottom_buttons"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:alpha="1"
-            android:background="@color/monokaiDarkGreen"
+            android:layout_height="0dp"
+            android:alpha="0"
+            android:background="@color/colorMyOffGrey"
             android:layout_above="@id/linearLayoutTabButtons"/>
         <LinearLayout
             android:id="@+id/linearLayoutTabButtons"
             android:layout_width="match_parent"
-            android:layout_height="30dp"
+            android:layout_height="40dp"
             android:clickable="true"
             android:layout_alignParentBottom="true"
             >
@@ -174,37 +167,116 @@
                 style="@style/switch_tab_button_style"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="?android:selectableItemBackground"
                 android:layout_weight="33.333333"/>
+
             <View
-                android:layout_width="1dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:background="@color/colorMyBetweenGrey"/>
+                android:background="@color/colorMyOffGrey"/>
             <Button
                 android:id="@+id/home_button"
                 android:text="HOME"
                 style="@style/switch_tab_button_style"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="?android:selectableItemBackground"
                 android:layout_weight="33.333333"/>
             <View
-                android:layout_width="1dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:background="@color/colorMyBetweenGrey"/>
+                android:background="@color/colorMyOffGrey"/>
             <Button
+                android:id="@+id/store_button"
                 android:text="STORE"
                 style="@style/switch_tab_button_style"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="?android:selectableItemBackground"
                 android:layout_weight="33.333333"/>
 
         </LinearLayout>
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_below="@id/house_surface_view">
+            <View
+                android:id="@+id/find_memes_highlight"
+                android:layout_weight="33.33333"
+                android:layout_width="wrap_content"
+                android:layout_height="2dp"
+                android:background="@color/greenWhite"
+                android:alpha="0.7"/>
+            <View
+                android:id="@+id/home_highlight"
+                android:layout_weight="33.33333"
+                android:layout_width="wrap_content"
+                android:layout_height="2dp"
+                android:background="@color/greenWhite"
+                android:alpha="0.7"/>
+            <View
+                android:id="@+id/store_highlight"
+                android:layout_weight="33.33333"
+                android:layout_width="wrap_content"
+                android:layout_height="2dp"
+                android:background="@color/greenWhite"
+                android:alpha="0.7"/>
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/TopBar"
+            android:id="@+id/TopBarSeperator">
+            <EditText
+                android:id="@+id/search_meme_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Search"
+                android:drawableLeft="@mipmap/search_icon"
+                android:textColor="@color/greenWhite"
+                android:textCursorDrawable="@null"
+                android:paddingLeft="15dp"
+                android:paddingStart="15dp"
+                android:drawablePadding="7dp"
+                android:maxLines="1"
+                android:textColorHint="@color/colorMyOffGrey"
+                />
+
+        </RelativeLayout>
+        <RelativeLayout
+            android:id="@+id/drag_down_line"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0.5"
+            android:layout_below="@id/TopBar">
+
+            <View
+                android:layout_marginLeft="97dp"
+                android:layout_marginRight="97dp"
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/greenWhite"/>
+            <Button
+                android:id="@+id/drop_down_arrow"
+                android:layout_marginTop="-8dp"
+                android:gravity="center_horizontal"
+                android:layout_centerInParent="true"
+                android:layout_alignParentTop="true"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@android:color/transparent"
+                android:drawableTop="@mipmap/ic_action_arrow_drop_downgrey"
+                />
+        </RelativeLayout>
+        <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@id/TopBarSeperator"
-            android:layout_above="@id/line_above_bottom_buttons">
+            android:layout_above="@id/line_above_bottom_buttons"
+            >
 
 
             <FrameLayout
@@ -213,34 +285,8 @@
                 android:id="@+id/meme_details_fragment">
 
             </FrameLayout>
-            <EditText
-                android:id="@+id/search_meme_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:hint="Search"
-                android:drawableLeft="@mipmap/search_icon"
-                android:textColor="@color/greenWhite"
-                android:backgroundTint="@color/greenWhite"
-                android:textCursorDrawable="@null"
-                android:drawablePadding="7dp"
-                android:maxLines="1"
-                android:textColorHint="@color/colorMyOffGrey"
-            />
-            <!--android:textColorHint="#50700f"-->
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:layout_below="@id/search_meme_view"
-                android:id="@+id/SearchBarSeperator">
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="10dp"
-                    android:alpha="0.1"
-                    android:background="@color/greenWhite"/>
-            </RelativeLayout>
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

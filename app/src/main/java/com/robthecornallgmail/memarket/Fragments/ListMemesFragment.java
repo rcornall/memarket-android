@@ -87,7 +87,7 @@ public class ListMemesFragment extends Fragment {
             recyclerView.setItemViewCacheSize(20);
             recyclerView.setDrawingCacheEnabled(true);
             recyclerView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
-            recyclerView.addItemDecoration(new MyDividerItemDecoration(view.getContext(), LinearLayoutManager.VERTICAL, R.drawable.recycler_divider));
+//            recyclerView.addItemDecoration(new MyDividerItemDecoration(view.getContext(), LinearLayoutManager.VERTICAL, R.drawable.recycler_divider));
             recyclerView.setAdapter(mAdapter);
         }
 

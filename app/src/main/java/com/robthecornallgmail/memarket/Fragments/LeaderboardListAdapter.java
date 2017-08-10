@@ -51,6 +51,9 @@ public class LeaderboardListAdapter extends RecyclerView.Adapter<LeaderboardList
 
             holder.mView.setBackgroundColor(holder.mView.getResources().getColor(R.color.colorMyOffGrey));
         }
+        else {
+            holder.mView.setBackgroundColor(holder.mView.getResources().getColor(R.color.mySlightlyOffGrey));
+        }
 
         String name = mRows.get(position).getName();
         Log.v(TAG, "name is: " + name);

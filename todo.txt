@@ -1,10 +1,7 @@
-fixing memory issues:
-  DONEscaling down images before decoding (helps with huge images)
-  DONErecycling bitmaps, and freeing imageviews when activities destroyed
-  should probably make the homeSurfaceView its own fragment.
+should make house view houses more minimalist
 
-DONEscrollable canvase houseview
-
+might have screwed up main.cpp 'buf' isnt being incremented 15mins
+only after all memes are colected
 
 
 
@@ -34,4 +31,19 @@ DONEscrollable canvase houseview
 *****Chat system*****
 
 
+******** (+) add new meme right of edit text, ************
+maintain list of newly submitted memes, users can vote on what to keep.
+drop oldest/least relevant meme
 
+UI / DESIGN:
+* like twitch app more spacing for settings button, make them white or grey
+* search bar could pop up new full-screen dialog with recent searches
+* black on bottom tab buttons bar
+* get rid of divider lines in listfragment (minimalist)
+* buy and sell buttons bigger and more subtle background color
+
+
+
+
+
+COULD USE SELENIUM AS A BACKUP FOR GETTING TRENDS DATA

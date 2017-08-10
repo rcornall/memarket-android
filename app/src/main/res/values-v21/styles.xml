@@ -62,7 +62,7 @@
         <item name="android:textSize">10sp</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
-        <item name="android:background">@color/colorMyOffGrey</item>
+        <item name="android:background">@color/backgroundGrey</item>
         <item name="android:textColor">@color/greenWhite</item>
         <item name="android:fontFamily">sans-serif</item>
     </style>

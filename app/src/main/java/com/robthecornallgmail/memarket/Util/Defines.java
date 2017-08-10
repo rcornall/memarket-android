@@ -8,7 +8,7 @@ import android.view.animation.AlphaAnimation;
 
 public final class Defines
 {
-    public static String SERVER_ADDRESS = "http://192.168.1.74:8000";
+    public static String SERVER_ADDRESS = "http://192.168.1.76:8000";
     public static AlphaAnimation buttonClick = new AlphaAnimation(1F, 0.8F);
 }
 

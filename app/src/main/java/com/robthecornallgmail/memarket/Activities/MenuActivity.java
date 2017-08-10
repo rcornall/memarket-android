@@ -21,6 +21,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.io.BufferedWriter;
@@ -108,7 +110,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         mApplication = (MyApplication) getApplicationContext();
 
         mMemeListFragment = new ListMemesFragment();
-        mLeaderboardDialogFragment = new LeaderboardDialogFragment();
+//        mLeaderboardDialogFragment = new LeaderboardDialogFragment();
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
 
@@ -148,6 +150,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
             public void onClick(View v) {
                 mLeaderboardUsersToMoneyMap.clear();
                 new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getLeaderboard.php?action", "GETTING_LEADERBOARD");
+                mLeaderboardDialogFragment = new LeaderboardDialogFragment();
                 mLeaderboardDialogFragment.show(getFragmentManager(), TAG);
             }
         });
@@ -169,8 +172,19 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         money.setText("$" + mApplication.userData.getMoney().toString());
 
         mSearchView = (EditText) findViewById(R.id.search_meme_view);
-        mSearchView.getBackground().setColorFilter(getResources().getColor(R.color.colorMyOffGrey), PorterDuff.Mode.SRC_IN);
-        mSearchView.setVisibility(View.GONE);
+//        mSearchView.getBackground().setColorFilter(getResources().getColor(R.color.colorMyOffGrey), PorterDuff.Mode.SRC_IN);
+        mSearchView.setBackgroundColor(getResources().getColor(R.color.backgroundGrey));
+//        mSearchView.setVisibility(View.GONE);
+        final RelativeLayout searchBar = (RelativeLayout) findViewById(R.id.TopBarSeperator);
+        final RelativeLayout dragDownButton = (RelativeLayout) findViewById(R.id.drag_down_line);
+        final LinearLayout linearLayoutTabButtons = (LinearLayout) findViewById(R.id.linearLayoutTabButtons);
+
+        dragDownButton.setAlpha(0.95f);
+        searchBar.setBackgroundColor(getResources().getColor(R.color.backgroundGrey));
+        searchBar.setVisibility(View.GONE);
+
+        linearLayoutTabButtons.setBackgroundColor(getResources().getColor(R.color.backgroundGrey));
+
         final FrameLayout flListFragment = (FrameLayout) findViewById(R.id.meme_list_fragment);
         final FrameLayout flDetailsFragment = (FrameLayout) findViewById(R.id.meme_details_fragment);
 
@@ -181,8 +195,14 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         flListFragment.setVisibility(View.GONE);
 
 
-        Button searchMemesButton = (Button) findViewById(R.id.find_memes_button);
-        searchMemesButton.setOnClickListener(new View.OnClickListener() {
+        final View findMemesHighlight =(View) findViewById(R.id.find_memes_highlight);
+        final View homeHighlight =(View) findViewById(R.id.home_highlight);
+        final View storeHighlight =(View) findViewById(R.id.store_highlight);
+        storeHighlight.setVisibility(View.INVISIBLE);
+        findMemesHighlight.setVisibility(View.INVISIBLE);
+
+        Button findMemesButton = (Button) findViewById(R.id.find_memes_button);
+        findMemesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.v(TAG, "FIND MEMES PRESSED");
@@ -191,10 +211,15 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 hsv.free();
 
                 hsv.setVisibility(View.INVISIBLE);
+                homeHighlight.setVisibility(View.INVISIBLE);
+                storeHighlight.setVisibility(View.INVISIBLE);
+                findMemesHighlight.setVisibility(View.VISIBLE);
                 Log.v(TAG, "SET TO INVISIBLE DONE");
-                mSearchView.setVisibility(View.VISIBLE);
+//                mSearchView.setVisibility(View.VISIBLE);
+                searchBar.setVisibility(View.VISIBLE);
                 flListFragment.setVisibility(View.VISIBLE);
                 flDetailsFragment.setVisibility(View.VISIBLE);
+                dragDownButton.setAlpha(0.5f);
 //                try {
 //                    mMemeListFragment.updateList(mMemeNametoStockMap);
 //                } catch (Exception e) {
@@ -207,12 +232,27 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
             @Override
             public void onClick(View v) {
                 Log.v(TAG, "HOME PRESSED");
+                homeHighlight.setVisibility(View.VISIBLE);
+                storeHighlight.setVisibility(View.INVISIBLE);
+                findMemesHighlight.setVisibility(View.INVISIBLE);
+
                 flDetailsFragment.setVisibility(View.GONE);
                 flListFragment.setVisibility(View.GONE);
-                mSearchView.setVisibility(View.GONE);
+//                mSearchView.setVisibility(View.GONE);
+                searchBar.setVisibility(View.GONE);
                 hsv.setVisibility(View.VISIBLE);
+                dragDownButton.setAlpha(0.95f);
 
 
+            }
+        });
+        Button storeButton = (Button) findViewById(R.id.store_button);
+        storeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                homeHighlight.setVisibility(View.INVISIBLE);
+                findMemesHighlight.setVisibility(View.INVISIBLE);
+                storeHighlight.setVisibility(View.VISIBLE);
             }
         });
 

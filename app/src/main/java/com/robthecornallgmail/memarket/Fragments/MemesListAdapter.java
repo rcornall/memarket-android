@@ -56,7 +56,10 @@ public class MemesListAdapter extends RecyclerView.Adapter<MemesListAdapter.View
     public void onBindViewHolder(final ViewHolder holder, int position) {
         Log.v("memelistadapter", "sldfksdlfkjsldfk");
         if( position%2 == 0) {
-            holder.mView.setBackgroundColor(holder.mView.getResources().getColor(R.color.colorMyBetweenGrey));
+            holder.mView.setBackgroundColor(holder.mView.getResources().getColor(R.color.colorMySlightlyBetweenGreylight));
+        }
+        else {
+            holder.mView.setBackgroundColor(holder.mView.getResources().getColor(R.color.colorMySlightlyBetweenGreyDark));
         }
 
         DecimalFormat df = new DecimalFormat("#0.0#");
