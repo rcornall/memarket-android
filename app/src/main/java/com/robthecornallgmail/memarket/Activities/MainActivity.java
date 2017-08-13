@@ -62,12 +62,17 @@ public class MainActivity extends AppCompatActivity implements TaskCallback
         super.onCreate(savedInstanceState);
         //start the dank
 
-        mp3Player = MediaPlayer.create(this, R.raw.roccow_pumped);
-        mp3Player.setLooping(true);
+        //hide song till happy with it TODO 07092017
+//        mp3Player = MediaPlayer.create(this, R.raw.roccow_pumped);
+//        mp3Player.setLooping(true);
+//        mp3Player.start();
 
         setContentView(R.layout.activity_main);
 
-        mp3Player.start();
+        //hide surface view till work on it later.. TODO 07092017
+        MainSurfaceView msv = (MainSurfaceView) findViewById(R.id.mainSurfaceView);
+        msv.setVisibility(View.GONE);
+
 
         mBlackFog = findViewById(R.id.black_fog);
 //        OurView ov = new OurView(this);
@@ -155,19 +160,19 @@ public class MainActivity extends AppCompatActivity implements TaskCallback
     @Override
     protected void onPause() {
         super.onPause();
-        mp3Player.pause();
+//        mp3Player.pause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mp3Player.start();
+//        mp3Player.start();
     }
 
     @Override
     protected void onDestroy() {
         Log.v(TAG, "MainActivity onDestroy()");
-        mp3Player.release(); //prob redundant
+//        mp3Player.release(); //prob redundant
 //        MainSurfaceView msv = (MainSurfaceView) findViewById(R.id.mainSurfaceView);
 //        msv.surfaceDestroyed();
 //        msv.free();

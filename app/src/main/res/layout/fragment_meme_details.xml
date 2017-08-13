@@ -76,74 +76,76 @@
             android:layout_toLeftOf="@+id/memeIcon"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true" />
+
+        <TextView
+            android:id="@+id/YouOwnSentence"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/memeIcon"
+            android:layout_marginBottom="6dp"
+            android:text="Shares Currently Held "
+            android:textColor="@color/greenWhite"
+            android:textStyle="bold"/>
+        <TextView
+            android:id="@+id/stocks_owned"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/YouOwnSentence"
+            android:layout_alignBottom="@id/memeIcon"
+            android:layout_marginBottom="6dp"
+            android:layout_marginLeft="2dp"
+            android:text="0"
+            android:textStyle="bold"
+            android:textColor="@color/monokaiGreen"/>
+
     </RelativeLayout>
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:paddingBottom="@dimen/activity_vertical_margin"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         >
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:gravity="center"
-            android:id="@+id/linearLayoutYouOwn">
 
-
-            <TextView
-                android:id="@+id/YouOwnSentence"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Shares Currently Held "
-                android:textColor="@color/greenWhite"
-                android:textStyle="italic"/>
-            <TextView
-                android:id="@+id/stocks_owned"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="10dp"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:text="0"
-                android:textSize="25sp"
-                android:textColor="@color/monokaiGreen"/>
-        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/linearLayoutButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/linearLayoutYouOwn">
+            android:background="?attr/selectableItemBackground"
+            android:layout_marginBottom="10dp">
 
             <Button
             android:id="@+id/sell_stock_button"
+            android:background="?attr/selectableItemBackground"
             android:text="SELL"
-                android:clickable="true"
-                android:focusable="true"
-            style="@style/login_button_style"
+            android:clickable="true"
+            android:focusable="true"
             android:textStyle="bold"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="50dp"
             android:layout_marginLeft="13dp"
             android:layout_marginStart="13dp"
+            android:layout_marginRight="1dp"
             android:layout_weight="50" />
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1"/>
 
+            <View
+            android:layout_width="1dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"/>
             <Button
             android:id="@+id/buy_stock_button"
+            android:background="?attr/selectableItemBackground"
             android:text="BUY"
-                android:clickable="true"
-                android:focusable="true"
-            style="@style/login_button_style"
+            android:clickable="true"
+            android:focusable="true"
             android:textStyle="bold"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="50dp"
             android:layout_marginRight="12dp"
             android:layout_marginEnd="12dp"
+            android:layout_marginLeft="5dp"
             android:layout_weight="50" />
         </LinearLayout>
 

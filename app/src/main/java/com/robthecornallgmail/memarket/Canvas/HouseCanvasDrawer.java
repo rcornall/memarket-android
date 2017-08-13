@@ -15,14 +15,14 @@ import com.robthecornallgmail.memarket.Views.MainSurfaceView;
 public class HouseCanvasDrawer {
     private final Bitmap cloud1;
     private String TAG = "HouseCanvasDrawer";
-    private final Bitmap background, ground, guy, house;
+    private final Bitmap background, ground, guy, house, officeTall;
     private  int ground_y;
     private Integer x_background_diff, y_background_diff;
     private int backgroundWidth;
     private int groundWidth;
 
     private int guyFrame = 0; //30 frame sprite animation, 12 x 5 x 8 x 5
-    private int guyWidth;
+    private int guyWidth, houseWidth, officeTallWidth;
     private int guyHeight;
 
     private int SCREEN_WIDTH, SCREEN_HEIGHT;
@@ -33,7 +33,7 @@ public class HouseCanvasDrawer {
     Bitmap test2;
     Bitmap test3;
 
-    public HouseCanvasDrawer(Bitmap background, Bitmap cloud1, Bitmap ground, Bitmap guy, Bitmap house, int SCREEN_WIDTH, int SCREEN_HEIGHT, Bitmap test1,
+    public HouseCanvasDrawer(Bitmap background, Bitmap cloud1, Bitmap ground, Bitmap guy, Bitmap house, Bitmap officeTall, int SCREEN_WIDTH, int SCREEN_HEIGHT, Bitmap test1,
                              Bitmap test2,
                              Bitmap test3) {
         this.background = background;
@@ -41,6 +41,7 @@ public class HouseCanvasDrawer {
         this.ground = ground;
         this.guy = guy;
         this.house = house;
+        this.officeTall = officeTall;
         this.SCREEN_WIDTH = SCREEN_WIDTH;
         this.SCREEN_HEIGHT = SCREEN_HEIGHT;
         this.test1 = test1 ;
@@ -55,6 +56,9 @@ public class HouseCanvasDrawer {
         guyWidth = guy.getWidth()/4;
         guyHeight = guy.getHeight();
 
+        houseWidth = house.getWidth();
+        officeTallWidth = officeTall.getWidth();
+
         this.y_background_diff = background.getHeight() - this.SCREEN_HEIGHT;
         Log.v(TAG, "y diff is " + this.y_background_diff.toString());
         Log.v(TAG, String.format("SCREEN HEIGHT=%d, groundy=%d", SCREEN_HEIGHT, ground_y));
@@ -62,34 +66,41 @@ public class HouseCanvasDrawer {
 
     }
 
-    public void onDraw(Canvas canvas,
+    public void onDraw(Canvas canvas, float scaleFactor,
                        float background_lastX, float background_lastY,
                        float ground_lastX, float ground_lastY,
                        float guyLastX, float guyLastY,
                        float cloudLastX, float cloudLastY,
-                       float houseLastX, float houseLastY) {
+                       float houseLastX, float houseLastY,
+                       float officeTallLastX, float officeTallLastY) {
 
+//        Log.v(TAG, "scaleFactor:" + scaleFactor);
+//        Log.v(TAG, "")
         // check if its out of screen bounds - dont waste resources drawing if texture is not in view
         float nextX = background_lastX;
-        while (nextX < SCREEN_WIDTH) {
+        while (nextX < (int)((float)SCREEN_WIDTH/scaleFactor)) {
             if (nextX+backgroundWidth >= 0) {
                 canvas.drawBitmap(background,nextX,background_lastY,null);
             }
             nextX+=backgroundWidth;
         }
         nextX = ground_lastX;
-        while (nextX < SCREEN_WIDTH) {
+        while (nextX < (int)((float)SCREEN_WIDTH/scaleFactor)) {
             if (nextX+groundWidth >= 0) {
                 canvas.drawBitmap(ground, nextX, ground_lastY, null);
             }
             nextX+=groundWidth;
         }
-        if(cloud1_dx<-(SCREEN_WIDTH*2+SCREEN_WIDTH/2)) {
-            cloud1_dx=2*SCREEN_WIDTH;
+        // reset cloud back to the right
+        if(cloud1_dx<-(SCREEN_WIDTH*2-SCREEN_WIDTH/4)) {
+            cloud1_dx=SCREEN_WIDTH-SCREEN_WIDTH/4;
         }
         canvas.drawBitmap(cloud1, cloudLastX+cloud1_dx, cloudLastY, null);
         canvas.drawBitmap(house, houseLastX, houseLastY, null);
+        canvas.drawBitmap(officeTall, officeTallLastX, officeTallLastY, null);
+        canvas.drawBitmap(officeTall, officeTallLastX+houseWidth+officeTallWidth, officeTallLastY, null);
 
+//2438
 
         int guyX = 0;
         if (guyFrame < 12) {

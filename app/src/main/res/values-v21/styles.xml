@@ -44,7 +44,6 @@
 
     <style name="login_button_style">
         <item name="android:background">@color/colorMyOffGrey</item>
-        <item name="android:layout_margin">@dimen/login_button_margin</item>
         <item name="android:textColor">@color/monokaiGreen</item>
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:clickable">true</item>

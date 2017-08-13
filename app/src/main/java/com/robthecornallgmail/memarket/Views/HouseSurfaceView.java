@@ -36,7 +36,6 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
     private int VIEW_HEIGHT;
     boolean first = true;
 
-    private ScaleGestureDetector mScaleDetector; // for pinch zoom
     private InteractionMode mMode; // for touchevents
     Matrix mMatrixSky = new Matrix(); // for calculating where to put image after pan/zoom
     Matrix mMatrixGround = new Matrix(); // for calculating where to put image after pan/zoom
@@ -46,11 +45,14 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
     private HouseCanvasDrawer houseCanvasDrawer;
     private HouseThread houseThread;
 
-    private static int GROUND_HEIGHT, GUY_HEIGHT, HOUSE_HEIGHT, CLOUD_HEIGHT;
-    private static float GROUND_SCALE_FACTOR, GUY_SCALE_FACTOR, HOUSE_SCALE_FACTOR, CLOUD_SCALE_FACTOR;
+    private static int GROUND_HEIGHT, GUY_HEIGHT, HOUSE_HEIGHT, OFFICE_TALL_HEIGHT, CLOUD_HEIGHT;
+    private static float GROUND_SCALE_FACTOR, GUY_SCALE_FACTOR, HOUSE_SCALE_FACTOR, OFFICE_TALL_SCALE_FACTOR, CLOUD_SCALE_FACTOR;
     private Bitmap background, ground, guy;
-    private Bitmap house;
+    private Bitmap house, officeTall;
     private Bitmap cloud1;
+
+    private ScaleGestureDetector mScaleDetector;
+    private float mScaleFactor = 1.f;
 
     private class ObjectCoordinates{
         public float lastY = 0, backupx = 0;
@@ -79,7 +81,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         }
     }
 
-    ObjectCoordinates backgroundCoordinates, groundCoordinates, guyCoordinates, houseCoordinates;
+    ObjectCoordinates backgroundCoordinates, groundCoordinates, guyCoordinates, houseCoordinates, officeTallCoordinates;
     ObjectCoordinates cloud1Coordinates;
     movementCoordinates touchCoordinates;
     Bitmap test1;
@@ -112,30 +114,35 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
         setFocusable(true);
 
-        // scale the background to 1.5 times the height, this makes for a scrollable up/down screen
-        background = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.house_background), SKY_SIZE_X/100, SKY_SIZE_Y, true);
+        // scale the background to 1.25 times the height, this makes for a scrollable up/down screen
+        background = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.sky_gradient4), SKY_SIZE_X/100, SKY_SIZE_Y, true);
 
 
         // creating a scaled Bitmap reduces means reduced memory, since you dont decode the original full bitmap
-        GROUND_HEIGHT = SCREEN_HEIGHT/14;
-        ground = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.ground1, HouseSurfaceView.GROUND_HEIGHT);
+        GROUND_HEIGHT = SCREEN_HEIGHT/16;
+        ground = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.ground2, HouseSurfaceView.GROUND_HEIGHT);
         GROUND_SCALE_FACTOR = (float)HouseSurfaceView.GROUND_HEIGHT/(float)ground.getHeight();
         ground = Bitmap.createScaledBitmap(ground,(int)((float)ground.getWidth()*GROUND_SCALE_FACTOR), GROUND_HEIGHT, true);
 
 
-        GUY_HEIGHT = SCREEN_HEIGHT/8;
+        GUY_HEIGHT = (int)((float)SCREEN_HEIGHT/8.5);
         guy = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.ground_frog, GUY_HEIGHT);
         GUY_SCALE_FACTOR = (float)GUY_HEIGHT/(float)guy.getHeight();
         guy = Bitmap.createScaledBitmap(guy,(int)((float)guy.getWidth()*GUY_SCALE_FACTOR), GUY_HEIGHT, true);
 
 
-        HOUSE_HEIGHT = (int)((float)SCREEN_HEIGHT/2.5);
-        house = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.house1, HOUSE_HEIGHT);
+        HOUSE_HEIGHT = (int)((float)SCREEN_HEIGHT/3);
+        house = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.office, HOUSE_HEIGHT);
         HOUSE_SCALE_FACTOR = (float)HOUSE_HEIGHT/(float)house.getHeight();
         house = Bitmap.createScaledBitmap(house,(int)((float)house.getWidth()*HOUSE_SCALE_FACTOR), HOUSE_HEIGHT, true);
 
+        OFFICE_TALL_HEIGHT = (int)((float)SCREEN_HEIGHT/1.85);
+        officeTall = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.office_tall, OFFICE_TALL_HEIGHT);
+        OFFICE_TALL_SCALE_FACTOR = (float)OFFICE_TALL_HEIGHT/(float)officeTall.getHeight();
+        officeTall = Bitmap.createScaledBitmap(officeTall,(int)((float)officeTall.getWidth()*OFFICE_TALL_SCALE_FACTOR), OFFICE_TALL_HEIGHT, true);
 
-        CLOUD_HEIGHT = SCREEN_HEIGHT/10;
+
+        CLOUD_HEIGHT = SCREEN_HEIGHT/12;
         cloud1 = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.cloud_houseview, CLOUD_HEIGHT);
         CLOUD_SCALE_FACTOR = (float)CLOUD_HEIGHT/(float)cloud1.getHeight();
         cloud1 = Bitmap.createScaledBitmap(cloud1,(int)((float)cloud1.getWidth()*CLOUD_SCALE_FACTOR), CLOUD_HEIGHT, true);
@@ -146,9 +153,9 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         groundCoordinates = new ObjectCoordinates();
         guyCoordinates = new ObjectCoordinates();
         houseCoordinates = new ObjectCoordinates();
+        officeTallCoordinates = new ObjectCoordinates();
         cloud1Coordinates = new ObjectCoordinates();
         touchCoordinates = new movementCoordinates();
-        mScaleDetector = new ScaleGestureDetector(context, new ScaleGestureDetector.SimpleOnScaleGestureListener());
 
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         backgroundCoordinates.lastX = - (float) ( (SKY_SIZE_X - this.SCREEN_WIDTH)/2 );
@@ -158,13 +165,16 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         guyCoordinates.lastX = SCREEN_WIDTH/4;
         guyCoordinates.lastY = SCREEN_HEIGHT-ground.getHeight()-100 -  guy.getHeight();
         houseCoordinates.lastX = SCREEN_WIDTH/2 - guy.getWidth()/5;
-        houseCoordinates.lastY = SCREEN_HEIGHT-ground.getHeight()-100 - house.getHeight();
+        houseCoordinates.lastY = SCREEN_HEIGHT-ground.getHeight() - house.getHeight();
+        officeTallCoordinates.lastX = 4;
+        officeTallCoordinates.lastY = SCREEN_HEIGHT-ground.getHeight() - officeTall.getHeight();
         cloud1Coordinates.lastX = SCREEN_WIDTH-SCREEN_WIDTH/3;
-        cloud1Coordinates.lastY = SCREEN_HEIGHT/181;
+        cloud1Coordinates.lastY = SCREEN_HEIGHT/18;
 
         Log.v(TAG, "HouseSurface constructor finished (loading bitmaps)");
 
         CalculateMatrix(true);
+        mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
     }
 
 
@@ -175,11 +185,11 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
         if(background == null)
         {   Log.v(TAG, "bitmaps are getting reloaded");
-            background = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.house_background), SKY_SIZE_X/100, SKY_SIZE_Y, true);
+            background = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.sky_gradient4), SKY_SIZE_X/100, SKY_SIZE_Y, true);
         }
         if(ground == null)
         {
-            ground = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.ground1, GROUND_HEIGHT);
+            ground = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.ground2, GROUND_HEIGHT);
             ground = Bitmap.createScaledBitmap(ground,(int)((float)ground.getWidth()*GROUND_SCALE_FACTOR), GROUND_HEIGHT, true);
         }
         if(guy == null)
@@ -189,8 +199,13 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         }
         if(house == null)
         {
-            house = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.house1, HOUSE_HEIGHT);
+            house = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.office, HOUSE_HEIGHT);
             house = Bitmap.createScaledBitmap(house,(int)((float)house.getWidth()*HOUSE_SCALE_FACTOR), HOUSE_HEIGHT, true);
+        }
+        if(officeTall == null)
+        {
+            officeTall = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.office_tall, OFFICE_TALL_HEIGHT);
+            officeTall = Bitmap.createScaledBitmap(officeTall,(int)((float)officeTall.getWidth()*OFFICE_TALL_SCALE_FACTOR), OFFICE_TALL_HEIGHT, true);
         }
         if(cloud1 == null)
         {
@@ -206,6 +221,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                                                     ground,
                                                     guy,
                                                     house,
+                                                    officeTall,
                                                     SCREEN_WIDTH,SCREEN_HEIGHT,test1,
                 test2,
                 test3
@@ -225,8 +241,9 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                     houseCanvasDrawer.setHeight(VIEW_HEIGHT);
                     Log.v(TAG, String.format("HEIGHT OF VIEW= %d", VIEW_HEIGHT));
                     groundCoordinates.lastY = VIEW_HEIGHT - ground.getHeight();
-                    guyCoordinates.lastY = VIEW_HEIGHT - ground.getHeight() - guy.getHeight() + ground.getHeight() / 14;
-                    houseCoordinates.lastY = VIEW_HEIGHT - ground.getHeight() - house.getHeight() + ground.getHeight() / 14;
+                    guyCoordinates.lastY = VIEW_HEIGHT - ground.getHeight() - guy.getHeight() + ground.getHeight() / 12;
+                    houseCoordinates.lastY = VIEW_HEIGHT - ground.getHeight() - house.getHeight();
+                    officeTallCoordinates.lastY = VIEW_HEIGHT - ground.getHeight() - officeTall.getHeight();
                 }
 //                CalculateMatrix(true);
             }
@@ -266,12 +283,16 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 //                first = false;
 //
 //            }
-            houseCanvasDrawer.onDraw(canvas,
+            canvas.save();
+            canvas.scale(mScaleFactor, mScaleFactor);
+            houseCanvasDrawer.onDraw(canvas, mScaleFactor,
                     backgroundCoordinates.lastX, backgroundCoordinates.lastY,
                     groundCoordinates.lastX, groundCoordinates.lastY,
                     guyCoordinates.lastX, guyCoordinates.lastY,
                     cloud1Coordinates.lastX, cloud1Coordinates.lastY,
-                    houseCoordinates.lastX, houseCoordinates.lastY);
+                    houseCoordinates.lastX, houseCoordinates.lastY,
+                    officeTallCoordinates.lastX, officeTallCoordinates.lastY);
+            canvas.restore();
         }
     }
 
@@ -288,6 +309,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                 groundCoordinates.setBackupXY(groundCoordinates.lastX,groundCoordinates.lastY);
                 guyCoordinates.setBackupXY(guyCoordinates.lastX,guyCoordinates.lastY);
                 houseCoordinates.setBackupXY(houseCoordinates.lastX,houseCoordinates.lastY);
+                officeTallCoordinates.setBackupXY(officeTallCoordinates.lastX,officeTallCoordinates.lastY);
                 cloud1Coordinates.setBackupXY(cloud1Coordinates.lastX,cloud1Coordinates.lastY);
                 mMode = InteractionMode.PAN;
                 break;
@@ -297,34 +319,43 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 //                    Log.v(TAG, String.format("backgroundCoordinates.x and y are: %f, %f. \nnewxy are: %f, %f", touchCoordinates.x, touchCoordinates.x, new_x, new_y));
                     touchCoordinates.setdxdy( new_x - touchCoordinates.x, new_y - touchCoordinates.y);
 
-//                    Log.v(TAG, String.format("x and y are: %f, %f. \ndx and dy are: %f, %f", new_x, new_y, touchCoordinates.dx, touchCoordinates.dy));
+                    Log.v(TAG, String.format("x and y are: %f, %f. \ndx and dy are: %f, %f", new_x, new_y, touchCoordinates.dx, touchCoordinates.dy));
+                    Log.v(TAG, String.format("scaleFactor is: %f", mScaleFactor));
+                    Log.v(TAG, String.format("MinY*scaleFactor is: %f", (float)MIN_Y*mScaleFactor));
+                    Log.v(TAG, String.format("MAXY*scaleFactor is: %f", (float)MAX_Y*mScaleFactor));
+                    Log.v(TAG, String.format("backgroundCoordinates.backupy+touchCoordinates.dy: %f", backgroundCoordinates.backupy+touchCoordinates.dy));
+
                     //lock the surfaceview area to move around the size of the sky width and height.
                     if (backgroundCoordinates.backupx+touchCoordinates.dx > MAX_X) {
-                        float diff = MAX_X-backgroundCoordinates.lastX;
+                        float diff = ((float)MAX_X*mScaleFactor)-backgroundCoordinates.lastX;
                         backgroundCoordinates.lastX = backgroundCoordinates.lastX + diff;
                         groundCoordinates.lastX = groundCoordinates.lastX + diff;
                         guyCoordinates.lastX = guyCoordinates.lastX + diff;
                         houseCoordinates.lastX = houseCoordinates.lastX + diff;
+                        officeTallCoordinates.lastX = officeTallCoordinates.lastX + diff;
                         cloud1Coordinates.lastX = cloud1Coordinates.lastX + diff;
 
                         backgroundCoordinates.backupx = backgroundCoordinates.lastX;
                         groundCoordinates.backupx = groundCoordinates.lastX;
                         guyCoordinates.backupx = guyCoordinates.lastX;
                         houseCoordinates.backupx = houseCoordinates.lastX;
+                        officeTallCoordinates.backupx = officeTallCoordinates.lastX;
                         cloud1Coordinates.backupx = cloud1Coordinates.lastX;
                         touchCoordinates.x = new_x;
                     } else if (backgroundCoordinates.backupx+touchCoordinates.dx < MIN_X) {
-                        float diff = MIN_X-backgroundCoordinates.lastX;
+                        float diff = ((float)MIN_X*mScaleFactor)-backgroundCoordinates.lastX;
                         backgroundCoordinates.lastX = backgroundCoordinates.lastX + diff;
                         groundCoordinates.lastX = groundCoordinates.lastX + diff;
                         guyCoordinates.lastX = guyCoordinates.lastX + diff;
                         houseCoordinates.lastX = houseCoordinates.lastX + diff;
+                        officeTallCoordinates.lastX = officeTallCoordinates.lastX + diff;
                         cloud1Coordinates.lastX = cloud1Coordinates.lastX + diff;
 
                         backgroundCoordinates.backupx = backgroundCoordinates.lastX;
                         groundCoordinates.backupx = groundCoordinates.lastX;
                         guyCoordinates.backupx = guyCoordinates.lastX;
                         houseCoordinates.backupx = houseCoordinates.lastX;
+                        officeTallCoordinates.backupx = officeTallCoordinates.lastX;
                         cloud1Coordinates.backupx = cloud1Coordinates.lastX;
                         touchCoordinates.x = new_x;
                     } else {
@@ -332,34 +363,39 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                         groundCoordinates.lastX = groundCoordinates.backupx+touchCoordinates.dx;
                         guyCoordinates.lastX = guyCoordinates.backupx+touchCoordinates.dx;
                         houseCoordinates.lastX = houseCoordinates.backupx+touchCoordinates.dx;
+                        officeTallCoordinates.lastX = officeTallCoordinates.backupx+touchCoordinates.dx;
                         cloud1Coordinates.lastX = cloud1Coordinates.backupx+touchCoordinates.dx;
                     }
                     if (backgroundCoordinates.backupy+touchCoordinates.dy > MAX_Y) {
-                        float diff = MAX_Y-backgroundCoordinates.lastY;
+                        float diff = ((float)MAX_Y*mScaleFactor)-backgroundCoordinates.lastY;
                         backgroundCoordinates.lastY = backgroundCoordinates.lastY + diff;
                         groundCoordinates.lastY = groundCoordinates.lastY + diff;
                         guyCoordinates.lastY = guyCoordinates.lastY + diff;
                         houseCoordinates.lastY = houseCoordinates.lastY + diff;
+                        officeTallCoordinates.lastY = officeTallCoordinates.lastY + diff;
                         cloud1Coordinates.lastY = cloud1Coordinates.lastY + diff;
 
                         backgroundCoordinates.backupy = backgroundCoordinates.lastY;
                         groundCoordinates.backupy = groundCoordinates.lastY;
                         guyCoordinates.backupy = guyCoordinates.lastY;
                         houseCoordinates.backupy = houseCoordinates.lastY;
+                        officeTallCoordinates.backupy = officeTallCoordinates.lastY;
                         cloud1Coordinates.backupy = cloud1Coordinates.lastY;
                         touchCoordinates.y = new_y;
-                    } else if (backgroundCoordinates.backupy+touchCoordinates.dy < MIN_Y) {
-                        float diff = MIN_Y-backgroundCoordinates.lastY;
+                    } else if (backgroundCoordinates.backupy+touchCoordinates.dy < ((float)MIN_Y*mScaleFactor)) {
+                        float diff = ((float)MIN_Y*mScaleFactor)-backgroundCoordinates.lastY;
                         backgroundCoordinates.lastY = backgroundCoordinates.lastY + diff;
                         groundCoordinates.lastY = groundCoordinates.lastY + diff;
                         guyCoordinates.lastY = guyCoordinates.lastY + diff;
                         houseCoordinates.lastY = houseCoordinates.lastY + diff;
+                        officeTallCoordinates.lastY = officeTallCoordinates.lastY + diff;
                         cloud1Coordinates.lastY = cloud1Coordinates.lastY + diff;
 
                         backgroundCoordinates.backupy = backgroundCoordinates.lastY;
                         groundCoordinates.backupy = groundCoordinates.lastY;
                         guyCoordinates.backupy = guyCoordinates.lastY;
                         houseCoordinates.backupy = houseCoordinates.lastY;
+                        officeTallCoordinates.backupy = officeTallCoordinates.lastY;
                         cloud1Coordinates.backupy = cloud1Coordinates.lastY;
                         touchCoordinates.y = new_y;
                     } else {
@@ -367,6 +403,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                         groundCoordinates.lastY = groundCoordinates.backupy+touchCoordinates.dy;
                         guyCoordinates.lastY = guyCoordinates.backupy+touchCoordinates.dy;
                         houseCoordinates.lastY = houseCoordinates.backupy+touchCoordinates.dy;
+                        officeTallCoordinates.lastY = officeTallCoordinates.backupy+touchCoordinates.dy;
                         cloud1Coordinates.lastY = cloud1Coordinates.backupy+touchCoordinates.dy;
                     }
 //                    CalculateMatrix(true);
@@ -377,6 +414,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                 // tap( calling tap method incase we decide to add in the future.);
                 break;
         }
+        mScaleDetector.onTouchEvent(event);
         return true;
     }
 
@@ -407,11 +445,24 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
             house.recycle();
             house = null;
         }
+        if(officeTall!=null) {
+            officeTall.recycle();
+            officeTall = null;
+        }
         if(cloud1!=null) {
             cloud1.recycle();
             cloud1 = null;
         }
     }
 
-
+    private class ScaleListener extends
+            ScaleGestureDetector.SimpleOnScaleGestureListener {
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            mScaleFactor *= detector.getScaleFactor();
+            mScaleFactor = Math.max(0.6f, Math.min(mScaleFactor, 1.8f));
+            invalidate();
+            return true;
+        }
+    }
 }

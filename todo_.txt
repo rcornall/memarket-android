@@ -1,0 +1,11 @@
+study 428
+
+memarket:
+1 use small textures(for buildings) repeatedly like ground, this will fix the lag issue 100% - tall office buildings are way too large
+5 load actual description of meme
+6 ..
+7 GRID view option for list of memes w/ just pics and maybe a lil ^ arrow or price on the picture like albums
+
+loading screens between activities and loading list of memes etc
+
+sun color low alpha on houseviewcanvas
