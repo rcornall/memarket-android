@@ -1,22 +1,37 @@
 package com.robthecornallgmail.memarket.Fragments;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatImageButton;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -32,7 +47,10 @@ import com.robthecornallgmail.memarket.Activities.MenuActivity;
 import com.robthecornallgmail.memarket.R;
 import com.robthecornallgmail.memarket.Util.Defines;
 import com.robthecornallgmail.memarket.Util.MyApplication;
+import com.robthecornallgmail.memarket.Util.MyHelper;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -42,6 +60,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import static android.R.attr.width;
+import static android.support.v7.appcompat.R.attr.height;
 import static java.lang.Thread.sleep;
 
 /**
@@ -68,7 +88,7 @@ public class MemeDetailsFragment extends Fragment {
     private Integer mStocksOwned;
     private TextView mMemeTitleView;
     private TextView mPriceView;
-    private AppCompatImageButton mImageView;
+    private ImageButton mImageView;
     private TextView mStocksOwnedView;
     private Button mSellButton;
     private Button mBuyButton;
@@ -89,6 +109,8 @@ public class MemeDetailsFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     private  MotionEvent mMotionEvent;
+
+    private ProgressDialog mProgressDialog;
 
     public MemeDetailsFragment() {
         // Required empty public constructor
@@ -157,7 +179,7 @@ public class MemeDetailsFragment extends Fragment {
             mApplication = (MyApplication) getActivity().getApplicationContext();
             mMemeTitleView = (TextView) mView.findViewById(R.id.detail_meme_title);
             mPriceView = (TextView) mView.findViewById(R.id.detail_meme_price);
-            mImageView = (AppCompatImageButton) mView.findViewById(R.id.memeIcon);
+            mImageView = (ImageButton) mView.findViewById(R.id.memeIcon);
             mStocksOwnedView = (TextView) mView.findViewById(R.id.stocks_owned);
             mSellButton = (Button) mView.findViewById(R.id.sell_stock_button);
             mBuyButton = (Button) mView.findViewById(R.id.buy_stock_button);
@@ -177,11 +199,35 @@ public class MemeDetailsFragment extends Fragment {
             mGraphTitle.setText(mMemeName + "'s stock trend" );
 
             String iconName = "icon_" + mMemeName.replaceAll(" ", "_").toLowerCase();
-            int iconId = getResources().getIdentifier(iconName, "drawable", MainActivity.PACKAGE_NAME);
+            final int iconId = getResources().getIdentifier(iconName, "drawable", MainActivity.PACKAGE_NAME);
             Log.e(TAG, mImageView.toString());
 //            mImageView.setImageResource(iconId);
             // use picasso to scale down image, saves ram
-            Picasso.with(mView.getContext()).load(iconId).centerCrop().fit().into(mImageView);
+            Picasso.with(mView.getContext()).load(iconId).fit().centerCrop().into(mImageView);
+
+            mProgressDialog = new ProgressDialog(mView.getContext());
+            mProgressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            mImageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    // Load the high-resolution "zoomed-in" image.
+                    final ImageView expandedImageView = (ImageView) mView.findViewById(R.id.expanded_image);
+                    mProgressDialog.show();
+                    Picasso.with(mView.getContext()).load(iconId).fit().centerInside().into(expandedImageView, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            mProgressDialog.dismiss();
+                            MyHelper.zoomImageFromThumb(mImageView, expandedImageView, mView);
+                        }
+
+                        @Override
+                        public void onError() {
+                            mProgressDialog.dismiss();
+                        }
+                    });
+                }
+            });
 
             mDayButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
@@ -315,7 +361,11 @@ public class MemeDetailsFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         // hide that annoying keyboard
         final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(mView.getWindowToken(), 0);
+        try {
+            imm.hideSoftInputFromWindow(mView.getWindowToken(), 0);
+        } catch (Exception e) {
+            Log.e(TAG, e.toString());
+        }
     }
     // TODO: Rename method, update argument and hook method into UI event
 
@@ -426,6 +476,7 @@ public class MemeDetailsFragment extends Fragment {
     public void updateStockPrice(Integer price) {
         mPriceView.setText("$" + price.toString());
     }
+
 
     /**
      * This interface must be implemented by activities that contain this

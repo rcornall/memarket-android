@@ -15,6 +15,7 @@
     android:orientation="vertical"
     >
 
+
     <RelativeLayout
         android:id="@+id/topLayoutDescription"
         android:layout_width="match_parent"
@@ -24,7 +25,7 @@
         android:paddingTop="@dimen/activity_vertical_margin"
     >
 
-        <android.support.v7.widget.AppCompatImageButton
+        <ImageButton
             android:id="@+id/memeIcon"
             app:srcCompat="@drawable/icon_high_guy_meme"
             android:background="@android:drawable/picture_frame"
@@ -249,4 +250,10 @@
 
 
 </LinearLayout>
+
+    <ImageView
+    android:id="@+id/expanded_image"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="invisible" />
 </FrameLayout>
