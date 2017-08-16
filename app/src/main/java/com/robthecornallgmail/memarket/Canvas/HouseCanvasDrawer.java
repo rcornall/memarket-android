@@ -2,11 +2,10 @@ package com.robthecornallgmail.memarket.Canvas;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.util.Log;
 
-import com.robthecornallgmail.memarket.Views.MainSurfaceView;
+import com.robthecornallgmail.memarket.Util.Office;
 
 /**
  * Created by rob on 03/03/17.
@@ -15,14 +14,15 @@ import com.robthecornallgmail.memarket.Views.MainSurfaceView;
 public class HouseCanvasDrawer {
     private final Bitmap cloud1;
     private String TAG = "HouseCanvasDrawer";
-    private final Bitmap background, ground, guy, house, officeTall;
+    private final Bitmap background, ground, guy;
+    private Office office;
     private  int ground_y;
     private Integer x_background_diff, y_background_diff;
     private int backgroundWidth;
     private int groundWidth;
 
     private int guyFrame = 0; //30 frame sprite animation, 12 x 5 x 8 x 5
-    private int guyWidth, houseWidth, officeTallWidth;
+    private int guyWidth, houseWidth, officeWidth;
     private int guyHeight;
 
     private int SCREEN_WIDTH, SCREEN_HEIGHT;
@@ -33,15 +33,14 @@ public class HouseCanvasDrawer {
     Bitmap test2;
     Bitmap test3;
 
-    public HouseCanvasDrawer(Bitmap background, Bitmap cloud1, Bitmap ground, Bitmap guy, Bitmap house, Bitmap officeTall, int SCREEN_WIDTH, int SCREEN_HEIGHT, Bitmap test1,
+    public HouseCanvasDrawer(Bitmap background, Bitmap cloud1, Bitmap ground, Bitmap guy, Office office, int SCREEN_WIDTH, int SCREEN_HEIGHT, Bitmap test1,
                              Bitmap test2,
                              Bitmap test3) {
         this.background = background;
         this.cloud1 = cloud1;
         this.ground = ground;
         this.guy = guy;
-        this.house = house;
-        this.officeTall = officeTall;
+        this.office = office;
         this.SCREEN_WIDTH = SCREEN_WIDTH;
         this.SCREEN_HEIGHT = SCREEN_HEIGHT;
         this.test1 = test1 ;
@@ -56,8 +55,7 @@ public class HouseCanvasDrawer {
         guyWidth = guy.getWidth()/4;
         guyHeight = guy.getHeight();
 
-        houseWidth = house.getWidth();
-        officeTallWidth = officeTall.getWidth();
+        officeWidth = office.officeTop.getWidth();
 
         this.y_background_diff = background.getHeight() - this.SCREEN_HEIGHT;
         Log.v(TAG, "y diff is " + this.y_background_diff.toString());
@@ -95,12 +93,13 @@ public class HouseCanvasDrawer {
         if(cloud1_dx<-(SCREEN_WIDTH*2-SCREEN_WIDTH/4)) {
             cloud1_dx=SCREEN_WIDTH-SCREEN_WIDTH/4;
         }
-        canvas.drawBitmap(cloud1, cloudLastX+cloud1_dx, cloudLastY, null);
-        canvas.drawBitmap(house, houseLastX, houseLastY, null);
-        canvas.drawBitmap(officeTall, officeTallLastX, officeTallLastY, null);
-        canvas.drawBitmap(officeTall, officeTallLastX+houseWidth+officeTallWidth, officeTallLastY, null);
 
-//2438
+        canvas.drawBitmap(cloud1, cloudLastX+cloud1_dx, cloudLastY, null);
+
+        drawOffice(canvas,office,houseLastX, houseLastY, "short");
+        drawOffice(canvas,office,officeTallLastX,officeTallLastY,"tall");
+        drawOffice(canvas,office,houseLastX+officeWidth,officeTallLastY, "tall");
+
 
         int guyX = 0;
         if (guyFrame < 12) {
@@ -122,13 +121,36 @@ public class HouseCanvasDrawer {
 
         guyFrame = ++guyFrame % 30;
         cloud1_dx += -1;
-//        canvas.drawBitmap(test1,background_lastX,background_lastY,null);
-//        canvas.drawBitmap(test2,background_lastX,background_lastY,null);
-//        canvas.drawBitmap(test3,background_lastX,background_lastY,null);
 
     }
 
     public void setHeight(int height) {
         this.VIEW_HEIGHT = height;
     }
+
+    private void drawOffice(Canvas canvas, Office office, float x, float y, String size) {
+        canvas.drawBitmap(office.officeTop,x,y, null);
+        int topHeight = office.officeTop.getHeight();
+        int middleHeight = office.officeMiddle.getHeight();
+        if (size == "tall") {
+            for(int i = 0; i<5;i++) {
+                if(i==4) {
+                    canvas.drawBitmap(office.officeBottom,x,y+topHeight+i*middleHeight,null);
+                } else {
+                    canvas.drawBitmap(office.officeMiddle,x,y+topHeight+i*middleHeight,null);
+                }
+            }
+        } else {
+            for(int i = 0; i<3;i++) {
+                if (i == 2) {
+                    canvas.drawBitmap(office.officeBottom, x, y + topHeight + i * middleHeight, null);
+                } else {
+                    canvas.drawBitmap(office.officeMiddle, x, y + topHeight + i * middleHeight, null);
+                }
+            }
+        }
+
+    }
 }
+
+

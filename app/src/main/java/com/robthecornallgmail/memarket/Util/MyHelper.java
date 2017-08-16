@@ -12,11 +12,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.LinearLayout;
 
 import com.robthecornallgmail.memarket.Activities.LoginActivity;
 
@@ -157,12 +159,13 @@ public class MyHelper {
         return BitmapFactory.decodeResource(res, resId, options);
     }
 
-    public static void zoomImageFromThumb(final View thumbView, final View expandedImageView, View mView) {
+    public static void zoomImageFromThumb(final View thumbView, final View expandedImageView, final View mView, final LinearLayout detailsLinearLayout) {
         // Calculate the starting and ending bounds for the zoomed-in image.
         // This step involves lots of math. Yay, math.
         final Rect startBounds = new Rect();
         final Rect finalBounds = new Rect();
         final Point globalOffset = new Point();
+
 
         // The start bounds are the global visible rectangle of the thumbnail,
         // and the final bounds are the global visible rectangle of the container
@@ -261,6 +264,11 @@ public class MyHelper {
                     }
                 });
                 set.start();
+
+                detailsLinearLayout.setAlpha(1.f);
+                detailsLinearLayout.setBackground(new ColorDrawable(0x00000000));
+
+
             }
         });
     }
