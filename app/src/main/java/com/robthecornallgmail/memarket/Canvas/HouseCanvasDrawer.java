@@ -26,16 +26,12 @@ public class HouseCanvasDrawer {
     private int guyHeight;
 
     private int SCREEN_WIDTH, SCREEN_HEIGHT;
-    private int VIEW_HEIGHT;
+    private int VIEW_HEIGHT, CLOUD_LEFT_EDGE, CLOUD_RIGHT_EDGE;
 
     private int cloud1_dx = 0;
-    Bitmap test1;
-    Bitmap test2;
-    Bitmap test3;
 
-    public HouseCanvasDrawer(Bitmap background, Bitmap cloud1, Bitmap ground, Bitmap guy, Office office, int SCREEN_WIDTH, int SCREEN_HEIGHT, Bitmap test1,
-                             Bitmap test2,
-                             Bitmap test3) {
+    public HouseCanvasDrawer(Bitmap background, Bitmap cloud1, Bitmap ground, Bitmap guy, Office office,
+                             int SCREEN_WIDTH, int SCREEN_HEIGHT) {
         this.background = background;
         this.cloud1 = cloud1;
         this.ground = ground;
@@ -43,9 +39,6 @@ public class HouseCanvasDrawer {
         this.office = office;
         this.SCREEN_WIDTH = SCREEN_WIDTH;
         this.SCREEN_HEIGHT = SCREEN_HEIGHT;
-        this.test1 = test1 ;
-        this.test2 = test2 ;
-        this.test3 = test3 ;
 
         ground_y = SCREEN_HEIGHT/10;
 
@@ -61,7 +54,29 @@ public class HouseCanvasDrawer {
         Log.v(TAG, "y diff is " + this.y_background_diff.toString());
         Log.v(TAG, String.format("SCREEN HEIGHT=%d, groundy=%d", SCREEN_HEIGHT, ground_y));
 
-
+//                             |----------------SCREEN_WIDTH*3.75-----------|
+//                              ____________________________________________
+//                             |                                            |
+//                             |        (0,0)_________________              |
+//                             |            |                 |             |
+//                             |            |            ___  |             |
+//                             |            |          (c l o u d)          |
+//                             |            |                 |             |
+//                             |            |                 |             |
+//                             |            |                 |             |
+//                             |____________|_________________|_____________|
+//
+//                                          |--SCREEN_WIDTH---|
+//
+// (cloud right edge) =                               |-------|-------------|
+//
+// (cloud left edge) = |(cloud)|------------|---------|       
+//                                   ||
+//                                   ||
+//                               ____/\____________________________
+//                              /                                  \
+        CLOUD_LEFT_EDGE =  (int)(SCREEN_WIDTH*3.75 - SCREEN_WIDTH)/2 + SCREEN_WIDTH-SCREEN_WIDTH/3+cloud1.getWidth();
+        CLOUD_RIGHT_EDGE = (int)(SCREEN_WIDTH*3.75 - SCREEN_WIDTH)/2 + SCREEN_WIDTH/3;
     }
 
     public void onDraw(Canvas canvas, float scaleFactor,
@@ -90,8 +105,9 @@ public class HouseCanvasDrawer {
             nextX+=groundWidth;
         }
         // reset cloud back to the right
-        if(cloud1_dx<-(SCREEN_WIDTH*2-SCREEN_WIDTH/4)) {
-            cloud1_dx=SCREEN_WIDTH-SCREEN_WIDTH/4;
+
+        if(cloud1_dx < -CLOUD_LEFT_EDGE) {
+            cloud1_dx=CLOUD_RIGHT_EDGE;
         }
 
         canvas.drawBitmap(cloud1, cloudLastX+cloud1_dx, cloudLastY, null);

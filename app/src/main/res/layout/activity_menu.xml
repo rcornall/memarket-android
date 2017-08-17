@@ -145,7 +145,7 @@
             android:id="@+id/house_surface_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/TopBarSeperator"
+            android:layout_below="@+id/TopBar"
             android:layout_above="@+id/linearLayoutTabButtons" />
         <View
             android:id="@+id/line_above_bottom_buttons"

@@ -14,7 +14,7 @@ public class HouseThread extends Thread {
     private SurfaceHolder surfaceHolder;
     private HouseSurfaceView houseSurfaceView;
     private Canvas canvas;
-    private boolean running;
+    public boolean running;
 
     public HouseThread(SurfaceHolder surfaceHolder, HouseSurfaceView houseSurfaceView) {
         super();
