@@ -1,12 +1,15 @@
 package com.robthecornallgmail.memarket.Views;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -20,6 +23,7 @@ import com.robthecornallgmail.memarket.Canvas.HouseCanvasDrawer;
 import com.robthecornallgmail.memarket.R;
 import com.robthecornallgmail.memarket.Threads.HouseThread;
 import com.robthecornallgmail.memarket.Util.InteractionMode;
+import com.robthecornallgmail.memarket.Util.MyApplication;
 import com.robthecornallgmail.memarket.Util.MyHelper;
 import com.robthecornallgmail.memarket.Util.Office;
 
@@ -31,7 +35,8 @@ import static java.lang.Thread.sleep;
 
 public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     private String TAG = "HouseSurfaceView";
-
+    MyApplication mApplication;
+    int mTextColor;
     public static int SCREEN_WIDTH,SCREEN_HEIGHT,CANVAS_HEIGHT;
 
     private int SKY_SIZE_X, SKY_SIZE_Y;
@@ -48,9 +53,9 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
     private HouseCanvasDrawer houseCanvasDrawer;
     private HouseThread houseThread;
 
-    private static int GROUND_HEIGHT, GUY_HEIGHT, HOUSE_HEIGHT, OFFICE_WIDTH, CLOUD_HEIGHT;
-    private static float GROUND_SCALE_FACTOR, GUY_SCALE_FACTOR, HOUSE_SCALE_FACTOR, OFFICETOP_SCALE_FACTOR,OFFICEMID_SCALE_FACTOR,OFFICEBOT_SCALE_FACTOR, CLOUD_SCALE_FACTOR;
-    private Bitmap background, ground, guy;
+    private static int GROUND_HEIGHT, GUY_HEIGHT, SILHOUETTE_HEIGHT, HOUSE_HEIGHT, OFFICE_WIDTH, CLOUD_HEIGHT;
+    private static float GROUND_SCALE_FACTOR, GUY_SCALE_FACTOR, SILHOUETTE_SCALE_FACTOR, HOUSE_SCALE_FACTOR, OFFICETOP_SCALE_FACTOR,OFFICEMID_SCALE_FACTOR,OFFICEBOT_SCALE_FACTOR, CLOUD_SCALE_FACTOR;
+    private Bitmap background, ground, guy, silhouette;
     private Bitmap house, officeTall;
     private Bitmap cloud1;
     private Office office = new Office();
@@ -88,16 +93,23 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
     ObjectCoordinates backgroundCoordinates, groundCoordinates, guyCoordinates, houseCoordinates, officeTallCoordinates;
     ObjectCoordinates cloud1Coordinates;
     movementCoordinates touchCoordinates;
+    Bitmap test;
     Bitmap test1;
     Bitmap test2;
     Bitmap test3;
+    Bitmap test4;
+    Bitmap test5;
+    Bitmap test6;
+    Bitmap test7;
+    Bitmap test8;
     public HouseSurfaceView(Context context, AttributeSet attrs) {
         // If we scale everything to screen size of users phone,
         // then sprites and map size should all be scaled relatively to each other
         // but if screen size is not 16:9 then sprites may be stretched, which is ok.
         super(context, attrs);
         Log.v(TAG, "surface view constructor, sleeping to let previous activity destroy");
-
+        mApplication = (MyApplication) context.getApplicationContext();
+        mTextColor = context.getResources().getColor(R.color.monokaiBetweenGreen);
         try {
             sleep(1000);
         } catch (InterruptedException e) {
@@ -340,6 +352,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                 mFirst = false;
                 // scale the background to 1.25 times the height, this makes for a scrollable up/down screen
                 background = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(mResources, R.drawable.sky_gradient4), SKY_SIZE_X/100, SKY_SIZE_Y, true);
+                Log.v(TAG, "byteCount: " + background.getByteCount() + ", allocBytes: " + background.getAllocationByteCount() + ", height + width: " + background.getHeight() + " " + background.getWidth());
 
                 // creating a scaled Bitmap reduces means reduced memory, since you dont decode the original full bitmap
                 GROUND_HEIGHT = SCREEN_HEIGHT/16;
@@ -347,11 +360,6 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                 GROUND_SCALE_FACTOR = (float)HouseSurfaceView.GROUND_HEIGHT/(float)ground.getHeight();
                 ground = Bitmap.createScaledBitmap(ground,(int)((float)ground.getWidth()*GROUND_SCALE_FACTOR), GROUND_HEIGHT, true);
 
-
-                GUY_HEIGHT = (int)((float)SCREEN_HEIGHT/10);
-                guy = MyHelper.decodeSampledBitmapFromResource(mResources, R.drawable.ground_frog, GUY_HEIGHT);
-                GUY_SCALE_FACTOR = (float)GUY_HEIGHT/(float)guy.getHeight();
-                guy = Bitmap.createScaledBitmap(guy,(int)((float)guy.getWidth()*GUY_SCALE_FACTOR), GUY_HEIGHT, true);
 
                 OFFICE_WIDTH = (int)((float)SCREEN_HEIGHT/5);
                 office.officeTop = MyHelper.decodeSampledBitmapFromResource(mResources, R.drawable.office_top, OFFICE_WIDTH*3);
@@ -364,10 +372,21 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                 office.officeMiddle = Bitmap.createScaledBitmap(office.officeMiddle,OFFICE_WIDTH, (int)((float)office.officeMiddle.getHeight()*OFFICEMID_SCALE_FACTOR), true);
                 office.officeBottom = Bitmap.createScaledBitmap(office.officeBottom,OFFICE_WIDTH, (int)((float)office.officeBottom.getHeight()*OFFICEBOT_SCALE_FACTOR), true);
 
+                GUY_HEIGHT = (int)((float)SCREEN_HEIGHT/10);
+                guy = MyHelper.decodeSampledBitmapFromResource(mResources, R.drawable.ground_frog, GUY_HEIGHT);
+                GUY_SCALE_FACTOR = (float)GUY_HEIGHT/(float)guy.getHeight();
+                guy = Bitmap.createScaledBitmap(guy,(int)((float)guy.getWidth()*GUY_SCALE_FACTOR), GUY_HEIGHT, true);
+
+                SILHOUETTE_HEIGHT = (int)((float)(office.officeMiddle.getHeight()*4 + office.officeBottom.getHeight())/12);
+                silhouette = MyHelper.decodeSampledBitmapFromResource(mResources, R.drawable.silouette, SILHOUETTE_HEIGHT);
+                SILHOUETTE_SCALE_FACTOR = (float)SILHOUETTE_HEIGHT/(float) silhouette.getHeight();
+                silhouette = Bitmap.createScaledBitmap(silhouette,(int)((float) silhouette.getWidth()*SILHOUETTE_SCALE_FACTOR), SILHOUETTE_HEIGHT, true);
+
                 CLOUD_HEIGHT = SCREEN_HEIGHT/12;
                 cloud1 = MyHelper.decodeSampledBitmapFromResource(mResources, R.drawable.cloud_houseview, CLOUD_HEIGHT);
                 CLOUD_SCALE_FACTOR = (float)CLOUD_HEIGHT/(float)cloud1.getHeight();
                 cloud1 = Bitmap.createScaledBitmap(cloud1,(int)((float)cloud1.getWidth()*CLOUD_SCALE_FACTOR), CLOUD_HEIGHT, true);
+
 
 
 
@@ -441,12 +460,14 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            houseCanvasDrawer = new HouseCanvasDrawer(background,
-                                                      cloud1,
-                                                      ground,
-                                                      guy,
-                                                      office,
-                                                      SCREEN_WIDTH,CANVAS_HEIGHT
+            houseCanvasDrawer = new HouseCanvasDrawer(  background,
+                                                        cloud1,
+                                                        ground,
+                                                        guy,
+                                                        office,
+                                                        silhouette,
+                                                        SCREEN_WIDTH,CANVAS_HEIGHT,
+                                                        mApplication.pixelFont, mTextColor
                                                       );
             if(!houseThread.running)
             {

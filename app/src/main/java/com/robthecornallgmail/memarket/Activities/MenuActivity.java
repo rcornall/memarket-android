@@ -1,5 +1,6 @@
 package com.robthecornallgmail.memarket.Activities;
 
+import android.app.ActivityManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PorterDuff;
@@ -108,6 +109,9 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
         mApplication = (MyApplication) getApplicationContext();
+        ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        int memoryClass = am.getMemoryClass();
+        Log.v(TAG, "memoryClass: " + Integer.toString(memoryClass));
 
         mMemeListFragment = new ListMemesFragment();
 //        mLeaderboardDialogFragment = new LeaderboardDialogFragment();
@@ -287,15 +291,15 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 } catch (NullPointerException e) {
                     Log.v(TAG, e.toString());
                 }
-                try{
-                    mMemeDetailsFragment.updateStockPrice(mMemeNametoStockMap.get(mSelectedName));
-                } catch (NullPointerException e) {
-                    Log.v(TAG, e.toString());
-                }
+
                 //clear old graph data so we forced to get new ones
-                for(MemePastData it : mGraphDataObjectMap.values())
-                {
-                    it.setNotDone();
+                try {
+                    for(MemePastData it : mGraphDataObjectMap.values())
+                    {
+                        it.setNotDone();
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, e.toString());
                 }
                 this.cancel();
                 this.start();
@@ -329,15 +333,14 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 } catch (NullPointerException e) {
                     Log.v(TAG, e.toString());
                 }
-                try{
-                    mMemeDetailsFragment.updateStockPrice(mMemeNametoStockMap.get(mSelectedName));
-                } catch (NullPointerException e) {
-                    Log.v(TAG, e.toString());
-                }
                 //clear old graph data so we forced to get new ones
-                for(MemePastData it : mGraphDataObjectMap.values())
-                {
-                    it.setNotDone();
+                try {
+                    for(MemePastData it : mGraphDataObjectMap.values())
+                    {
+                        it.setNotDone();
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, e.toString());
                 }
                 this.cancel();
                 MenuActivity.mFifteenMinTimer.start();
@@ -711,6 +714,11 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                         mMemeListFragment.updateList(mMemeNametoStockMap, mMemeNametoLastStockMap);
                     } catch (Exception e) {
                         e.printStackTrace();
+                    }
+                    try{
+                        mMemeDetailsFragment.updateStockPrice(mMemeNametoStockMap.get(mSelectedName));
+                    } catch (NullPointerException e) {
+                        Log.v(TAG, e.toString());
                     }
                 } else if(mRequest == "GETTING_LEADERBOARD") {
                     try {

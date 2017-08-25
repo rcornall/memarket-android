@@ -64,7 +64,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import jp.wasabeef.blurry.Blurry;
 
 import static android.R.attr.width;
 import static android.support.v7.appcompat.R.attr.height;
@@ -380,7 +379,7 @@ public class MemeDetailsFragment extends Fragment {
             mGraphView.getGridLabelRenderer().setNumHorizontalLabels(6); //spacing
             Calendar cal = Calendar.getInstance();
             Date start = cal.getTime();
-            cal.add(Calendar.HOUR, -24);
+            cal.add(Calendar.HOUR, -17);
             Date end = cal.getTime();
             mGraphView.getViewport().setMaxX(start.getTime());
             mGraphView.getViewport().setMinX(end.getTime());
@@ -474,7 +473,7 @@ public class MemeDetailsFragment extends Fragment {
         });
         Calendar cal = Calendar.getInstance();
         Date start = cal.getTime();
-        cal.add(Calendar.HOUR, -24);
+        cal.add(Calendar.HOUR, -17);
         Date end = cal.getTime();
         mGraphView.getViewport().setMaxX(start.getTime());
         mGraphView.getViewport().setMinX(end.getTime());

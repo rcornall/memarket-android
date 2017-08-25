@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements TaskCallback
 
     MediaPlayer mp3Player;
 
-    View mBlackFog;
+//    View mBlackFog;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -70,11 +70,11 @@ public class MainActivity extends AppCompatActivity implements TaskCallback
         setContentView(R.layout.activity_main);
 
         //hide surface view till work on it later.. TODO 07092017
-        MainSurfaceView msv = (MainSurfaceView) findViewById(R.id.mainSurfaceView);
-        msv.setVisibility(View.GONE);
+//        MainSurfaceView msv = (MainSurfaceView) findViewById(R.id.mainSurfaceView);
+//        msv.setVisibility(View.GONE);
 
 
-        mBlackFog = findViewById(R.id.black_fog);
+//        mBlackFog = findViewById(R.id.black_fog);
 //        OurView ov = new OurView(this);
 //        setContentView(ov);
         mApplication = (MyApplication) getApplicationContext();
@@ -277,14 +277,14 @@ public class MainActivity extends AppCompatActivity implements TaskCallback
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            mBlackFog.setVisibility(View.VISIBLE);
+//            mBlackFog.setVisibility(View.VISIBLE);
             mProgressView.setVisibility(View.VISIBLE);
             int shortAnimTime = getResources().getInteger(android.R.integer.config_longAnimTime);
             mProgressView.animate().setDuration(6000).alpha(1).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     mProgressView.setVisibility(View.GONE);
-                    mBlackFog.setVisibility(View.GONE);
+//                    mBlackFog.setVisibility(View.GONE);
                 }
             });
             mAuthTask = new UserLoginTask(email, password, this);
@@ -295,8 +295,8 @@ public class MainActivity extends AppCompatActivity implements TaskCallback
     @Override
     public void done() {
         Log.v(TAG, "Done() called, finish called");
-        MainSurfaceView msv = (MainSurfaceView) findViewById(R.id.mainSurfaceView);
-        msv.free();
+//        MainSurfaceView msv = (MainSurfaceView) findViewById(R.id.mainSurfaceView);
+//        msv.free();
         this.finish();
     }
 
@@ -499,7 +499,7 @@ public class MainActivity extends AppCompatActivity implements TaskCallback
                     MyHelper.AlertBox(MainActivity.this, Result.response);
                 }
             }
-            mBlackFog.setVisibility(View.GONE);
+//            mBlackFog.setVisibility(View.GONE);
             mProgressView.setVisibility(View.GONE);
         }
 
@@ -507,7 +507,7 @@ public class MainActivity extends AppCompatActivity implements TaskCallback
         protected void onCancelled()
         {
 //            mAuthTask = null;
-//            mBlackFog.setVisibility(View.GONE);
+////            mBlackFog.setVisibility(View.GONE);
 //            mProgressView.setVisibility(View.GONE);
         }
     }

@@ -14,6 +14,7 @@ public class HouseThread extends Thread {
     private SurfaceHolder surfaceHolder;
     private HouseSurfaceView houseSurfaceView;
     private Canvas canvas;
+    long startTime, doneTime;
     public boolean running;
 
     public HouseThread(SurfaceHolder surfaceHolder, HouseSurfaceView houseSurfaceView) {
@@ -23,7 +24,7 @@ public class HouseThread extends Thread {
     }
     @Override
     public void run() {
-        long startTime, doneTime;
+
         while(running){
             canvas = null;
             startTime = System.currentTimeMillis();
