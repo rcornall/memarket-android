@@ -1,7 +1,4 @@
-should make house view houses more minimalist
-
-might have screwed up main.cpp 'buf' isnt being incremented 15mins
-only after all memes are colected
+add up All values (overall traffic) and get relative stocks from that (sandys idea)
 
 
 

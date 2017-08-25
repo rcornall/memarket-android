@@ -65,6 +65,8 @@ import com.robthecornallgmail.memarket.Util.Defines;
 import com.robthecornallgmail.memarket.Util.UserRow;
 import com.robthecornallgmail.memarket.Views.HouseSurfaceView;
 import com.robthecornallgmail.memarket.Fragments.LeaderboardDialogFragment;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+import com.squareup.picasso.Picasso;
 
 import static java.lang.Thread.sleep;
 
@@ -80,6 +82,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     private static final String TAG = "Menu";
 
     private Button mSettingsWheelButton, mLeaderboardButton;
+
     private GraphView mGraphView;
     private GetGraphData mGetGraphTask;
     private DateRange mDateRange = DateRange.DAY;
@@ -347,6 +350,127 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
             }
         }.start();
+
+
+
+        /*                    load character view in slidingdrawer layout                    */
+        ImageView userCharacter = (ImageView) findViewById(R.id.character_full);
+        Picasso.with(getApplicationContext()).load(R.drawable.character_full).fit().centerInside().into(userCharacter);
+
+        ImageView invBag, invOffice, invPeople, invMemes, invFinancials;
+        invBag = (ImageView) findViewById(R.id.inventory_bag);
+        invOffice = (ImageView) findViewById(R.id.inventory_office);
+        invPeople= (ImageView) findViewById(R.id.inventory_people);
+        invMemes = (ImageView) findViewById(R.id.inventory_memes);
+        invFinancials= (ImageView) findViewById(R.id.inventory_financials);
+
+        final View bagHighlight, officeHighlight, peopleHighlight, memesHighlight, financialsHighlight;
+        final View bagHighlightView, officeHighlightView, peopleHighlightView, memesHighlightView, financialsHighlightView;
+
+        bagHighlight = findViewById(R.id.inventory_bag_highlight);
+        officeHighlight = findViewById(R.id.inventory_office_highlight);
+        peopleHighlight = findViewById(R.id.inventory_people_highlight);
+        memesHighlight = findViewById(R.id.inventory_memes_highlight);
+        financialsHighlight  = findViewById(R.id.inventory_financials_highlight);
+
+        bagHighlightView = findViewById(R.id.bag_highlight_view);
+        officeHighlightView = findViewById(R.id.office_highlight_view);
+        peopleHighlightView = findViewById(R.id.people_highlight_view);
+        memesHighlightView = findViewById(R.id.memes_highlight_view);
+        financialsHighlightView  = findViewById(R.id.financials_highlight_view);
+
+        Picasso.with(getApplicationContext()).load(R.drawable.bag).fit().centerInside().into(invBag);
+        Picasso.with(getApplicationContext()).load(R.drawable.office_inventory).fit().centerInside().into(invOffice);
+        Picasso.with(getApplicationContext()).load(R.drawable.people_inventory).fit().centerInside().into(invPeople);
+        Picasso.with(getApplicationContext()).load(R.drawable.memes_inventory).fit().centerInside().into(invMemes);
+        Picasso.with(getApplicationContext()).load(R.drawable.financials_inventory).fit().centerInside().into(invFinancials);
+
+
+        memesHighlight.setVisibility(View.INVISIBLE);
+        officeHighlight.setVisibility(View.INVISIBLE);
+        peopleHighlight.setVisibility(View.INVISIBLE);
+        financialsHighlight.setVisibility(View.INVISIBLE);
+
+        memesHighlightView.setVisibility(View.INVISIBLE);
+        officeHighlightView.setVisibility(View.INVISIBLE);
+        peopleHighlightView.setVisibility(View.INVISIBLE);
+        financialsHighlightView.setVisibility(View.INVISIBLE);
+
+        invBag.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bagHighlight.setVisibility(View.VISIBLE);
+                bagHighlightView.setVisibility(View.VISIBLE);
+                officeHighlight.setVisibility(View.INVISIBLE);
+                officeHighlightView.setVisibility(View.INVISIBLE);
+                peopleHighlight.setVisibility(View.INVISIBLE);
+                peopleHighlightView.setVisibility(View.INVISIBLE);
+                memesHighlight.setVisibility(View.INVISIBLE);
+                memesHighlightView.setVisibility(View.INVISIBLE);
+                financialsHighlight.setVisibility(View.INVISIBLE);
+                financialsHighlightView.setVisibility(View.INVISIBLE);
+            }
+        });
+        invOffice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bagHighlight.setVisibility(View.INVISIBLE);
+                bagHighlightView.setVisibility(View.INVISIBLE);
+                officeHighlight.setVisibility(View.VISIBLE);
+                officeHighlightView.setVisibility(View.VISIBLE);
+                peopleHighlight.setVisibility(View.INVISIBLE);
+                peopleHighlightView.setVisibility(View.INVISIBLE);
+                memesHighlight.setVisibility(View.INVISIBLE);
+                memesHighlightView.setVisibility(View.INVISIBLE);
+                financialsHighlight.setVisibility(View.INVISIBLE);
+                financialsHighlightView.setVisibility(View.INVISIBLE);
+            }
+        });
+        invPeople.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bagHighlight.setVisibility(View.INVISIBLE);
+                bagHighlightView.setVisibility(View.INVISIBLE);
+                officeHighlight.setVisibility(View.INVISIBLE);
+                officeHighlightView.setVisibility(View.INVISIBLE);
+                peopleHighlight.setVisibility(View.VISIBLE);
+                peopleHighlightView.setVisibility(View.VISIBLE);
+                memesHighlight.setVisibility(View.INVISIBLE);
+                memesHighlightView.setVisibility(View.INVISIBLE);
+                financialsHighlight.setVisibility(View.INVISIBLE);
+                financialsHighlightView.setVisibility(View.INVISIBLE);
+            }
+        });
+        invMemes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bagHighlight.setVisibility(View.INVISIBLE);
+                bagHighlightView.setVisibility(View.INVISIBLE);
+                officeHighlight.setVisibility(View.INVISIBLE);
+                officeHighlightView.setVisibility(View.INVISIBLE);
+                peopleHighlight.setVisibility(View.INVISIBLE);
+                peopleHighlightView.setVisibility(View.INVISIBLE);
+                memesHighlight.setVisibility(View.VISIBLE);
+                memesHighlightView.setVisibility(View.VISIBLE);
+                financialsHighlight.setVisibility(View.INVISIBLE);
+                financialsHighlightView.setVisibility(View.INVISIBLE);
+            }
+        });
+        invFinancials.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bagHighlight.setVisibility(View.INVISIBLE);
+                bagHighlightView.setVisibility(View.INVISIBLE);
+                officeHighlight.setVisibility(View.INVISIBLE);
+                officeHighlightView.setVisibility(View.INVISIBLE);
+                peopleHighlight.setVisibility(View.INVISIBLE);
+                peopleHighlightView.setVisibility(View.INVISIBLE);
+                memesHighlight.setVisibility(View.INVISIBLE);
+                memesHighlightView.setVisibility(View.INVISIBLE);
+                financialsHighlight.setVisibility(View.VISIBLE);
+                financialsHighlightView.setVisibility(View.VISIBLE);
+            }
+        });
 
 
         new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getData.php?action", "GETTING_DATA");

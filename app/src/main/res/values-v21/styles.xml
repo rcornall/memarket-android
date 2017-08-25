@@ -24,6 +24,7 @@
 
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
+        <item name="android:windowActionBarOverlay">true</item>
         <item name="colorPrimary">@color/colorMyBetweenGrey</item>
         <item name="colorPrimaryDark">@android:color/holo_green_dark</item>
         <item name="colorAccent">@color/greenWhite</item>

@@ -7,17 +7,16 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     tools:context="com.robthecornallgmail.memarket.Activities.MainActivity">
-
     <RelativeLayout
         android:id="@+id/mainRelativeView"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
 
         android:layout_gravity="center_horizontal">
-        <com.robthecornallgmail.memarket.Views.MainSurfaceView
-            android:id="@+id/mainSurfaceView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+        <!--<com.robthecornallgmail.memarket.Views.MainSurfaceView-->
+            <!--android:id="@+id/mainSurfaceView"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent" />-->
         <View
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
@@ -120,15 +119,15 @@
             <!--android:layout_centerHorizontal="true" />-->
 
     </RelativeLayout>
-    <RelativeLayout
-        android:id="@+id/black_fog"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:alpha="0.5"
-        android:visibility="gone"
-        android:background="#000000">
+    <!--<RelativeLayout-->
+        <!--android:id="@+id/black_fog"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:alpha="0.5"-->
+        <!--android:visibility="gone"-->
+        <!--android:background="#000000">-->
 
-    </RelativeLayout>
+    <!--</RelativeLayout>-->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">

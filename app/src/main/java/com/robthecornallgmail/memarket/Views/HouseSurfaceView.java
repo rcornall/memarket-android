@@ -43,6 +43,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
     private int MAX_X, MIN_X, MAX_Y, MIN_Y;
     private int VIEW_HEIGHT;
     boolean mFirst = true;
+    boolean mFreed = false;
 
     private InteractionMode mMode; // for touchevents
     Matrix mMatrixSky = new Matrix(); // for calculating where to put image after pan/zoom
@@ -143,6 +144,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        mFreed = false;
         CANVAS_HEIGHT = this.getHeight();
 
         houseThread = new HouseThread(holder, this);
@@ -178,11 +180,11 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                 houseThread.join();
                 houseThread = null;
                 Log.v(TAG, "thread has joined");
+                retry = false;
             } catch (InterruptedException e) {
                 Log.e(TAG, "failed to stop thread?");
                 e.printStackTrace();
             }
-            retry = false;
         }
         free();
     }
@@ -460,20 +462,31 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            houseCanvasDrawer = new HouseCanvasDrawer(  background,
-                                                        cloud1,
-                                                        ground,
-                                                        guy,
-                                                        office,
-                                                        silhouette,
-                                                        SCREEN_WIDTH,CANVAS_HEIGHT,
-                                                        mApplication.pixelFont, mTextColor
-                                                      );
-            if(!houseThread.running)
+            /* check we havent freed bitmaps (they arent null) before proceeding */
+            if(!mFreed)
             {
-                houseThread.start();
-                Log.v(TAG, "Thread has started");
-                houseThread.setRunning(true);
+                houseCanvasDrawer = new HouseCanvasDrawer(  background,
+                        cloud1,
+                        ground,
+                        guy,
+                        office,
+                        silhouette,
+                        SCREEN_WIDTH,CANVAS_HEIGHT,
+                        mApplication.pixelFont, mTextColor
+                );
+                if(houseThread != null)
+                {
+                    if(!houseThread.running)
+                    {
+                        houseThread.start();
+                        Log.v(TAG, "Thread has started");
+                        houseThread.setRunning(true);
+                    }
+                }
+                else
+                {
+                    Log.v(TAG, "houseThread is null, probably left houseview previously");
+                }
             }
         }
     }
@@ -499,6 +512,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
     }
     public void free() {
+        mFreed = true;
         // fix memory leak issues..
         Log.v(TAG, "free() bitmaps called");
         if(background!=null) {

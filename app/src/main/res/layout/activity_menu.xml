@@ -7,297 +7,543 @@
     android:fitsSystemWindows="true"
     tools:context="com.robthecornallgmail.memarket.Activities.MenuActivity">
 
-    <RelativeLayout
+    <com.sothree.slidinguppanel.SlidingUpPanelLayout
+        xmlns:sothree="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/sliding_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:gravity="top"
+        android:clickable="true"
+        sothree:umanoOverlay="true"
+        sothree:umanoShadowHeight="0dp"
+        sothree:umanoPanelHeight="68dp"
+        sothree:umanoFadeColor="@color/colorSlideFade">
+        <!--                      Main view                      -->
         <RelativeLayout
-            android:id="@+id/TopBar"
-            android:background="@color/backgroundGrey"
             android:layout_width="match_parent"
-            android:layout_marginTop="0dp"
-            android:layout_height="68dp"
-            android:layout_alignParentTop="true">
-            <android.support.v7.widget.AppCompatImageButton
-                android:layout_width="70dp"
-                android:layout_marginBottom="0dp"
-                android:layout_marginTop="2dp"
+            android:layout_height="match_parent">
+            <View
+                android:id="@+id/space"
+                android:layout_width="match_parent"
+                android:layout_height="69dp"/>
+
+
+            <com.robthecornallgmail.memarket.Views.HouseSurfaceView
+                android:id="@+id/house_surface_view"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="fitXY"
-                android:id="@+id/character_icon"
-                android:background="@drawable/blink_animation2" />
-            <TextView
-                android:layout_toRightOf="@id/character_icon"
-                android:id="@+id/username_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top"
-                android:gravity="top"
-                android:maxLines="1"
-                android:textStyle="bold"
-                android:text="Loading..."
-                android:textColor="@color/greenWhite"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="0dp"
-                android:layout_marginLeft="3dp"
-                android:textSize="22sp"/>
+                android:layout_below="@+id/space"
+                android:layout_above="@+id/linearLayoutTabButtons" />
             <View
-                android:layout_toRightOf="@id/character_icon"
-                android:id="@+id/view1"
-                android:layout_width="0dp"
+                android:id="@+id/line_above_bottom_buttons"
+                android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"/>
-
-
+                android:alpha="0"
+                android:background="@color/colorMyOffGrey"
+                android:layout_above="@id/linearLayoutTabButtons"/>
             <LinearLayout
-                android:id="@+id/money_and_settings"
-                android:layout_toRightOf="@id/view1"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="7dp"
-                android:layout_marginRight="3dp"
-                android:gravity="right">
-
-
-
-                <Button
-                    android:id="@+id/leaderboard_button"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_marginTop="-4dp"
-                    android:layout_marginRight="5dp"
-                    android:layout_marginLeft="5dp"
-                    android:background="@drawable/crown_greenwhite"
-                    android:alpha="0.3"/>
-
-                <Button
-
-                    android:id="@+id/settings_button"
-                    android:minWidth="5dp"
-                    android:minHeight="5dp"
-                    android:maxHeight="25sp"
-                    android:gravity="center_vertical"
-                    android:layout_gravity="end"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="5dp"
-                    android:layout_marginLeft="5dp"
-                    android:background="@android:color/transparent"
-                    android:drawableTop="@mipmap/ic_action_settings"
-                    android:alpha="0.3"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="bottom"
+                android:id="@+id/linearLayoutTabButtons"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:clickable="true"
                 android:layout_alignParentBottom="true"
-                android:layout_below="@+id/money_and_settings"
-                android:layout_toRightOf="@id/character_icon">
-
-                <TextView
-                    android:id="@+id/money_text"
+                >
+                <Button
+                    android:id="@+id/find_memes_button"
+                    android:text="Find memes"
+                    style="@style/switch_tab_button_style"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="2dp"
-                    android:layout_marginLeft="3dp"
-                    android:text="Loading..."
-                    android:textColor="@color/greenWhite"
-                    android:textSize="18sp"/>
+                    android:background="?android:selectableItemBackground"
+                    android:layout_weight="33.333333"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorMyOffGrey"/>
+                <Button
+                    android:id="@+id/home_button"
+                    android:text="HOME"
+                    style="@style/switch_tab_button_style"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?android:selectableItemBackground"
+                    android:layout_weight="33.333333"/>
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorMyOffGrey"/>
+                <Button
+                    android:id="@+id/store_button"
+                    android:text="STORE"
+                    style="@style/switch_tab_button_style"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?android:selectableItemBackground"
+                    android:layout_weight="33.333333"/>
+
             </LinearLayout>
+
             <LinearLayout
-                android:id="@+id/update_time_layout"
-                android:layout_below="@+id/money_and_settings"
-                android:gravity="bottom"
-                android:layout_alignParentBottom="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true">
-
-
-                <TextView
-                    android:id="@+id/timer_title"
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_below="@id/house_surface_view">
+                <View
+                    android:id="@+id/find_memes_highlight"
+                    android:layout_weight="33.33333"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="next update:"
-                    android:textColor="@color/greenWhite"
-                    android:layout_marginBottom="2dp"
-                    android:textSize="18sp"/>
-                <TextView
-                    android:id="@+id/timer_text"
+                    android:layout_height="2dp"
+                    android:background="@color/greenWhite"
+                    android:alpha="0.7"/>
+                <View
+                    android:id="@+id/home_highlight"
+                    android:layout_weight="33.33333"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textStyle="bold"
-                    android:text="15:00"
-                    android:textColor="@color/greenWhite"
-                    android:layout_marginBottom="2dp"
-                    android:layout_marginRight="4dp"
-                    android:layout_marginLeft="4dp"
-                    android:textSize="18sp"
-
-                    />
+                    android:layout_height="2dp"
+                    android:background="@color/greenWhite"
+                    android:alpha="0.7"/>
+                <View
+                    android:id="@+id/store_highlight"
+                    android:layout_weight="33.33333"
+                    android:layout_width="wrap_content"
+                    android:layout_height="2dp"
+                    android:background="@color/greenWhite"
+                    android:alpha="0.7"/>
             </LinearLayout>
 
-        </RelativeLayout>
-
-        <com.robthecornallgmail.memarket.Views.HouseSurfaceView
-            android:id="@+id/house_surface_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@+id/TopBar"
-            android:layout_above="@+id/linearLayoutTabButtons" />
-        <View
-            android:id="@+id/line_above_bottom_buttons"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:alpha="0"
-            android:background="@color/colorMyOffGrey"
-            android:layout_above="@id/linearLayoutTabButtons"/>
-        <LinearLayout
-            android:id="@+id/linearLayoutTabButtons"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:clickable="true"
-            android:layout_alignParentBottom="true"
-            >
-            <Button
-                android:id="@+id/find_memes_button"
-                android:text="Find memes"
-                style="@style/switch_tab_button_style"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="?android:selectableItemBackground"
-                android:layout_weight="33.333333"/>
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:background="@color/colorMyOffGrey"/>
-            <Button
-                android:id="@+id/home_button"
-                android:text="HOME"
-                style="@style/switch_tab_button_style"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="?android:selectableItemBackground"
-                android:layout_weight="33.333333"/>
-            <View
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:background="@color/colorMyOffGrey"/>
-            <Button
-                android:id="@+id/store_button"
-                android:text="STORE"
-                style="@style/switch_tab_button_style"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="?android:selectableItemBackground"
-                android:layout_weight="33.333333"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_below="@id/house_surface_view">
-            <View
-                android:id="@+id/find_memes_highlight"
-                android:layout_weight="33.33333"
-                android:layout_width="wrap_content"
-                android:layout_height="2dp"
-                android:background="@color/greenWhite"
-                android:alpha="0.7"/>
-            <View
-                android:id="@+id/home_highlight"
-                android:layout_weight="33.33333"
-                android:layout_width="wrap_content"
-                android:layout_height="2dp"
-                android:background="@color/greenWhite"
-                android:alpha="0.7"/>
-            <View
-                android:id="@+id/store_highlight"
-                android:layout_weight="33.33333"
-                android:layout_width="wrap_content"
-                android:layout_height="2dp"
-                android:background="@color/greenWhite"
-                android:alpha="0.7"/>
-        </LinearLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/TopBar"
-            android:id="@+id/TopBarSeperator">
-            <EditText
-                android:id="@+id/search_meme_view"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Search"
-                android:drawableLeft="@mipmap/search_icon"
-                android:textColor="@color/greenWhite"
-                android:textCursorDrawable="@null"
-                android:paddingLeft="15dp"
-                android:paddingStart="15dp"
-                android:drawablePadding="7dp"
-                android:maxLines="1"
-                android:textColorHint="@color/colorMyOffGrey"
-                />
+                android:layout_below="@+id/space"
+                android:id="@+id/TopBarSeperator">
+                <EditText
+                    android:id="@+id/search_meme_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Search"
+                    android:drawableLeft="@mipmap/search_icon"
+                    android:textColor="@color/greenWhite"
+                    android:textCursorDrawable="@null"
+                    android:paddingLeft="15dp"
+                    android:paddingStart="15dp"
+                    android:drawablePadding="7dp"
+                    android:maxLines="1"
+                    android:textColorHint="@color/colorMyOffGrey"
+                    />
 
+            </RelativeLayout>
+            <RelativeLayout
+                android:id="@+id/drag_down_line"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/space"
+                android:alpha="0.5">
+
+                <View
+                    android:layout_marginLeft="97dp"
+                    android:layout_marginRight="97dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="@color/greenWhite"/>
+                <Button
+                    android:id="@+id/drop_down_arrow"
+                    android:layout_marginTop="-8dp"
+                    android:gravity="center_horizontal"
+                    android:layout_centerInParent="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:background="@android:color/transparent"
+                    android:drawableTop="@mipmap/ic_action_arrow_drop_downgrey"
+                    />
+            </RelativeLayout>
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/TopBarSeperator"
+                android:layout_above="@id/line_above_bottom_buttons"
+                >
+
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/meme_details_fragment">
+
+                </FrameLayout>
+
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/meme_list_fragment">
+
+                </FrameLayout>
+            </LinearLayout>
         </RelativeLayout>
-        <RelativeLayout
-            android:id="@+id/drag_down_line"
+
+        <!--                  slidingDrawer view                    -->
+        <LinearLayout
+            android:id="@+id/dragView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:focusable="false"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/drag_down_space"
+                android:layout_width="match_parent"
+                android:layout_height="488dp"
+                android:background="@color/colorMyGrey"
+                android:orientation="vertical">
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="68dp"/>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/character_full"
+                        android:layout_width="125dp"
+                        android:layout_height="195dp"
+                        android:scaleX="-1"/>
+                    <FrameLayout
+                        android:layout_marginRight="2dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@+id/character_full">
+
+                        <LinearLayout
+                            android:id="@+id/inv_bag_buttons"
+                            android:layout_width="match_parent"
+                            android:layout_height="45dp"
+                            android:background="@color/backgroundGrey"
+                            >
+
+                            <!--<ImageView-->
+                                <!--android:id="@+id/bag_clothes_button"-->
+                                <!--android:layout_width="45dp"-->
+                                <!--android:layout_height="45dp"-->
+                                <!--android:layout_weight="0.2"-->
+                                <!--/>-->
+                            <!--<ImageView-->
+                                <!--android:id="@+id/bag_"-->
+                                <!--android:layout_width="45dp"-->
+                                <!--android:layout_height="45dp"-->
+                                <!--android:layout_weight="0.2"-->
+                                <!--/>-->
+                            <!--<ImageView-->
+                                <!--android:id="@+id/bag_"-->
+                                <!--android:layout_width="45dp"-->
+                                <!--android:layout_height="45dp"-->
+                                <!--android:layout_weight="0.2"-->
+                                <!--/>-->
+                        </LinearLayout>
+
+                    </FrameLayout>
+                    <Button
+                        android:id="@+id/drop_up_arrow"
+                        android:layout_marginBottom="-8dp"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_alignParentBottom="true"
+                        android:layout_centerHorizontal="true"
+                        android:gravity="center_horizontal"
+                        android:background="@android:color/transparent"
+                        android:drawableTop="@mipmap/ic_action_arrow_drop_downgrey"
+                        android:rotation="180"
+                        android:alpha="0.5"
+                        />
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true">
+
+                        <LinearLayout
+                            android:id="@+id/inventory_buttons"
+                            android:layout_width="match_parent"
+                            android:layout_height="60dp"
+                            android:layout_alignParentBottom="true"
+                            android:background="@color/backgroundGrey"
+                            android:paddingLeft="15dp"
+                            android:paddingRight="15dp"
+                            android:gravity="center_vertical">
+                            <ImageView
+                                android:id="@+id/inventory_bag"
+                                android:layout_width="45dp"
+                                android:layout_height="45dp"
+                                android:layout_weight="0.2"
+                                />
+                            <ImageView
+                                android:id="@+id/inventory_office"
+                                android:layout_width="45dp"
+                                android:layout_height="45dp"
+                                android:layout_weight="0.2"
+                                />
+                            <ImageView
+                                android:id="@+id/inventory_people"
+                                android:layout_width="45dp"
+                                android:layout_height="45dp"
+                                android:layout_weight="0.2"
+                                />
+                            <ImageView
+                                android:id="@+id/inventory_memes"
+                                android:layout_width="45dp"
+                                android:layout_height="45dp"
+                                android:layout_weight="0.2"
+                                />
+                            <ImageView
+                                android:id="@+id/inventory_financials"
+                                android:layout_width="45dp"
+                                android:layout_height="45dp"
+                                android:layout_weight="0.2"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/inv_highlight"
+                            android:layout_width="match_parent"
+                            android:layout_height="60dp"
+                            android:paddingLeft="15dp"
+                            android:paddingRight="15dp"
+                            android:gravity="center_vertical">
+
+                            <View
+                                android:id="@+id/bag_highlight_view"
+                                android:layout_width="45dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="0.2"
+                                android:background="@android:color/white"
+                                android:alpha="0.10"
+                                />
+                            <View
+                                android:id="@+id/office_highlight_view"
+                                android:layout_width="45dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="0.2"
+                                android:background="@android:color/white"
+                                android:alpha="0.10"
+                                />
+                            <View
+                                android:id="@+id/people_highlight_view"
+                                android:layout_width="45dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="0.2"
+                                android:background="@android:color/white"
+                                android:alpha="0.10"
+                                />
+                            <View
+                                android:id="@+id/memes_highlight_view"
+                                android:layout_width="45dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="0.2"
+                                android:background="@android:color/white"
+                                android:alpha="0.10"
+                                />
+                            <View
+                                android:id="@+id/financials_highlight_view"
+                                android:layout_width="45dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="0.2"
+                                android:background="@android:color/white"
+                                android:alpha="0.10"
+                                />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="2dp"
+                            android:layout_marginLeft="15dp"
+                            android:layout_marginRight="15dp">
+                            <View
+                                android:id="@+id/inventory_bag_highlight"
+                                android:layout_weight="0.2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="2dp"
+                                android:background="@color/greenWhite"
+                                android:alpha="0.7"/>
+                            <View
+                                android:id="@+id/inventory_office_highlight"
+                                android:layout_weight="0.2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="2dp"
+                                android:background="@color/greenWhite"
+                                android:alpha="0.7"/>
+                            <View
+                                android:id="@+id/inventory_people_highlight"
+                                android:layout_weight="0.2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="2dp"
+                                android:background="@color/greenWhite"
+                                android:alpha="0.7"/>
+                            <View
+                                android:id="@+id/inventory_memes_highlight"
+                                android:layout_weight="0.2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="2dp"
+                                android:background="@color/greenWhite"
+                                android:alpha="0.7"/>
+                            <View
+                                android:id="@+id/inventory_financials_highlight"
+                                android:layout_weight="0.2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="2dp"
+                                android:background="@color/greenWhite"
+                                android:alpha="0.7"/>
+                        </LinearLayout>
+                    </FrameLayout>
+                </RelativeLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:orientation="vertical"
+                android:id="@+id/drag_up_line"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <View
+                    android:layout_marginLeft="97dp"
+                    android:layout_marginRight="97dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:alpha="0.5"
+                    android:background="@color/greenWhite"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+
+    <!--                        Top Bar view                        -->
+    <RelativeLayout
+        android:id="@+id/TopBar"
+        android:background="@color/backgroundGrey"
+        android:layout_width="match_parent"
+        android:layout_marginTop="0dp"
+        android:layout_height="68dp"
+        android:layout_alignParentTop="true">
+        <ImageView
+            android:layout_width="70dp"
+            android:layout_marginBottom="0dp"
+            android:layout_marginTop="2dp"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"
+            android:id="@+id/character_icon"
+            android:background="@drawable/blink_animation2" />
+        <TextView
+            android:layout_toRightOf="@id/character_icon"
+            android:id="@+id/username_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:alpha="0.5"
-            android:layout_below="@id/TopBar">
+            android:layout_gravity="top"
+            android:gravity="top"
+            android:maxLines="1"
+            android:textStyle="bold"
+            android:text="Loading..."
+            android:textColor="@color/greenWhite"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="0dp"
+            android:layout_marginLeft="3dp"
+            android:textSize="22sp"/>
+        <View
+            android:layout_toRightOf="@id/character_icon"
+            android:id="@+id/view1"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
 
-            <View
-                android:layout_marginLeft="97dp"
-                android:layout_marginRight="97dp"
-                android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="@color/greenWhite"/>
-            <Button
-                android:id="@+id/drop_down_arrow"
-                android:layout_marginTop="-8dp"
-                android:gravity="center_horizontal"
-                android:layout_centerInParent="true"
-                android:layout_alignParentTop="true"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:background="@android:color/transparent"
-                android:drawableTop="@mipmap/ic_action_arrow_drop_downgrey"
-                />
-        </RelativeLayout>
+
         <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/TopBarSeperator"
-            android:layout_above="@id/line_above_bottom_buttons"
-            >
+            android:id="@+id/money_and_settings"
+            android:layout_toRightOf="@id/view1"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
+            android:layout_marginRight="3dp"
+            android:gravity="right">
 
 
-            <FrameLayout
-                android:layout_width="match_parent"
+
+            <Button
+                android:id="@+id/leaderboard_button"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginTop="-4dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginLeft="5dp"
+                android:background="@drawable/crown_greenwhite"
+                android:alpha="0.3"/>
+
+            <Button
+
+                android:id="@+id/settings_button"
+                android:minWidth="5dp"
+                android:minHeight="5dp"
+                android:maxHeight="25sp"
+                android:gravity="center_vertical"
+                android:layout_gravity="end"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/meme_details_fragment">
-
-            </FrameLayout>
-
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/meme_list_fragment">
-
-            </FrameLayout>
-
-
-
-
+                android:layout_marginRight="5dp"
+                android:layout_marginLeft="5dp"
+                android:background="@android:color/transparent"
+                android:drawableTop="@mipmap/ic_action_settings"
+                android:alpha="0.3"/>
         </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="bottom"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@+id/money_and_settings"
+            android:layout_toRightOf="@id/character_icon">
 
+            <TextView
+                android:id="@+id/money_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="2dp"
+                android:layout_marginLeft="3dp"
+                android:text="Loading..."
+                android:textColor="@color/greenWhite"
+                android:textSize="18sp"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/update_time_layout"
+            android:layout_below="@+id/money_and_settings"
+            android:gravity="bottom"
+            android:layout_alignParentBottom="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true">
+
+
+            <TextView
+                android:id="@+id/timer_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="next update:"
+                android:textColor="@color/greenWhite"
+                android:layout_marginBottom="2dp"
+                android:textSize="18sp"/>
+            <TextView
+                android:id="@+id/timer_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:text="15:00"
+                android:textColor="@color/greenWhite"
+                android:layout_marginBottom="2dp"
+                android:layout_marginRight="4dp"
+                android:layout_marginLeft="4dp"
+                android:textSize="18sp"
+
+                />
+        </LinearLayout>
     </RelativeLayout>
+
 </android.support.design.widget.CoordinatorLayout>
