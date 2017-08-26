@@ -208,7 +208,7 @@
 
                     <ImageView
                         android:id="@+id/character_full"
-                        android:layout_width="125dp"
+                        android:layout_width="145dp"
                         android:layout_height="195dp"
                         android:scaleX="-1"/>
                     <FrameLayout

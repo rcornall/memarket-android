@@ -421,7 +421,7 @@ public class MemeDetailsFragment extends Fragment {
         mListener = null;
     }
 
-    public void updateGraph(LineGraphSeries<DataPoint> dataPointLineGraphSeries, DateRange dateRange) {
+    public Boolean updateGraph(LineGraphSeries<DataPoint> dataPointLineGraphSeries, DateRange dateRange) {
         // remove old mMemeIDtoSeriesMap.get(mMemeID)(line)
 //        try {
 //            sleep(3000);
@@ -430,10 +430,15 @@ public class MemeDetailsFragment extends Fragment {
 //        }
 //ih
         mDateRange = dateRange;
+        if(mGraphView == null)
+        {
+            return false;
+        }
         try {
             mGraphView.removeAllSeries();
         } catch (Exception e) {
             Log.e(TAG, e.toString());
+            return false;
         }
         mCurrentSeries = dataPointLineGraphSeries;
         mGraphView.addSeries(dataPointLineGraphSeries);
@@ -481,6 +486,7 @@ public class MemeDetailsFragment extends Fragment {
         mGraphView.getViewport().setBackgroundColor(Color.argb(11, 230, 255, 255));
 
         mGraphView.dispatchTouchEvent(mMotionEvent);
+        return true;
     }
 
     public void updateOwned(Map<Integer, Integer> owned, Map<String , Integer> nametoID) {

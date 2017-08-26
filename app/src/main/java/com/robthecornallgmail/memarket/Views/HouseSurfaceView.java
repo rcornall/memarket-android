@@ -34,7 +34,7 @@ import static java.lang.Thread.sleep;
  */
 
 public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
-    private String TAG = "HouseSurfaceView";
+    private static String TAG = "HouseSurfaceView";
     MyApplication mApplication;
     int mTextColor;
     public static int SCREEN_WIDTH,SCREEN_HEIGHT,CANVAS_HEIGHT;
@@ -43,7 +43,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
     private int MAX_X, MIN_X, MAX_Y, MIN_Y;
     private int VIEW_HEIGHT;
     boolean mFirst = true;
-    boolean mFreed = false;
+    static boolean mFreed = false;
 
     private InteractionMode mMode; // for touchevents
     Matrix mMatrixSky = new Matrix(); // for calculating where to put image after pan/zoom
@@ -56,10 +56,14 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
     private static int GROUND_HEIGHT, GUY_HEIGHT, SILHOUETTE_HEIGHT, HOUSE_HEIGHT, OFFICE_WIDTH, CLOUD_HEIGHT;
     private static float GROUND_SCALE_FACTOR, GUY_SCALE_FACTOR, SILHOUETTE_SCALE_FACTOR, HOUSE_SCALE_FACTOR, OFFICETOP_SCALE_FACTOR,OFFICEMID_SCALE_FACTOR,OFFICEBOT_SCALE_FACTOR, CLOUD_SCALE_FACTOR;
-    private Bitmap background, ground, guy, silhouette;
-    private Bitmap house, officeTall;
-    private Bitmap cloud1;
-    private Office office = new Office();
+    private static Bitmap background;
+    private static Bitmap ground;
+    private static Bitmap guy;
+    private Bitmap silhouette;
+    private static Bitmap house;
+    private Bitmap officeTall;
+    private static Bitmap cloud1;
+    private static Office office = new Office();
 
     private ScaleGestureDetector mScaleDetector;
     private float mScaleFactor = 1.f;
@@ -168,15 +172,40 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {}
 
 
-
+//    private class destroySurface extends AsyncTask<String, Void, Boolean>
+//    {
+//
+//        @Override
+//        protected Boolean doInBackground(String... params) {
+//            boolean retry = true;
+//            houseThread.setRunning(false);
+//            while(retry) {
+//                try {
+//                    houseThread.join();
+//                    houseThread = null;
+//                    Log.v(TAG, "thread has joined");
+//                } catch (InterruptedException e) {
+//                    Log.e(TAG, "failed to stop thread?");
+//                    e.printStackTrace();
+//                }
+//                retry = false;
+//            }
+//            HouseSurfaceView.free();
+//            return true;
+//        }
+//    }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
+
+
         Log.v(TAG, "SURFACE DESTROYED");
+//        destroySurface ds = new destroySurface();
+//        ds.execute("");
         boolean retry = true;
+        houseThread.setRunning(false);
         while(retry) {
             try {
-                houseThread.setRunning(false);
                 houseThread.join();
                 houseThread = null;
                 Log.v(TAG, "thread has joined");
@@ -476,7 +505,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                 );
                 if(houseThread != null)
                 {
-                    if(!houseThread.running)
+                    if(!houseThread.isRunning())
                     {
                         houseThread.start();
                         Log.v(TAG, "Thread has started");
@@ -511,7 +540,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         }
 
     }
-    public void free() {
+    static public void free() {
         mFreed = true;
         // fix memory leak issues..
         Log.v(TAG, "free() bitmaps called");

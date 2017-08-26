@@ -101,6 +101,8 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     private LeaderboardDialogFragment mLeaderboardDialogFragment;
 
     MemeDetailsFragment mMemeDetailsFragment;
+
+    HouseSurfaceView mHouseSurfaceView;
     // map meme IDs to their respective past Data from server.
     private Map<Integer, MemePastData> mGraphDataObjectMap = new HashMap<>();
 
@@ -123,7 +125,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 //        mGraphView = (GraphView) findViewById(R.id.graph);
-        final HouseSurfaceView hsv = (HouseSurfaceView) findViewById(R.id.house_surface_view);
+        mHouseSurfaceView = (HouseSurfaceView) findViewById(R.id.house_surface_view);
 
         mSettingsWheelButton = (Button) findViewById(R.id.settings_button);
         mSettingsWheelButton.setOnClickListener(new View.OnClickListener() {
@@ -135,7 +137,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                hsv.free();
+                                mHouseSurfaceView.free();
                                 Intent myIntent = new Intent(MenuActivity.this, MainActivity.class);
                                 startActivity(myIntent);
                                 finish();
@@ -215,9 +217,9 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 Log.v(TAG, "FIND MEMES PRESSED");
 
                 /* Manually freeing Bitmaps because java sucks? */
-                hsv.free();
+                mHouseSurfaceView.free();
 
-                hsv.setVisibility(View.INVISIBLE);
+                mHouseSurfaceView.setVisibility(View.INVISIBLE);
                 homeHighlight.setVisibility(View.INVISIBLE);
                 storeHighlight.setVisibility(View.INVISIBLE);
                 findMemesHighlight.setVisibility(View.VISIBLE);
@@ -247,7 +249,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 flListFragment.setVisibility(View.GONE);
 //                mSearchView.setVisibility(View.GONE);
                 searchBar.setVisibility(View.GONE);
-                hsv.setVisibility(View.VISIBLE);
+                mHouseSurfaceView.setVisibility(View.VISIBLE);
                 dragDownButton.setAlpha(0.95f);
 
 
@@ -544,9 +546,18 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         }
     }
 
-
-
-
+//    @Override
+//    protected void onPause() {
+//        Log.v(TAG,"ONPAUSE");
+//        mHouseSurfaceView.setVisibility(View.GONE);
+//        super.onPause();
+//    }
+//
+//    @Override
+//    protected void onResume() {
+//        mHouseSurfaceView.setVisibility(View.VISIBLE);
+//        super.onResume();
+//    }
 
     @Override
     public void onMemeDetailsFragmentInteraction(String arg)
@@ -1043,10 +1054,20 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                     e.printStackTrace();
                 }
                 try {
-                    this.mMemeDetailsFragment.updateGraph(this.mDataPointLineGraphSeries, this.mDateRange);
+                    /* keep trying to update the graphView if its not null, otherwise request the data */
+                    boolean res = this.mMemeDetailsFragment.updateGraph(this.mDataPointLineGraphSeries, this.mDateRange);
+                    if (!res)
+                    {
+                        if(i >= 4)
+                        {
+                            return false;
+                        }
+                        i++;
+                        continue;
+                    }
                 } catch (Exception e) {
                     Log.e(TAG, e.toString());
-                    if(i >= 5)
+                    if(i >= 2)
                     {
                         return false;
                     }

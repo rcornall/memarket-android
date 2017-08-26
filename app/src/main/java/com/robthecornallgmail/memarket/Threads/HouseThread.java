@@ -1,6 +1,7 @@
 package com.robthecornallgmail.memarket.Threads;
 
 import android.graphics.Canvas;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 import com.robthecornallgmail.memarket.Views.HouseSurfaceView;
@@ -11,11 +12,12 @@ import com.robthecornallgmail.memarket.Views.MainSurfaceView;
  */
 
 public class HouseThread extends Thread {
+    String TAG = "HouseThread";
     private SurfaceHolder surfaceHolder;
     private HouseSurfaceView houseSurfaceView;
     private Canvas canvas;
     long startTime, doneTime;
-    public boolean running;
+    private volatile boolean running = false;
 
     public HouseThread(SurfaceHolder surfaceHolder, HouseSurfaceView houseSurfaceView) {
         super();
@@ -25,7 +27,9 @@ public class HouseThread extends Thread {
     @Override
     public void run() {
 
+        running = true;
         while(running){
+        Log.v(TAG, "run()");
             canvas = null;
             startTime = System.currentTimeMillis();
             try {
@@ -66,5 +70,9 @@ public class HouseThread extends Thread {
 
     public void setRunning(boolean b) {
         running = b;
+        Log.v(TAG, "set running"+b);
+    }
+    public boolean isRunning() {
+        return running;
     }
 }
