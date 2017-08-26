@@ -15,6 +15,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -51,6 +52,8 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.robthecornallgmail.memarket.Fragments.ListMemesFragment;
 import com.robthecornallgmail.memarket.Fragments.MemeDetailsFragment;
+import com.robthecornallgmail.memarket.Util.AllItems;
+import com.robthecornallgmail.memarket.Util.ItemObject;
 import com.robthecornallgmail.memarket.Util.MemePastData;
 import com.robthecornallgmail.memarket.Util.MemeRow;
 import com.robthecornallgmail.memarket.Util.MyApplication;
@@ -62,6 +65,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import com.robthecornallgmail.memarket.Util.Defines;
+import com.robthecornallgmail.memarket.Util.UserItem;
 import com.robthecornallgmail.memarket.Util.UserRow;
 import com.robthecornallgmail.memarket.Views.HouseSurfaceView;
 import com.robthecornallgmail.memarket.Fragments.LeaderboardDialogFragment;
@@ -92,6 +96,8 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     private Map<Integer, Integer> mMemeIDtoAmountHeld = new HashMap<>();
     private Map<String, Integer> mMemeNametoLastStockMap= new HashMap<>();
     private Map<String,Integer> mLeaderboardUsersToMoneyMap = new LinkedHashMap<>(); //preserves ordering in HashMap
+    private HashMap<Integer, ItemObject> mItemsIdToObject = new HashMap<>();
+    private HashMap<Integer, UserItem> mItemsIdToUsersItems = new HashMap<>();
 
     private String mSelectedName;
     private Integer mSelectedMemeID;
@@ -475,8 +481,14 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         });
 
 
-        new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getData.php?action", "GETTING_DATA");
-        new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getUserStocks.php?user=" + mApplication.userData.getID(), "GETTING_USER_STOCKS");
+        new GetDataFromServer().execute
+                (Defines.SERVER_ADDRESS + "/getData.php?action", "GETTING_DATA");
+        new GetDataFromServer().execute
+                (Defines.SERVER_ADDRESS + "/getUserStocks.php?user=" + mApplication.userData.getID(), "GETTING_USER_STOCKS");
+        new GetDataFromServer().execute
+                (Defines.SERVER_ADDRESS + "/getUserItems.php?user=" + mApplication.userData.getID(), "GETTING_USER_ITEMS");
+        new GetDataFromServer().execute
+                (Defines.SERVER_ADDRESS + "/getItemTypes.php?", "GETTING_ITEM_TYPES");
 
     }
 
@@ -803,11 +815,31 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                         String NAME = jsonObject.getString("USER_DISPLAY_NAME");
                         Integer MONEY = jsonObject.getInt("MONEY");
                         mLeaderboardUsersToMoneyMap.put(NAME, MONEY);
+                    } else if (strings[1].equals("GETTING_ITEM_TYPES")) {
+                        Integer ID = jsonObject.getInt("ITEM_ID");
+                        String NAME = jsonObject.getString("ITEM_NAME");
+                        String ITEM_DESCRIPTION = jsonObject.getString("ITEM_DESCRIPTION");
+                        Integer ITEM_PRICE = jsonObject.getInt("ITEM_PRICE");
+                        Integer ITEM_MAX_AMOUNT = jsonObject.getInt("ITEM_MAX_AMOUNT");
+                        Integer ITEM_TYPE = jsonObject.getInt("ITEM_TYPE");
+                        Integer ITEM_SUBTYPE = jsonObject.getInt("ITEM_SUBTYPE");
+                        mItemsIdToObject.put(ID, new ItemObject(NAME, ITEM_DESCRIPTION, ITEM_PRICE,
+                                            ITEM_MAX_AMOUNT,ITEM_TYPE,ITEM_SUBTYPE));
+                    } else if (strings[1].equals("GETTING_USER_ITEMS")) {
+                        Integer ID = jsonObject.getInt("ITEM_ID");
+                        Integer ITEM_AMOUNT = jsonObject.getInt("ITEM_AMOUNT");
+                        Integer EQUIPPED = jsonObject.getInt("EQUIPPED");
+                        mItemsIdToUsersItems.put(ID, new UserItem(ITEM_AMOUNT,EQUIPPED));
                     } else {
                         Result.success = false;
                         Log.e(TAG, "params wrong..");
                         return  Result;
                     }
+                }
+                for(Map.Entry<Integer, UserItem> i: mItemsIdToUsersItems.entrySet())
+                {
+                    Log.v(TAG, i.getKey().toString());
+                    Log.v(TAG, i.getValue().mIsEquipped.toString());
                 }
                 Result.success = true;
             } catch (JSONException e) {
