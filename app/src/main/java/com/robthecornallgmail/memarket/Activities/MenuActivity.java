@@ -50,9 +50,11 @@ import android.widget.Toast;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+import com.robthecornallgmail.memarket.Fragments.BagGridFragment;
 import com.robthecornallgmail.memarket.Fragments.ListMemesFragment;
 import com.robthecornallgmail.memarket.Fragments.MemeDetailsFragment;
 import com.robthecornallgmail.memarket.Util.AllItems;
+import com.robthecornallgmail.memarket.Util.BagGrid;
 import com.robthecornallgmail.memarket.Util.ItemObject;
 import com.robthecornallgmail.memarket.Util.MemePastData;
 import com.robthecornallgmail.memarket.Util.MemeRow;
@@ -76,7 +78,8 @@ import static java.lang.Thread.sleep;
 
 public class MenuActivity extends AppCompatActivity implements ListMemesFragment.OnListFragmentInteractionListener,
         MemeDetailsFragment.OnFragmentInteractionListener,
-        LeaderboardDialogFragment.OnLeaderboardFragmentInteractionListener
+        LeaderboardDialogFragment.OnLeaderboardFragmentInteractionListener,
+        BagGridFragment.OnBagGridInteractionListener
 {
     private static long timeTillUpdate = 900000;
     private static CountDownTimer mFifteenMinTimer;
@@ -87,9 +90,12 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
     private Button mSettingsWheelButton, mLeaderboardButton;
 
+    /*graph stuff*/
     private GraphView mGraphView;
     private GetGraphData mGetGraphTask;
     private DateRange mDateRange = DateRange.DAY;
+
+    /*maps holding various data*/
     private Map<String, Integer> mMemeNametoIDMap = new HashMap<>();
     private Map<Integer, LineGraphSeries<DataPoint>> mMemeIDtoSeriesMap = new HashMap<>();
     private Map<String, Integer> mMemeNametoStockMap = new HashMap<>();
@@ -99,14 +105,17 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     private HashMap<Integer, ItemObject> mItemsIdToObject = new HashMap<>();
     private HashMap<Integer, UserItem> mItemsIdToUsersItems = new HashMap<>();
 
+    /*selected meme for list/detail fragments*/
     private String mSelectedName;
     private Integer mSelectedMemeID;
 
     EditText mSearchView;
-    private ListMemesFragment mMemeListFragment;
-    private LeaderboardDialogFragment mLeaderboardDialogFragment;
 
+    /*fragments*/
+    ListMemesFragment mMemeListFragment;
+    LeaderboardDialogFragment mLeaderboardDialogFragment;
     MemeDetailsFragment mMemeDetailsFragment;
+    BagGridFragment mBagGridFragment;
 
     HouseSurfaceView mHouseSurfaceView;
     // map meme IDs to their respective past Data from server.
@@ -125,6 +134,8 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         Log.v(TAG, "memoryClass: " + Integer.toString(memoryClass));
 
         mMemeListFragment = new ListMemesFragment();
+        mBagGridFragment = new BagGridFragment();
+
 //        mLeaderboardDialogFragment = new LeaderboardDialogFragment();
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
@@ -200,16 +211,22 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
         linearLayoutTabButtons.setBackgroundColor(getResources().getColor(R.color.backgroundGrey));
 
+        /* get framelayouts for fragments*/
         final FrameLayout flListFragment = (FrameLayout) findViewById(R.id.meme_list_fragment);
         final FrameLayout flDetailsFragment = (FrameLayout) findViewById(R.id.meme_details_fragment);
 
+        /* add list fragment and hide it first (for home view to show) */
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.meme_list_fragment, mMemeListFragment);
-        transaction.addToBackStack(null);
+//        transaction.addToBackStack(null);
+        /* add bag grid fragment (first to show as default) */
+        transaction.add(R.id.inventory_bag_fragment, mBagGridFragment);
         transaction.commit();
         flListFragment.setVisibility(View.GONE);
 
 
+
+        /* Setup highlights for bottom tab buttons e.g. home find store*/
         final View findMemesHighlight =(View) findViewById(R.id.find_memes_highlight);
         final View homeHighlight =(View) findViewById(R.id.home_highlight);
         final View storeHighlight =(View) findViewById(R.id.store_highlight);
@@ -222,7 +239,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
             public void onClick(View v) {
                 Log.v(TAG, "FIND MEMES PRESSED");
 
-                /* Manually freeing Bitmaps because java sucks? */
+                /* Manually freeing Bitmaps because java */
                 mHouseSurfaceView.free();
 
                 mHouseSurfaceView.setVisibility(View.INVISIBLE);
@@ -610,6 +627,11 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         Log.v(TAG, "onLeaderboardFragmentInteractioncalled: ");
     }
 
+    @Override
+    public void OnBagGridInteraction(BagGrid row) {
+        Log.v(TAG, "OnBagGridInteraction called ");
+    }
+
 
 // TODO: 03/08/17 NEED TO MAKE SURE ONLY ONE INSTANCE OF THIS THREAD IS RUNNING AT ONCE BEFORE STARTING A NEW ONE 
 
@@ -836,11 +858,6 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                         return  Result;
                     }
                 }
-                for(Map.Entry<Integer, UserItem> i: mItemsIdToUsersItems.entrySet())
-                {
-                    Log.v(TAG, i.getKey().toString());
-                    Log.v(TAG, i.getValue().mIsEquipped.toString());
-                }
                 Result.success = true;
             } catch (JSONException e) {
                 Log.e(TAG, "Error parsing data " + e.toString());
@@ -886,6 +903,12 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                         mMemeDetailsFragment.updateStockPrice(mMemeNametoStockMap.get(mSelectedName));
                     } catch (NullPointerException e) {
                         Log.v(TAG, e.toString());
+                    }
+                } else if(mRequest ==  "GETTING_ITEM_TYPES") {
+                    try {
+                        mBagGridFragment.updateList(mItemsIdToUsersItems, mItemsIdToObject);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 } else if(mRequest == "GETTING_LEADERBOARD") {
                     try {

@@ -10,7 +10,6 @@ public class UserItem {
     public UserItem(Integer amount, Integer isEquipped)
     {
         mAmount = amount;
-
         mIsEquipped = isEquipped.equals(1);
     }
 }

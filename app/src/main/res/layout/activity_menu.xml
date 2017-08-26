@@ -211,40 +211,58 @@
                         android:layout_width="145dp"
                         android:layout_height="195dp"
                         android:scaleX="-1"/>
+                    <!--             5 Fragments for each tab in the slidingDrawer             -->
                     <FrameLayout
+                        android:id="@+id/inventory_bag_fragment"
                         android:layout_marginRight="2dp"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_toRightOf="@+id/character_full">
+                        android:layout_height="match_parent"
+                        android:layout_toRightOf="@+id/character_full"
+                        android:layout_above="@+id/inv_buttons_frame_layout">
 
-                        <LinearLayout
-                            android:id="@+id/inv_bag_buttons"
-                            android:layout_width="match_parent"
-                            android:layout_height="45dp"
-                            android:background="@color/backgroundGrey"
-                            >
-
-                            <!--<ImageView-->
-                                <!--android:id="@+id/bag_clothes_button"-->
-                                <!--android:layout_width="45dp"-->
-                                <!--android:layout_height="45dp"-->
-                                <!--android:layout_weight="0.2"-->
-                                <!--/>-->
-                            <!--<ImageView-->
-                                <!--android:id="@+id/bag_"-->
-                                <!--android:layout_width="45dp"-->
-                                <!--android:layout_height="45dp"-->
-                                <!--android:layout_weight="0.2"-->
-                                <!--/>-->
-                            <!--<ImageView-->
-                                <!--android:id="@+id/bag_"-->
-                                <!--android:layout_width="45dp"-->
-                                <!--android:layout_height="45dp"-->
-                                <!--android:layout_weight="0.2"-->
-                                <!--/>-->
-                        </LinearLayout>
 
                     </FrameLayout>
+
+                    <FrameLayout
+                        android:id="@+id/inventory_office_fragment"
+                        android:layout_marginRight="2dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_toRightOf="@+id/character_full"
+                        android:layout_above="@+id/inv_buttons_frame_layout">
+
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:id="@+id/inventory_people_fragment"
+                        android:layout_marginRight="2dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_toRightOf="@+id/character_full"
+                        android:layout_above="@+id/inv_buttons_frame_layout">
+
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:id="@+id/inventory_memes_fragment"
+                        android:layout_marginRight="2dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_toRightOf="@+id/character_full"
+                        android:layout_above="@+id/inv_buttons_frame_layout">
+
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:id="@+id/inventory_financials_fragment"
+                        android:layout_marginRight="2dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_toRightOf="@+id/character_full"
+                        android:layout_above="@+id/inv_buttons_frame_layout">
+
+                    </FrameLayout>
+
                     <Button
                         android:id="@+id/drop_up_arrow"
                         android:layout_marginBottom="-8dp"
@@ -260,6 +278,7 @@
                         />
 
                     <FrameLayout
+                        android:id="@+id/inv_buttons_frame_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true">
