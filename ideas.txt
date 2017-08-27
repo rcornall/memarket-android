@@ -1,0 +1,34 @@
+game:
+
+game dev story type setup?
+
+or after clicking on building 
+can have view like:  
+ _________________
+|                 |
+|                 |
+|    top floor    |
+|                 |
+|                 |    ___
+|_____0__0________|   |   | - building outline walls
+|                 |   |___|
+|                 |
+|*****************|   ****
+|*               *|   *  *  - screen view 
+|*               *|   ****
+|*____0__0_______*|
+|*               *|     0   - worker
+|*               *|
+|*               *|
+|*               *|
+|*               *|
+|*_______________*|
+|*****************|
+|                 |
+|                 |
+|  first floor    |
+|                 |
+|_____0__0________|
+
+
+

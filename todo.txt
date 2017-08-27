@@ -4,29 +4,13 @@ add up All values (overall traffic) and get relative stocks from that (sandys id
 
 
 
-**********leaderboard************
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 ***view other players houses***
 
 
 *****Chat system*****
-
+unlock chat emotes using money
 
 ******** (+) add new meme right of edit text, ************
 maintain list of newly submitted memes, users can vote on what to keep.

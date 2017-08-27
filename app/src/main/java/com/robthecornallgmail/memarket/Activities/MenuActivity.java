@@ -218,7 +218,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         /* add list fragment and hide it first (for home view to show) */
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.meme_list_fragment, mMemeListFragment);
-//        transaction.addToBackStack(null);
+        transaction.addToBackStack(null);
         /* add bag grid fragment (first to show as default) */
         transaction.add(R.id.inventory_bag_fragment, mBagGridFragment);
         transaction.commit();
