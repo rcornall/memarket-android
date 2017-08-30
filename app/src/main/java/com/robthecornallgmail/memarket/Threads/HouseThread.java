@@ -13,7 +13,7 @@ import com.robthecornallgmail.memarket.Views.MainSurfaceView;
 
 public class HouseThread extends Thread {
     String TAG = "HouseThread";
-    private SurfaceHolder surfaceHolder;
+    private final SurfaceHolder surfaceHolder;
     private HouseSurfaceView houseSurfaceView;
     private Canvas canvas;
     long startTime, doneTime;
@@ -57,7 +57,7 @@ public class HouseThread extends Thread {
                 if (timeDelta >= 20) {
                     continue;
                 } else {
-                    this.sleep(20-timeDelta);
+                    sleep(20-timeDelta);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();

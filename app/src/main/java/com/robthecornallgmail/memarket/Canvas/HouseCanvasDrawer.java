@@ -201,7 +201,7 @@ public class HouseCanvasDrawer {
     private void drawOffice(Canvas canvas, Office office,
                             float x, float y, String size) {
         canvas.drawBitmap(office.officeTop,x,y, null);
-        if (size == "tall") {
+        if (size.equals("tall")) {
             for(int i = 0; i<5;i++) {
                 if(i==4) {
                     canvas.drawBitmap(office.officeBottom,x,y+officeTopHeight+i*officeMiddleHeight,null);

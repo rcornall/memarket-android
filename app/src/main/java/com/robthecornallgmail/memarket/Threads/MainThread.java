@@ -14,7 +14,7 @@ public class MainThread extends  Thread {
 
     private static final int FRAMERATE = 10; //10 fps for pixel animations
     private static Canvas canvas;
-    private SurfaceHolder surfaceHolder;
+    private final SurfaceHolder surfaceHolder;
     private boolean running;
     private MainSurfaceView mainSurfaceView;
 

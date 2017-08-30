@@ -409,7 +409,7 @@ public class MainActivity extends AppCompatActivity implements TaskCallback
                 JSONObject jsonObject = new JSONObject(serverResponse);
                 Log.v(TAG, jsonObject.getString("result"));
                 result = jsonObject.getString("result");
-                if (result == "true")
+                if (result.equals("true"))
                 {
                     mApplication.userData.setID(jsonObject.getInt("id"));
                     mApplication.userData.setUsername(jsonObject.getString("username"));
@@ -437,7 +437,7 @@ public class MainActivity extends AppCompatActivity implements TaskCallback
             {
                 return Result;
             }
-            else if (result == "true")
+            else if (result.equals("true"))
             {
                 Result.success = true;
             }

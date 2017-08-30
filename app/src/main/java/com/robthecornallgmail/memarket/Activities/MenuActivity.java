@@ -895,7 +895,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
             if (Result.success) {
 //                mFraLgment = (ListMemesFragment) getSupportFragmentManager().findFragmentById(R.id.meme_list_fragment);
-                if (mRequest == "GETTING_DATA") {
+                if (mRequest.equals("GETTING_DATA")) {
                     try {
                         mMemeListFragment.updateList(mMemeNametoStockMap, mMemeNametoLastStockMap);
                     } catch (Exception e) {
@@ -906,14 +906,14 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                     } catch (NullPointerException e) {
                         Log.v(TAG, e.toString());
                     }
-                } else if(mRequest ==  "GETTING_ITEM_TYPES") {
+                } else if(mRequest.equals("GETTING_ITEM_TYPES")) {
                     try {
                         mHouseSurfaceView.updateBitmaps(mUserItemIdToUsersItems, mItemsIdToObject);
                         mBagGridFragment.updateList(mUserItemIdToUsersItems, mItemsIdToObject);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                } else if(mRequest == "GETTING_LEADERBOARD") {
+                } else if(mRequest.equals("GETTING_LEADERBOARD")) {
                     try {
                         mLeaderboardDialogFragment.updateList(mLeaderboardUsersToMoneyMap);
                     } catch (Exception e) {

@@ -284,28 +284,29 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
                 Log.v(TAG, "HouseSurface constructor finished (loading bitmaps)");
             }
-            else
-            {
-                if(mDefaultBitmaps.get(Defines.DEFAULT_TYPE.BACKGROUND).mBitmap == null)
-                {   Log.v(TAG, "bitmaps are getting reloaded");
-                    mDefaultBitmaps.get(Defines.DEFAULT_TYPE.BACKGROUND).mBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(mResources, R.drawable.sky_gradient4), SKY_SIZE_X/100, SKY_SIZE_Y, true);
+            else {
+                if (mDefaultBitmaps.get(Defines.DEFAULT_TYPE.BACKGROUND).mBitmap == null) {
+                    Log.v(TAG, "bitmaps are getting reloaded");
+                    mDefaultBitmaps.get(Defines.DEFAULT_TYPE.BACKGROUND).mBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(mResources, R.drawable.sky_gradient4), SKY_SIZE_X / 100, SKY_SIZE_Y, true);
                 }
-                if(mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GROUND).mBitmap == null)
-                {
+                if (mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GROUND).mBitmap == null) {
                     mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GROUND).mBitmap = MyHelper.decodeSampledBitmapFromResourceByHeight(mResources, R.drawable.ground2, GROUND_HEIGHT);
                     mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GROUND).mBitmap = Bitmap.createScaledBitmap(mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GROUND).mBitmap,
-                            (int)((float)mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GROUND).mBitmap.getWidth()*GROUND_SCALE_FACTOR), GROUND_HEIGHT, true);
+                            (int) ((float) mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GROUND).mBitmap.getWidth() * GROUND_SCALE_FACTOR), GROUND_HEIGHT, true);
                 }
-                if(mDefaultBitmaps.get(Defines.DEFAULT_TYPE.CLOUD1).mBitmap == null) {
+                if (mDefaultBitmaps.get(Defines.DEFAULT_TYPE.CLOUD1).mBitmap == null) {
                     mDefaultBitmaps.get(Defines.DEFAULT_TYPE.CLOUD1).mBitmap = MyHelper.decodeSampledBitmapFromResourceByHeight(mResources, R.drawable.cloud_houseview, CLOUD_HEIGHT);
                     mDefaultBitmaps.get(Defines.DEFAULT_TYPE.CLOUD1).mBitmap = Bitmap.createScaledBitmap(mDefaultBitmaps.get(Defines.DEFAULT_TYPE.CLOUD1).mBitmap,
                             (int) ((float) mDefaultBitmaps.get(Defines.DEFAULT_TYPE.CLOUD1).mBitmap.getWidth() * CLOUD_SCALE_FACTOR), CLOUD_HEIGHT, true);
                 }
-                if(mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GUY).mBitmap == null)
-                {
+                if (mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GUY).mBitmap == null) {
                     mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GUY).mBitmap = MyHelper.decodeSampledBitmapFromResourceByHeight(mResources, R.drawable.ground_frog, GUY_HEIGHT);
                     mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GUY).mBitmap = Bitmap.createScaledBitmap(mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GUY).mBitmap,
-                            (int)((float)mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GUY).mBitmap.getWidth()*GUY_SCALE_FACTOR), GUY_HEIGHT, true);
+                            (int) ((float) mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GUY).mBitmap.getWidth() * GUY_SCALE_FACTOR), GUY_HEIGHT, true);
+                }
+                if (mSilhouette == null) {
+                    mSilhouette = MyHelper.decodeSampledBitmapFromResourceByHeight(mResources, R.drawable.silouette, SILHOUETTE_HEIGHT);
+                    mSilhouette = Bitmap.createScaledBitmap(mSilhouette,(int)((float) mSilhouette.getWidth()*SILHOUETTE_SCALE_FACTOR), SILHOUETTE_HEIGHT, true);
                 }
 
                 for (UserBitmap bitmap : mUserBitmaps.values()) {
@@ -443,7 +444,8 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                             bitmap.mCoordinates.lastX = bitmap.mCoordinates.backupx + mTouchCoordinates.dx;
                         }
                     }
-//                    MAX_Y-(((float)MIN_Y*mScaleFactor)-MIN_Y)
+
+                    /* Y coordinates */
                     if (backgroundCoordinates_backupY+ mTouchCoordinates.dy > MAX_Y)
                     {
                         float diff = MAX_Y-backgroundCoordinates_lastY;
@@ -488,12 +490,13 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                             userBitmap.mCoordinates.lastY = userBitmap.mCoordinates.backupy + mTouchCoordinates.dy;
                         }
                     }
-//                    CalculateMatrix(true);
+                    /* CalculateMatrix(true); */
                 }
                 break;
             case MotionEvent.ACTION_UP:
                 mMode = InteractionMode.NONE;
                 // tap( calling tap method incase we decide to add in the future.);
+
                 break;
         }
         mScaleDetector.onTouchEvent(event);
