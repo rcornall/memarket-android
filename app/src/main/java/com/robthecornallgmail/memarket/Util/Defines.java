@@ -31,10 +31,19 @@ public final class Defines
         public static final class OFFICE_TYPE {
             public static int SHORT_OFFICE_GREY = 1;
             public static int TALL_OFFICE_GREY = 2;
+            public static int HOUSE_SMALL_SOMETHING = 3;
         }
 
 
+        public static int EQUIPPED = 1;
+        public static int NOT_EQUIPPED = 0;
+    }
 
+    public static final class DEFAULT_TYPE {
+        public static int BACKGROUND = 0;
+        public static int GROUND = 1;
+        public static int CLOUD1 = 2;
+        public static int GUY = 3;
     }
 }
 

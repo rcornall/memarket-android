@@ -135,12 +135,12 @@ public class MyHelper {
                 inSampleSize *= 2;
             }
         }
-        Log.v(TAG, "insamplesize = " + inSampleSize);
+//        Log.v(TAG, "insamplesize = " + inSampleSize);
 
         return inSampleSize;
     }
 
-    public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId, int reqHeight) {
+    public static Bitmap decodeSampledBitmapFromResourceByHeight(Resources res, int resId, int reqHeight) {
 
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -158,6 +158,26 @@ public class MyHelper {
         options.inScaled = false;
         return BitmapFactory.decodeResource(res, resId, options);
     }
+
+    public static Bitmap decodeSampledBitmapFromResourceByWidth(Resources res, int resId, int reqWidth) {
+
+        // First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeResource(res, resId, options);
+
+        float scaleFactor = (float)reqWidth/(float)options.outWidth;
+        int reqHeight = (int) ((float)options.outHeight * scaleFactor);
+
+        // Calculate inSampleSize
+        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        options.inScaled = false;
+        return BitmapFactory.decodeResource(res, resId, options);
+    }
+
 
     public static void zoomImageFromThumb(final View thumbView, final View expandedImageView, final View mView, final LinearLayout detailsLinearLayout) {
         // Calculate the starting and ending bounds for the zoomed-in image.

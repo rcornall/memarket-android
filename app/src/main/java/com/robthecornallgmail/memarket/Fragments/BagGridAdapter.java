@@ -48,7 +48,6 @@ String TAG = "BagGridAdapter";
         String description = holder.mItem.mDescription;
         Boolean isEquipped = holder.mItem.mIsEquipped;
         Integer amount = holder.mItem.mAmount;
-        Log.v(TAG, "TESTTTTTTTT name is: " + name + "descrip: " + description);
 
         int iconId = holder.mView.getResources().getIdentifier(name, "drawable", MainActivity.PACKAGE_NAME);
 

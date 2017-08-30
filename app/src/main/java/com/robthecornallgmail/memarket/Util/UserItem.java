@@ -5,11 +5,15 @@ package com.robthecornallgmail.memarket.Util;
  */
 
 public class UserItem {
+    public Integer mItemID;
     public Integer mAmount;
     public Boolean mIsEquipped;
-    public UserItem(Integer amount, Integer isEquipped)
+    public Integer mXCoordinate;
+    public UserItem(Integer itemID, Integer amount, Integer isEquipped, Integer x_coordinate)
     {
+        mItemID = itemID;
         mAmount = amount;
         mIsEquipped = isEquipped.equals(1);
+        mXCoordinate = x_coordinate;
     }
 }

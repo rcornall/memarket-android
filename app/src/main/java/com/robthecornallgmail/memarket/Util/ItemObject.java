@@ -11,9 +11,10 @@ public class ItemObject {
     public Integer mMaxAmount;
     public Integer mType;
     public Integer mSubtype;
+    public Integer mWidth;
 
     public ItemObject(String name, String description, Integer price,
-               Integer maxAmount, Integer type, Integer subType)
+                      Integer maxAmount, Integer type, Integer subType, Integer width)
     {
         mName = name;
         mDescription = description;
@@ -21,6 +22,7 @@ public class ItemObject {
         mMaxAmount = maxAmount;
         mType = type;
         mSubtype = subType;
+        mWidth = width;
     }
 
 }

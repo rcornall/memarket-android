@@ -6,30 +6,36 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.util.Log;
 
-import com.robthecornallgmail.memarket.R;
-import com.robthecornallgmail.memarket.Util.MyApplication;
+import com.robthecornallgmail.memarket.Util.Defines;
 import com.robthecornallgmail.memarket.Util.Office;
+import com.robthecornallgmail.memarket.Util.UserBitmap;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by rob on 03/03/17.
  */
 
 public class HouseCanvasDrawer {
-    private String TAG = "HouseCanvasDrawer";
-    private final Bitmap background, cloud1, ground, guy, silouette;
-    private Office office;
-    private  int ground_y;
-    private Integer x_background_diff, y_background_diff;
-    private int backgroundWidth;
-    private int groundWidth;
+    String TAG = "HouseCanvasDrawer";
 
-    private int guyFrame = 0; //30 frame sprite animation, 12 x 5 x 8 x 5
-    private int houseWidth, officeWidth, officeTopHeight, officeMiddleHeight, officeBottomHeight;
-    float guyWidth, silhoutteWidth;
+    HashMap<Integer, UserBitmap> mUserBitmaps;
+    ArrayList<DefaultBitmap> mDefaultBitmaps;
+
+
+    final Bitmap mSilhouette;
+    Office office;
+    int mBackgroundWidth;
+    int mGroundWidth;
+    int mCloud1Width;
+
+    int guyFrame = 0; //30 frame sprite animation, 12 x 5 x 8 x 5
+    int houseWidth, officeWidth, officeTopHeight, officeMiddleHeight, officeBottomHeight;
+    float mGuyWidth, mSilhouetteWidth;
     int officeCapacitySpace;
-    private int guyHeight,silouetteHeight;
+    int mGuyHeight, mSilhouetteHeight;
 
     Paint textPaint = new Paint();
     Paint RectPaintGrey = new Paint();
@@ -39,43 +45,41 @@ public class HouseCanvasDrawer {
     Rect guySrc = new Rect();
     Rect guyDst = new Rect();
 
-    private int SCREEN_WIDTH, SCREEN_HEIGHT;
-    private int VIEW_HEIGHT, CLOUD_LEFT_EDGE, CLOUD_RIGHT_EDGE;
+    int SCREEN_WIDTH, SCREEN_HEIGHT;
+    int VIEW_HEIGHT, CLOUD_LEFT_EDGE, CLOUD_RIGHT_EDGE;
 
-    private int cloud1_dx = 0;
+    int cloud1_dx = 0;
 
-    public HouseCanvasDrawer(Bitmap background, Bitmap cloud1, Bitmap ground, Bitmap guy, Office office,
-                             Bitmap silhouette, int SCREEN_WIDTH, int SCREEN_HEIGHT, Typeface pixelFont, int mTextColor) {
-        this.background = background;
-        this.cloud1 = cloud1;
-        this.ground = ground;
-        this.guy = guy;
-        this.office = office;
-        this.silouette = silhouette;
+    public HouseCanvasDrawer(HashMap<Integer, UserBitmap> userBitmaps, ArrayList<DefaultBitmap> defaultBitmaps, Bitmap silhouette,
+                             int SCREEN_WIDTH, int SCREEN_HEIGHT, Typeface pixelFont, int mTextColor) {
+        mUserBitmaps = userBitmaps;
+        mDefaultBitmaps = defaultBitmaps;
+        for(DefaultBitmap bitmap : mDefaultBitmaps) {
+            if(bitmap.mType == Defines.DEFAULT_TYPE.BACKGROUND)
+            {
+                mBackgroundWidth = bitmap.mBitmap.getWidth();
+            }
+            else if(bitmap.mType == Defines.DEFAULT_TYPE.GROUND)
+            {
+                mGroundWidth = bitmap.mBitmap.getWidth();
+            }
+            else if(bitmap.mType == Defines.DEFAULT_TYPE.CLOUD1)
+            {
+                mCloud1Width = bitmap.mBitmap.getWidth();
+            }
+            else if(bitmap.mType == Defines.DEFAULT_TYPE.GUY)
+            {
+                mGuyWidth = bitmap.mBitmap.getWidth()/4;
+                mGuyHeight = bitmap.mBitmap.getHeight();
+            }
+        }
+        this.mSilhouette = silhouette;
         this.SCREEN_WIDTH = SCREEN_WIDTH;
         this.SCREEN_HEIGHT = SCREEN_HEIGHT;
 
-        ground_y = SCREEN_HEIGHT/10;
+        mSilhouetteWidth = (float)silhouette.getWidth()/4;
+        mSilhouetteHeight = silhouette.getHeight();
 
-        backgroundWidth = background.getWidth();
-        groundWidth = ground.getWidth();
-        // guy is a sprite with 4 frames:
-        guyWidth = guy.getWidth()/4;
-        guyHeight = guy.getHeight();
-
-        silhoutteWidth = (float)silhouette.getWidth()/4;
-        silouetteHeight = silhouette.getHeight();
-
-        officeWidth = office.officeTop.getWidth();
-        officeTopHeight = office.officeTop.getHeight();
-        officeMiddleHeight = office.officeMiddle.getHeight();
-        officeBottomHeight = office.officeBottom.getHeight();
-        officeCapacitySpace = officeWidth/13;
-
-
-        this.y_background_diff = background.getHeight() - this.SCREEN_HEIGHT;
-        Log.v(TAG, "y diff is " + this.y_background_diff.toString());
-        Log.v(TAG, String.format("SCREEN HEIGHT=%d, groundy=%d", SCREEN_HEIGHT, ground_y));
 
 //                             |----------------SCREEN_WIDTH*3.75-----------|
 //                              ____________________________________________
@@ -98,7 +102,7 @@ public class HouseCanvasDrawer {
 //                                   ||
 //                               ____/\____________________________
 //                              /                                  \
-        CLOUD_LEFT_EDGE =  (int)(SCREEN_WIDTH*3.75 - SCREEN_WIDTH)/2 + SCREEN_WIDTH-SCREEN_WIDTH/3+cloud1.getWidth();
+        CLOUD_LEFT_EDGE =  (int)(SCREEN_WIDTH*3.75 - SCREEN_WIDTH)/2 + SCREEN_WIDTH-SCREEN_WIDTH/3+mCloud1Width;
         CLOUD_RIGHT_EDGE = (int)(SCREEN_WIDTH*3.75 - SCREEN_WIDTH)/2 + SCREEN_WIDTH/3;
 
         textPaint.setColor(mTextColor);
@@ -113,55 +117,69 @@ public class HouseCanvasDrawer {
         RectPaintBorder.setStrokeWidth(3);
     }
 
-    public void onDraw(Canvas canvas, float scaleFactor,
-                       float background_lastX, float background_lastY,
-                       float ground_lastX, float ground_lastY,
-                       float guyLastX, float guyLastY,
-                       float cloudLastX, float cloudLastY,
-                       float houseLastX, float houseLastY,
-                       float officeTallLastX, float officeTallLastY) {
+    public void onDraw(Canvas canvas, float scaleFactor) {
 
 //        Log.v(TAG, "scaleFactor:" + scaleFactor);
 //        Log.v(TAG, "")
-        // check if its out of screen bounds - dont waste resources drawing if texture is not in view
-        float nextX = background_lastX;
-        while (nextX < (int)((float)SCREEN_WIDTH/scaleFactor)) {
-            if (nextX+backgroundWidth >= 0) {
-                canvas.drawBitmap(background,nextX,background_lastY,null);
+        /* draw default bitmaps first */
+        for (DefaultBitmap bitmap : mDefaultBitmaps) {
+            if (bitmap.mType == Defines.DEFAULT_TYPE.BACKGROUND)
+            {
+                float nextX = bitmap.mCoordinates.lastX;
+                while (nextX < (int)((float)SCREEN_WIDTH/scaleFactor)){
+                    if (nextX+mBackgroundWidth >= 0) {
+                        canvas.drawBitmap(bitmap.mBitmap, nextX, bitmap.mCoordinates.lastY, null);
+                    }
+                    nextX+=mBackgroundWidth;
+                }
             }
-            nextX+=backgroundWidth;
-        }
-        nextX = ground_lastX;
-        while (nextX < (int)((float)SCREEN_WIDTH/scaleFactor)) {
-            if (nextX+groundWidth >= 0) {
-                canvas.drawBitmap(ground, nextX, ground_lastY, null);
+            else if (bitmap.mType == Defines.DEFAULT_TYPE.GROUND)
+            {
+                float nextX = bitmap.mCoordinates.lastX;
+                while (nextX < (int)((float)SCREEN_WIDTH/scaleFactor)){
+                    if (nextX+mGroundWidth >= 0) {
+                        canvas.drawBitmap(bitmap.mBitmap, nextX, bitmap.mCoordinates.lastY, null);
+                    }
+                    nextX+=mGroundWidth;
+                }
             }
-            nextX+=groundWidth;
+            else if(bitmap.mType == Defines.DEFAULT_TYPE.CLOUD1)
+            {
+                canvas.drawBitmap(bitmap.mBitmap, bitmap.mCoordinates.lastX + cloud1_dx, bitmap.mCoordinates.lastY, null);
+            }
         }
-        // reset cloud back to the right
 
+        // reset cloud back to the right
         if(cloud1_dx < -CLOUD_LEFT_EDGE) {
             cloud1_dx=CLOUD_RIGHT_EDGE;
         }
 
-        canvas.drawBitmap(cloud1, cloudLastX+cloud1_dx, cloudLastY, null);
+        for (UserBitmap userBitmap : mUserBitmaps.values()) {
+            canvas.drawBitmap(userBitmap.mBitmap, userBitmap.mCoordinates.lastX, userBitmap.mCoordinates.lastY, null);
+        }
 
-        drawOffice(canvas,office,officeTallLastX+officeWidth, houseLastY, "short");
-        drawOffice(canvas,office,officeTallLastX,officeTallLastY,"tall");
-        drawOffice(canvas,office,officeTallLastX+officeWidth*2,officeTallLastY, "tall");
+        int guyX = calculateGuyOffsets(guyFrame, mGuyWidth);
+        drawGuy(canvas, mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GUY).mBitmap, guyX,
+                mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GUY).mCoordinates.lastX,
+                mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GUY).mCoordinates.lastY, (int)mGuyWidth, mGuyHeight);
 
 
-        int guyX = calculateGuyOffsets(guyFrame,guyWidth);
-        drawGuy(canvas,guy,guyX,(int)guyLastX,(int)guyLastY,(int)guyWidth,guyHeight);
 
-//        Rect guySrc = new Rect(guyX, 0, guyX+guyWidth, 0+guyHeight);
-//        Rect guyDst = new Rect((int)guyLastX, (int)guyLastY, (int)guyLastX+guyWidth, (int)guyLastY+guyHeight);
+//        drawOffice(canvas,office,officeTallLastX+officeWidth, houseLastY, "short");
+//        drawOffice(canvas,office,officeTallLastX,officeTallLastY,"tall");
+//        drawOffice(canvas,office,officeTallLastX+officeWidth*2,officeTallLastY, "tall");
+
+
+
+//        Rect guySrc = new Rect(guyX, 0, guyX+mGuyWidth, 0+mGuyHeight);
+//        Rect guyDst = new Rect((int)guyLastX, (int)guyLastY, (int)guyLastX+mGuyWidth, (int)guyLastY+mGuyHeight);
 //        canvas.drawBitmap(guy,guySrc,guyDst,null);
-//        guyDst.set((int)guyLastX-guyWidth, (int)guyLastY, (int)guyLastX, (int)guyLastY+guyHeight);
+//        guyDst.set((int)guyLastX-mGuyWidth, (int)guyLastY, (int)guyLastX, (int)guyLastY+mGuyHeight);
 //        canvas.drawBitmap(guy,guySrc,guyDst,null);
-//        guyDst.set((int)guyLastX-guyWidth-guyWidth/2, (int)guyLastY, (int)guyLastX-guyWidth/2, (int)guyLastY+guyHeight);
+//        guyDst.set((int)guyLastX-mGuyWidth-mGuyWidth/2, (int)guyLastY, (int)guyLastX-mGuyWidth/2, (int)guyLastY+mGuyHeight);
 //        canvas.drawBitmap(guy,guySrc,guyDst,null);
 
+        /* do increments */
         guyFrame = ++guyFrame % 30;
         cloud1_dx += -1;
 
@@ -192,13 +210,13 @@ public class HouseCanvasDrawer {
                 }
             }
             for(int i = 0; i<12; i++) {
-                drawGuy(canvas,silouette,calculateGuyOffsets(guyFrame, silhoutteWidth),
-                        x + officeCapacitySpace/2, y + officeTopHeight + i*silouetteHeight, (int)silhoutteWidth,silouetteHeight);
+                drawGuy(canvas, mSilhouette,calculateGuyOffsets(guyFrame, mSilhouetteWidth),
+                        x + officeCapacitySpace/2, y + officeTopHeight + i* mSilhouetteHeight, (int) mSilhouetteWidth, mSilhouetteHeight);
             }
             // draw the capacity bars beside buildings
             canvas.drawRect(x + officeCapacitySpace*2-10, y+officeTopHeight+10, x + officeCapacitySpace*2,
                     y + officeTopHeight + officeMiddleHeight*4 + officeBottomHeight, RectPaintGrey);
-            canvas.drawRect(x + officeCapacitySpace*2-10, y+officeTopHeight+10+silouetteHeight*7, x + officeCapacitySpace*2,
+            canvas.drawRect(x + officeCapacitySpace*2-10, y+officeTopHeight+10+ mSilhouetteHeight *7, x + officeCapacitySpace*2,
                     y + officeTopHeight + officeMiddleHeight*4 + officeBottomHeight, RectPaintGreen);
             canvas.drawRect(x + officeCapacitySpace*2-10, y+officeTopHeight+10, x + officeCapacitySpace*2,
                     y + officeTopHeight + officeMiddleHeight*4 + officeBottomHeight, RectPaintBorder);
@@ -212,13 +230,13 @@ public class HouseCanvasDrawer {
                 }
             }
             for(int i = 0; i<6; i++) {
-                drawGuy(canvas,silouette,calculateGuyOffsets(guyFrame, silhoutteWidth),
-                        x + officeCapacitySpace/2, y + officeTopHeight + i*silouetteHeight, (int)silhoutteWidth,silouetteHeight);
+                drawGuy(canvas, mSilhouette,calculateGuyOffsets(guyFrame, mSilhouetteWidth),
+                        x + officeCapacitySpace/2, y + officeTopHeight + i* mSilhouetteHeight, (int) mSilhouetteWidth, mSilhouetteHeight);
             }
             // draw the capacity bars beside buildings
             canvas.drawRect(x + officeCapacitySpace*2-10, y+officeTopHeight+10, x + officeCapacitySpace*2,
                     y + officeTopHeight + officeMiddleHeight*2 + officeBottomHeight, RectPaintGrey);
-            canvas.drawRect(x + officeCapacitySpace*2-10, y+officeTopHeight+10+silouetteHeight*5, x + officeCapacitySpace*2,
+            canvas.drawRect(x + officeCapacitySpace*2-10, y+officeTopHeight+10+ mSilhouetteHeight *5, x + officeCapacitySpace*2,
                     y + officeTopHeight + officeMiddleHeight*2 + officeBottomHeight, RectPaintGreen);
             canvas.drawRect(x + officeCapacitySpace*2-10, y+officeTopHeight+10, x + officeCapacitySpace*2,
                     y + officeTopHeight + officeMiddleHeight*2 + officeBottomHeight, RectPaintBorder);

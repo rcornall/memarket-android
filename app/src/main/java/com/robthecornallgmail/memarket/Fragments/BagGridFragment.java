@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 
 import com.robthecornallgmail.memarket.R;
 import com.robthecornallgmail.memarket.Util.BagGrid;
+import com.robthecornallgmail.memarket.Util.Defines;
 import com.robthecornallgmail.memarket.Util.ItemObject;
 import com.robthecornallgmail.memarket.Util.UserItem;
 
@@ -53,7 +54,6 @@ String TAG = "BagGridFragment";
         // Set the adapter
         mAdapter = new BagGridAdapter(mBagGridList, mListener);
         if (view instanceof RecyclerView) {
-            Log.v(TAG, "did we get hereeeeeeeeeee");
             Context context = view.getContext();
             RecyclerView recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
@@ -89,18 +89,21 @@ String TAG = "BagGridFragment";
             mBagGridList.clear();
         }
         int i = 0;
-        for (Map.Entry<Integer, UserItem> i2u : itemsIDtoUserItems.entrySet())
+        for (Map.Entry<Integer, UserItem> itemToUserID : itemsIDtoUserItems.entrySet())
         {
-            Integer key = i2u.getKey();
-            String description = itemsIDtoObject.get(key).mDescription;
-            String name = itemsIDtoObject.get(key).mName;
-            BagGrid item = new BagGrid(name, i2u.getValue().mAmount, description, i2u.getValue().mIsEquipped );
-            mBagGridList.add(item);
-            mAdapter.mItemsCopy.add(item);
-            i++;
+
+            Integer itemID = itemToUserID.getValue().mItemID;
+            if(itemsIDtoObject.get(itemID).mType == Defines.ITEM_TYPE.CLOTHING)
+            {
+                String description = itemsIDtoObject.get(itemID).mDescription;
+                String name = itemsIDtoObject.get(itemID).mName;
+                BagGrid item = new BagGrid(name, itemToUserID.getValue().mAmount, description, itemToUserID.getValue().mIsEquipped );
+                mBagGridList.add(item);
+                mAdapter.mItemsCopy.add(item);
+                i++;
+            }
         }
-        for (int j = i;j<18; j++) {
-            Log.v(TAG, "asdfasdf");
+        for (int j = i;j<21; j++) {
             BagGrid item = new BagGrid("blank",1,"hii",true);
             mBagGridList.add(item);
             mAdapter.mItemsCopy.add(item);

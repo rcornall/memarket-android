@@ -53,7 +53,6 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import com.robthecornallgmail.memarket.Fragments.BagGridFragment;
 import com.robthecornallgmail.memarket.Fragments.ListMemesFragment;
 import com.robthecornallgmail.memarket.Fragments.MemeDetailsFragment;
-import com.robthecornallgmail.memarket.Util.AllItems;
 import com.robthecornallgmail.memarket.Util.BagGrid;
 import com.robthecornallgmail.memarket.Util.ItemObject;
 import com.robthecornallgmail.memarket.Util.MemePastData;
@@ -103,7 +102,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     private Map<String, Integer> mMemeNametoLastStockMap= new HashMap<>();
     private Map<String,Integer> mLeaderboardUsersToMoneyMap = new LinkedHashMap<>(); //preserves ordering in HashMap
     private HashMap<Integer, ItemObject> mItemsIdToObject = new HashMap<>();
-    private HashMap<Integer, UserItem> mItemsIdToUsersItems = new HashMap<>();
+    private HashMap<Integer, UserItem> mUserItemIdToUsersItems = new HashMap<>();
 
     /*selected meme for list/detail fragments*/
     private String mSelectedName;
@@ -845,13 +844,16 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                         Integer ITEM_MAX_AMOUNT = jsonObject.getInt("ITEM_MAX_AMOUNT");
                         Integer ITEM_TYPE = jsonObject.getInt("ITEM_TYPE");
                         Integer ITEM_SUBTYPE = jsonObject.getInt("ITEM_SUBTYPE");
+                        Integer ITEM_WIDTH = jsonObject.getInt("ITEM_WIDTH");
                         mItemsIdToObject.put(ID, new ItemObject(NAME, ITEM_DESCRIPTION, ITEM_PRICE,
-                                            ITEM_MAX_AMOUNT,ITEM_TYPE,ITEM_SUBTYPE));
+                                            ITEM_MAX_AMOUNT,ITEM_TYPE,ITEM_SUBTYPE, ITEM_WIDTH));
                     } else if (strings[1].equals("GETTING_USER_ITEMS")) {
-                        Integer ID = jsonObject.getInt("ITEM_ID");
+                        Integer USER_ITEM_ID = jsonObject.getInt("USER_ITEM_ID");
+                        Integer ITEM_ID = jsonObject.getInt("ITEM_ID");
                         Integer ITEM_AMOUNT = jsonObject.getInt("ITEM_AMOUNT");
                         Integer EQUIPPED = jsonObject.getInt("EQUIPPED");
-                        mItemsIdToUsersItems.put(ID, new UserItem(ITEM_AMOUNT,EQUIPPED));
+                        Integer X_COORDINATE = jsonObject.getInt("X_COORDINATE");
+                        mUserItemIdToUsersItems.put(USER_ITEM_ID, new UserItem(ITEM_ID,ITEM_AMOUNT,EQUIPPED,X_COORDINATE));
                     } else {
                         Result.success = false;
                         Log.e(TAG, "params wrong..");
@@ -906,7 +908,8 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                     }
                 } else if(mRequest ==  "GETTING_ITEM_TYPES") {
                     try {
-                        mBagGridFragment.updateList(mItemsIdToUsersItems, mItemsIdToObject);
+                        mHouseSurfaceView.updateBitmaps(mUserItemIdToUsersItems, mItemsIdToObject);
+                        mBagGridFragment.updateList(mUserItemIdToUsersItems, mItemsIdToObject);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

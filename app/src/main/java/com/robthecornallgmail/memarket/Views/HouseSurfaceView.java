@@ -1,15 +1,12 @@
 package com.robthecornallgmail.memarket.Views;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -19,14 +16,24 @@ import android.view.ScaleGestureDetector;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.robthecornallgmail.memarket.Activities.MainActivity;
+import com.robthecornallgmail.memarket.Canvas.DefaultBitmap;
 import com.robthecornallgmail.memarket.Canvas.HouseCanvasDrawer;
 import com.robthecornallgmail.memarket.R;
 import com.robthecornallgmail.memarket.Threads.HouseThread;
+import com.robthecornallgmail.memarket.Util.Defines;
 import com.robthecornallgmail.memarket.Util.InteractionMode;
+import com.robthecornallgmail.memarket.Util.ItemObject;
 import com.robthecornallgmail.memarket.Util.MyApplication;
 import com.robthecornallgmail.memarket.Util.MyHelper;
-import com.robthecornallgmail.memarket.Util.Office;
+import com.robthecornallgmail.memarket.Util.UserBitmap;
+import com.robthecornallgmail.memarket.Util.UserItem;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.robthecornallgmail.memarket.Util.MyHelper.decodeSampledBitmapFromResourceByWidth;
 import static java.lang.Thread.sleep;
 
 /**
@@ -34,54 +41,68 @@ import static java.lang.Thread.sleep;
  */
 
 public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
-    private static String TAG = "HouseSurfaceView";
+    static String TAG = "HouseSurfaceView";
     MyApplication mApplication;
     int mTextColor;
-    public static int SCREEN_WIDTH,SCREEN_HEIGHT,CANVAS_HEIGHT;
+    public static int SCREEN_WIDTH,SCREEN_HEIGHT,CANVAS_HEIGHT, MAP_SECTION_WIDTH;
 
-    private int SKY_SIZE_X, SKY_SIZE_Y;
-    private int MAX_X, MIN_X, MAX_Y, MIN_Y;
-    private int VIEW_HEIGHT;
+    int SKY_SIZE_X, SKY_SIZE_Y;
+    int MAX_X, MIN_X, MAX_Y, MIN_Y;
+
     boolean mFirst = true;
     static boolean mFreed = false;
 
-    private InteractionMode mMode; // for touchevents
+    InteractionMode mMode; // for touchevents
     Matrix mMatrixSky = new Matrix(); // for calculating where to put image after pan/zoom
     Matrix mMatrixGround = new Matrix(); // for calculating where to put image after pan/zoom
     Matrix mMatrixGuy = new Matrix();
 
-    private SurfaceHolder holder;
-    private HouseCanvasDrawer houseCanvasDrawer;
-    private HouseThread houseThread;
+    SurfaceHolder mHolder;
+    HouseCanvasDrawer mHouseCanvasDrawer;
+    HouseThread mHouseThread;
 
-    private static int GROUND_HEIGHT, GUY_HEIGHT, SILHOUETTE_HEIGHT, HOUSE_HEIGHT, OFFICE_WIDTH, CLOUD_HEIGHT;
-    private static float GROUND_SCALE_FACTOR, GUY_SCALE_FACTOR, SILHOUETTE_SCALE_FACTOR, HOUSE_SCALE_FACTOR, OFFICETOP_SCALE_FACTOR,OFFICEMID_SCALE_FACTOR,OFFICEBOT_SCALE_FACTOR, CLOUD_SCALE_FACTOR;
-    private static Bitmap background;
-    private static Bitmap ground;
-    private static Bitmap guy;
-    private Bitmap silhouette;
-    private static Bitmap house;
-    private Bitmap officeTall;
-    private static Bitmap cloud1;
-    private static Office office = new Office();
+    static int GROUND_HEIGHT, GUY_HEIGHT, SILHOUETTE_HEIGHT, CLOUD_HEIGHT;
+    static float GROUND_SCALE_FACTOR, GUY_SCALE_FACTOR, SILHOUETTE_SCALE_FACTOR, CLOUD_SCALE_FACTOR;
 
-    private ScaleGestureDetector mScaleDetector;
-    private float mScaleFactor = 1.f;
 
-    private class ObjectCoordinates{
-        public float lastY = 0, backupx = 0;
-        public float lastX = 0, backupy = 0;
+    /* list of bitmaps and their coordinates, types, etc. */
+    static HashMap<Integer,UserBitmap> mUserBitmaps = new HashMap<>();
+    /* default bitmaps are things like sky, clouds, ground etc. */
+    static ArrayList<DefaultBitmap> mDefaultBitmaps = new ArrayList<>();
+    static Bitmap mSilhouette;
 
-        public void setBackupXY(float x, float y) {
-            this.backupx = x;
-            this.backupy = y;
+
+    ScaleGestureDetector mScaleDetector;
+    float mScaleFactor = 1.f;
+
+    movementCoordinates mTouchCoordinates;
+
+
+    public void updateBitmaps(HashMap<Integer, UserItem> itemsIDtoUserItems, HashMap<Integer, ItemObject> itemsIdToObject) {
+        /*might have to stop/start thread here?*/
+
+        /* update list of users bitmaps & coordinates retrieved from server */
+        for (Map.Entry<Integer, UserItem> itemIDtoUser : itemsIDtoUserItems.entrySet()) {
+            Integer itemID = itemIDtoUser.getValue().mItemID;
+            ItemObject itemObj = itemsIdToObject.get(itemID);
+            /* only draw if building(for now) & equipped */
+            if(itemObj.mType == Defines.ITEM_TYPE.BUILDING)
+            {
+                if(itemIDtoUser.getValue().mIsEquipped)
+                {
+                    String name = itemObj.mName;
+                    Integer type = itemObj.mType;
+                    Integer subType = itemObj.mSubtype;
+                    Integer width = itemObj.mWidth;
+                    Integer xCoord = itemIDtoUser.getValue().mXCoordinate;
+                    mUserBitmaps.put(itemIDtoUser.getKey(),new UserBitmap(itemID,name,xCoord,width,type,subType));
+                }
+            }
         }
-
-        public void setLastXY(float x, float y) {
-            this.lastX = x;
-            this.lastY = y;
-        }
+        LoadBitmaps loadBitmaps = new LoadBitmaps(getResources());
+        loadBitmaps.execute((Void)null);
     }
+
     private class movementCoordinates {
         public float x = 0, dx = 0;
         public float y = 0, dy = 0;
@@ -93,20 +114,9 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
             this.dx = dx;
             this.dy = dy;
         }
+
     }
 
-    ObjectCoordinates backgroundCoordinates, groundCoordinates, guyCoordinates, houseCoordinates, officeTallCoordinates;
-    ObjectCoordinates cloud1Coordinates;
-    movementCoordinates touchCoordinates;
-    Bitmap test;
-    Bitmap test1;
-    Bitmap test2;
-    Bitmap test3;
-    Bitmap test4;
-    Bitmap test5;
-    Bitmap test6;
-    Bitmap test7;
-    Bitmap test8;
     public HouseSurfaceView(Context context, AttributeSet attrs) {
         // If we scale everything to screen size of users phone,
         // then sprites and map size should all be scaled relatively to each other
@@ -124,21 +134,22 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
         SCREEN_WIDTH = displaymetrics.widthPixels;
         SCREEN_HEIGHT = displaymetrics.heightPixels;
-        SKY_SIZE_X = (int)(SCREEN_WIDTH*3.75);
+
+        /* size of sections for bitmaps to be placed at coordinates 1-36 */
+        MAP_SECTION_WIDTH = SCREEN_WIDTH/9;
+
+        SKY_SIZE_X = (int)(SCREEN_WIDTH*4);
         SKY_SIZE_Y = (int)(SCREEN_HEIGHT*1.4);
         MAX_X = 0;
         MIN_X = -(SKY_SIZE_X - SCREEN_WIDTH);
         MAX_Y = 0;
         MIN_Y = -(SKY_SIZE_Y - SCREEN_HEIGHT);
-        holder = getHolder();
-        holder.addCallback(this);
+
+        mHolder = getHolder();
+        mHolder.addCallback(this);
 
         setFocusable(true);
 
-
-//        Resources res = getResources();
-//        LoadBitmaps loadBitmaps = new LoadBitmaps(res);
-//        loadBitmaps.execute((Void) null);
 
 
 //        CalculateMatrix(true);
@@ -151,63 +162,34 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         mFreed = false;
         CANVAS_HEIGHT = this.getHeight();
 
-        houseThread = new HouseThread(holder, this);
+        mHouseThread = new HouseThread(holder, this);
 
-        LoadBitmaps reloadBitmaps = new LoadBitmaps(getResources());
-        reloadBitmaps.execute((Void)null);
+        /* for the first time loading bitmaps is called from MenuActivity once requests are in */
+        if(!mFirst)
+        {
+            Log.e(TAG, "SDLKFJSDLKFJSDLKFJ");
+            LoadBitmaps reloadBitmaps = new LoadBitmaps(getResources());
+            reloadBitmaps.execute((Void)null);
+        }
 
-
-//        this.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                if (first) {
-//                    first = false;
-//               }
-//                CalculateMatrix(true);
-//            }
-//        });
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {}
 
 
-//    private class destroySurface extends AsyncTask<String, Void, Boolean>
-//    {
-//
-//        @Override
-//        protected Boolean doInBackground(String... params) {
-//            boolean retry = true;
-//            houseThread.setRunning(false);
-//            while(retry) {
-//                try {
-//                    houseThread.join();
-//                    houseThread = null;
-//                    Log.v(TAG, "thread has joined");
-//                } catch (InterruptedException e) {
-//                    Log.e(TAG, "failed to stop thread?");
-//                    e.printStackTrace();
-//                }
-//                retry = false;
-//            }
-//            HouseSurfaceView.free();
-//            return true;
-//        }
-//    }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
 
 
         Log.v(TAG, "SURFACE DESTROYED");
-//        destroySurface ds = new destroySurface();
-//        ds.execute("");
         boolean retry = true;
-        houseThread.setRunning(false);
+        mHouseThread.setRunning(false);
         while(retry) {
             try {
-                houseThread.join();
-                houseThread = null;
+                mHouseThread.join();
+                mHouseThread = null;
                 Log.v(TAG, "thread has joined");
                 retry = false;
             } catch (InterruptedException e) {
@@ -222,148 +204,16 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         if (canvas != null) {
             canvas.save();
             canvas.scale(mScaleFactor, mScaleFactor);
-            houseCanvasDrawer.onDraw(canvas, mScaleFactor,
-                    backgroundCoordinates.lastX, backgroundCoordinates.lastY,
-                    groundCoordinates.lastX, groundCoordinates.lastY,
-                    guyCoordinates.lastX, guyCoordinates.lastY,
-                    cloud1Coordinates.lastX, cloud1Coordinates.lastY,
-                    houseCoordinates.lastX, houseCoordinates.lastY,
-                    officeTallCoordinates.lastX, officeTallCoordinates.lastY);
+            mHouseCanvasDrawer.onDraw(canvas, mScaleFactor);
             canvas.restore();
         }
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        float x, y;
-        switch (event.getAction() & MotionEvent.ACTION_MASK) {
-            case MotionEvent.ACTION_DOWN:
-//                Log.v(TAG, String.format("dimens are: x = %f, y = %f", backgroundCoordinates.lastX, backgroundCoordinates.lastY));
-                x = event.getX(); y = event.getY();
-//                Log.v(TAG, String.format("PLZ, %f, %f", x,y));
-                touchCoordinates.setXY(x, y);
-                backgroundCoordinates.setBackupXY(backgroundCoordinates.lastX, backgroundCoordinates.lastY);
-                groundCoordinates.setBackupXY(groundCoordinates.lastX,groundCoordinates.lastY);
-                guyCoordinates.setBackupXY(guyCoordinates.lastX,guyCoordinates.lastY);
-                houseCoordinates.setBackupXY(houseCoordinates.lastX,houseCoordinates.lastY);
-                officeTallCoordinates.setBackupXY(officeTallCoordinates.lastX,officeTallCoordinates.lastY);
-                cloud1Coordinates.setBackupXY(cloud1Coordinates.lastX,cloud1Coordinates.lastY);
-                mMode = InteractionMode.PAN;
-                break;
-            case MotionEvent.ACTION_MOVE:
-                if (mMode == InteractionMode.PAN) {
-                    float new_x = event.getX(); float new_y = event.getY();
-//                    Log.v(TAG, String.format("backgroundCoordinates.x and y are: %f, %f. \nnewxy are: %f, %f", touchCoordinates.x, touchCoordinates.x, new_x, new_y));
-                    touchCoordinates.setdxdy( new_x - touchCoordinates.x, new_y - touchCoordinates.y);
-
-                    MIN_Y = (int)-(SKY_SIZE_Y - CANVAS_HEIGHT/mScaleFactor);
-                    MIN_X = (int)-(SKY_SIZE_X - SCREEN_WIDTH/mScaleFactor);
-
-//                    Log.v(TAG, String.format("x and y are: %f, %f. \ndx and dy are: %f, %f", new_x, new_y, touchCoordinates.dx, touchCoordinates.dy));
-//                    Log.v(TAG, String.format("scaleFactor is: %f", mScaleFactor));
-//                    Log.v(TAG, String.format("NEW MIN_Y is: %d", MIN_Y));
-//                    Log.v(TAG, String.format("MAXY*scaleFactor is: %d", MAX_Y));
-//                    Log.v(TAG, String.format("backgroundCoordinates.backupy+touchCoordinates.dy: %f", backgroundCoordinates.backupy+touchCoordinates.dy));
-
-                    //lock the surfaceview area to move around the size of the sky width and height.
-                    if (backgroundCoordinates.backupx+touchCoordinates.dx > MAX_X) {
-                        float diff = MAX_X-backgroundCoordinates.lastX;
-                        backgroundCoordinates.lastX = backgroundCoordinates.lastX + diff;
-                        groundCoordinates.lastX = groundCoordinates.lastX + diff;
-                        guyCoordinates.lastX = guyCoordinates.lastX + diff;
-                        houseCoordinates.lastX = houseCoordinates.lastX + diff;
-                        officeTallCoordinates.lastX = officeTallCoordinates.lastX + diff;
-                        cloud1Coordinates.lastX = cloud1Coordinates.lastX + diff;
-
-                        backgroundCoordinates.backupx = backgroundCoordinates.lastX;
-                        groundCoordinates.backupx = groundCoordinates.lastX;
-                        guyCoordinates.backupx = guyCoordinates.lastX;
-                        houseCoordinates.backupx = houseCoordinates.lastX;
-                        officeTallCoordinates.backupx = officeTallCoordinates.lastX;
-                        cloud1Coordinates.backupx = cloud1Coordinates.lastX;
-                        touchCoordinates.x = new_x;
-                    } else if (backgroundCoordinates.backupx+touchCoordinates.dx < MIN_X) {
-                        float diff = MIN_X-backgroundCoordinates.lastX;
-                        backgroundCoordinates.lastX = backgroundCoordinates.lastX + diff;
-                        groundCoordinates.lastX = groundCoordinates.lastX + diff;
-                        guyCoordinates.lastX = guyCoordinates.lastX + diff;
-                        houseCoordinates.lastX = houseCoordinates.lastX + diff;
-                        officeTallCoordinates.lastX = officeTallCoordinates.lastX + diff;
-                        cloud1Coordinates.lastX = cloud1Coordinates.lastX + diff;
-
-                        backgroundCoordinates.backupx = backgroundCoordinates.lastX;
-                        groundCoordinates.backupx = groundCoordinates.lastX;
-                        guyCoordinates.backupx = guyCoordinates.lastX;
-                        houseCoordinates.backupx = houseCoordinates.lastX;
-                        officeTallCoordinates.backupx = officeTallCoordinates.lastX;
-                        cloud1Coordinates.backupx = cloud1Coordinates.lastX;
-                        touchCoordinates.x = new_x;
-                    } else {
-                        backgroundCoordinates.lastX = backgroundCoordinates.backupx+touchCoordinates.dx;
-                        groundCoordinates.lastX = groundCoordinates.backupx+touchCoordinates.dx;
-                        guyCoordinates.lastX = guyCoordinates.backupx+touchCoordinates.dx;
-                        houseCoordinates.lastX = houseCoordinates.backupx+touchCoordinates.dx;
-                        officeTallCoordinates.lastX = officeTallCoordinates.backupx+touchCoordinates.dx;
-                        cloud1Coordinates.lastX = cloud1Coordinates.backupx+touchCoordinates.dx;
-                    }
-//                    MAX_Y-(((float)MIN_Y*mScaleFactor)-MIN_Y)
-                    if (backgroundCoordinates.backupy+touchCoordinates.dy > MAX_Y) {
-                        float diff = MAX_Y-backgroundCoordinates.lastY;
-                        backgroundCoordinates.lastY = backgroundCoordinates.lastY + diff;
-                        groundCoordinates.lastY = groundCoordinates.lastY + diff;
-                        guyCoordinates.lastY = guyCoordinates.lastY + diff;
-                        houseCoordinates.lastY = houseCoordinates.lastY + diff;
-                        officeTallCoordinates.lastY = officeTallCoordinates.lastY + diff;
-                        cloud1Coordinates.lastY = cloud1Coordinates.lastY + diff;
-
-                        backgroundCoordinates.backupy = backgroundCoordinates.lastY;
-                        groundCoordinates.backupy = groundCoordinates.lastY;
-                        guyCoordinates.backupy = guyCoordinates.lastY;
-                        houseCoordinates.backupy = houseCoordinates.lastY;
-                        officeTallCoordinates.backupy = officeTallCoordinates.lastY;
-                        cloud1Coordinates.backupy = cloud1Coordinates.lastY;
-                        touchCoordinates.y = new_y;
-                    } else if (backgroundCoordinates.backupy+touchCoordinates.dy < MIN_Y) {
-                        float diff = MIN_Y-backgroundCoordinates.lastY;
-                        backgroundCoordinates.lastY = backgroundCoordinates.lastY + diff;
-                        groundCoordinates.lastY = groundCoordinates.lastY + diff;
-                        guyCoordinates.lastY = guyCoordinates.lastY + diff;
-                        houseCoordinates.lastY = houseCoordinates.lastY + diff;
-                        officeTallCoordinates.lastY = officeTallCoordinates.lastY + diff;
-                        cloud1Coordinates.lastY = cloud1Coordinates.lastY + diff;
-
-                        backgroundCoordinates.backupy = backgroundCoordinates.lastY;
-                        groundCoordinates.backupy = groundCoordinates.lastY;
-                        guyCoordinates.backupy = guyCoordinates.lastY;
-                        houseCoordinates.backupy = houseCoordinates.lastY;
-                        officeTallCoordinates.backupy = officeTallCoordinates.lastY;
-                        cloud1Coordinates.backupy = cloud1Coordinates.lastY;
-                        touchCoordinates.y = new_y;
-                    } else {
-                        backgroundCoordinates.lastY = backgroundCoordinates.backupy+touchCoordinates.dy;
-                        groundCoordinates.lastY = groundCoordinates.backupy+touchCoordinates.dy;
-                        guyCoordinates.lastY = guyCoordinates.backupy+touchCoordinates.dy;
-                        houseCoordinates.lastY = houseCoordinates.backupy+touchCoordinates.dy;
-                        officeTallCoordinates.lastY = officeTallCoordinates.backupy+touchCoordinates.dy;
-                        cloud1Coordinates.lastY = cloud1Coordinates.backupy+touchCoordinates.dy;
-                    }
-//                    CalculateMatrix(true);
-                }
-                break;
-            case MotionEvent.ACTION_UP:
-                mMode = InteractionMode.NONE;
-                // tap( calling tap method incase we decide to add in the future.);
-                break;
-        }
-        mScaleDetector.onTouchEvent(event);
-        return true;
-    }
-
     void CalculateMatrix(boolean invalidate) {
         mMatrixSky.reset(); mMatrixGround.reset(); mMatrixGuy.reset();
-        mMatrixSky.postTranslate(backgroundCoordinates.lastX, backgroundCoordinates.lastY);
-        mMatrixGround.postTranslate(groundCoordinates.lastX, groundCoordinates.lastY);
-        mMatrixGuy.postTranslate(guyCoordinates.lastX, guyCoordinates.lastY);
+//        mMatrixSky.postTranslate(backgroundCoordinates.lastX, backgroundCoordinates.lastY);
+//        mMatrixGround.postTranslate(groundCoordinates.lastX, groundCoordinates.lastY);
+//        mMatrixGuy.postTranslate(guyCoordinates.lastX, guyCoordinates.lastY);
 
     }
 
@@ -381,106 +231,97 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
             if(mFirst)
             {
                 mFirst = false;
-                // scale the background to 1.25 times the height, this makes for a scrollable up/down screen
-                background = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(mResources, R.drawable.sky_gradient4), SKY_SIZE_X/100, SKY_SIZE_Y, true);
-                Log.v(TAG, "byteCount: " + background.getByteCount() + ", allocBytes: " + background.getAllocationByteCount() + ", height + width: " + background.getHeight() + " " + background.getWidth());
 
-                // creating a scaled Bitmap reduces means reduced memory, since you dont decode the original full bitmap
+            /* Load and add default bitmaps into list */
+
+                /* scale the background to 1.25 times the height, this makes for a scrollable up/down screen */
+                Bitmap background = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(mResources, R.drawable.sky_gradient4), SKY_SIZE_X/100, SKY_SIZE_Y, true);
+//                Log.v(TAG, "byteCount: " + background.getByteCount() + ", allocBytes: " + background.getAllocationByteCount() + ", height + width: " + background.getHeight() + " " + background.getWidth());
+
+                /* reading a scaled Bitmap reduces means reduced memory, since you dont decode the original full bitmap */
                 GROUND_HEIGHT = SCREEN_HEIGHT/16;
-                ground = MyHelper.decodeSampledBitmapFromResource(mResources, R.drawable.ground2, HouseSurfaceView.GROUND_HEIGHT);
+                Bitmap ground = MyHelper.decodeSampledBitmapFromResourceByHeight(mResources, R.drawable.ground2, HouseSurfaceView.GROUND_HEIGHT);
                 GROUND_SCALE_FACTOR = (float)HouseSurfaceView.GROUND_HEIGHT/(float)ground.getHeight();
                 ground = Bitmap.createScaledBitmap(ground,(int)((float)ground.getWidth()*GROUND_SCALE_FACTOR), GROUND_HEIGHT, true);
 
-
-                OFFICE_WIDTH = (int)((float)SCREEN_HEIGHT/5);
-                office.officeTop = MyHelper.decodeSampledBitmapFromResource(mResources, R.drawable.office_top, OFFICE_WIDTH*3);
-                office.officeMiddle = MyHelper.decodeSampledBitmapFromResource(mResources, R.drawable.office_middle, OFFICE_WIDTH*3);
-                office.officeBottom = MyHelper.decodeSampledBitmapFromResource(mResources, R.drawable.office_bottom, OFFICE_WIDTH*3);
-                OFFICETOP_SCALE_FACTOR = (float)OFFICE_WIDTH/(float)office.officeTop.getWidth();
-                OFFICEMID_SCALE_FACTOR = (float)OFFICE_WIDTH/(float)office.officeMiddle.getWidth();
-                OFFICEBOT_SCALE_FACTOR = (float)OFFICE_WIDTH/(float)office.officeBottom.getWidth();
-                office.officeTop = Bitmap.createScaledBitmap(office.officeTop,OFFICE_WIDTH,(int)((float)office.officeTop.getHeight()*OFFICETOP_SCALE_FACTOR), true);
-                office.officeMiddle = Bitmap.createScaledBitmap(office.officeMiddle,OFFICE_WIDTH, (int)((float)office.officeMiddle.getHeight()*OFFICEMID_SCALE_FACTOR), true);
-                office.officeBottom = Bitmap.createScaledBitmap(office.officeBottom,OFFICE_WIDTH, (int)((float)office.officeBottom.getHeight()*OFFICEBOT_SCALE_FACTOR), true);
-
                 GUY_HEIGHT = (int)((float)SCREEN_HEIGHT/10);
-                guy = MyHelper.decodeSampledBitmapFromResource(mResources, R.drawable.ground_frog, GUY_HEIGHT);
+                Bitmap guy = MyHelper.decodeSampledBitmapFromResourceByHeight(mResources, R.drawable.ground_frog, GUY_HEIGHT);
                 GUY_SCALE_FACTOR = (float)GUY_HEIGHT/(float)guy.getHeight();
                 guy = Bitmap.createScaledBitmap(guy,(int)((float)guy.getWidth()*GUY_SCALE_FACTOR), GUY_HEIGHT, true);
 
-                SILHOUETTE_HEIGHT = (int)((float)(office.officeMiddle.getHeight()*4 + office.officeBottom.getHeight())/12);
-                silhouette = MyHelper.decodeSampledBitmapFromResource(mResources, R.drawable.silouette, SILHOUETTE_HEIGHT);
-                SILHOUETTE_SCALE_FACTOR = (float)SILHOUETTE_HEIGHT/(float) silhouette.getHeight();
-                silhouette = Bitmap.createScaledBitmap(silhouette,(int)((float) silhouette.getWidth()*SILHOUETTE_SCALE_FACTOR), SILHOUETTE_HEIGHT, true);
+                SILHOUETTE_HEIGHT = MAP_SECTION_WIDTH/2;
+                mSilhouette = MyHelper.decodeSampledBitmapFromResourceByHeight(mResources, R.drawable.silouette, SILHOUETTE_HEIGHT);
+                SILHOUETTE_SCALE_FACTOR = (float)SILHOUETTE_HEIGHT/(float) mSilhouette.getHeight();
+                mSilhouette = Bitmap.createScaledBitmap(mSilhouette,(int)((float) mSilhouette.getWidth()*SILHOUETTE_SCALE_FACTOR), SILHOUETTE_HEIGHT, true);
 
                 CLOUD_HEIGHT = SCREEN_HEIGHT/12;
-                cloud1 = MyHelper.decodeSampledBitmapFromResource(mResources, R.drawable.cloud_houseview, CLOUD_HEIGHT);
+                Bitmap cloud1 = MyHelper.decodeSampledBitmapFromResourceByHeight(mResources, R.drawable.cloud_houseview, CLOUD_HEIGHT);
                 CLOUD_SCALE_FACTOR = (float)CLOUD_HEIGHT/(float)cloud1.getHeight();
                 cloud1 = Bitmap.createScaledBitmap(cloud1,(int)((float)cloud1.getWidth()*CLOUD_SCALE_FACTOR), CLOUD_HEIGHT, true);
 
+                mDefaultBitmaps.add(new DefaultBitmap(background, Defines.DEFAULT_TYPE.BACKGROUND, - (float) ( (SKY_SIZE_X - SCREEN_WIDTH)/2 ), - (float) (SKY_SIZE_Y - CANVAS_HEIGHT) ));
+                mDefaultBitmaps.add(new DefaultBitmap(ground, Defines.DEFAULT_TYPE.GROUND, - (float) ( (SKY_SIZE_X - HouseSurfaceView.SCREEN_WIDTH)/2 ), CANVAS_HEIGHT - ground.getHeight()));
+                mDefaultBitmaps.add(new DefaultBitmap(cloud1, Defines.DEFAULT_TYPE.CLOUD1, SCREEN_WIDTH-SCREEN_WIDTH/3, SCREEN_HEIGHT/18));
+                mDefaultBitmaps.add(new DefaultBitmap(guy, Defines.DEFAULT_TYPE.GUY, (mUserBitmaps.get(4).mXCoordinate - 14)*(SCREEN_WIDTH/9), CANVAS_HEIGHT - ground.getHeight() - guy.getHeight() + ground.getHeight() / 12));
+
+            /* load appropriate bitmaps which the user owns */
+                for (UserBitmap entry : mUserBitmaps.values()) {
+                    Log.v(TAG,"ENTRY mName: " + entry.mName);
+                    String name = entry.mName;
+                    name = "bitmap_" + name.replaceAll(" ", "_").toLowerCase();
+                    int bitmapWidth =  entry.mWidth*MAP_SECTION_WIDTH;
+                    entry.mBitmap = decodeSampledBitmapFromResourceByWidth(mResources, mResources.getIdentifier(name, "drawable", MainActivity.PACKAGE_NAME), bitmapWidth);
+                    float scaleFactor = (float)bitmapWidth/(float)entry.mBitmap.getWidth();
+                    entry.mBitmap = Bitmap.createScaledBitmap(entry.mBitmap, bitmapWidth, (int)((float)entry.mBitmap.getHeight()*scaleFactor), true);
+
+                    /* set coordinates using 1-36 section x coordinates, and placing at appropriate y coordinate */
+                    entry.mCoordinates.setLastXY((entry.mXCoordinate-14)*MAP_SECTION_WIDTH, CANVAS_HEIGHT-ground.getHeight()-entry.mBitmap.getHeight());
+                }
 
 
-
-                backgroundCoordinates = new ObjectCoordinates();
-                groundCoordinates = new ObjectCoordinates();
-                guyCoordinates = new ObjectCoordinates();
-                houseCoordinates = new ObjectCoordinates();
-                officeTallCoordinates = new ObjectCoordinates();
-                cloud1Coordinates = new ObjectCoordinates();
-                touchCoordinates = new movementCoordinates();
-
-                backgroundCoordinates.lastX = - (float) ( (SKY_SIZE_X - HouseSurfaceView.SCREEN_WIDTH)/2 );
-                groundCoordinates.lastX = - (float) ( (SKY_SIZE_X - HouseSurfaceView.SCREEN_WIDTH)/2 );
-                guyCoordinates.lastX = SCREEN_WIDTH/4;
-                houseCoordinates.lastX = SCREEN_WIDTH/2 - guy.getWidth()/3;
-                officeTallCoordinates.lastX = 4;
-                cloud1Coordinates.lastX = SCREEN_WIDTH-SCREEN_WIDTH/3;
+                mTouchCoordinates = new movementCoordinates();
 
 
-                backgroundCoordinates.lastY = - (float) (SKY_SIZE_Y - CANVAS_HEIGHT);
-                groundCoordinates.lastY = CANVAS_HEIGHT - ground.getHeight();
-                guyCoordinates.lastY = CANVAS_HEIGHT - ground.getHeight() - guy.getHeight() + ground.getHeight() / 12;
-                houseCoordinates.lastY = CANVAS_HEIGHT - ground.getHeight() - office.officeTop.getHeight() - office.officeMiddle.getHeight()*2 - office.officeBottom.getHeight();
-                officeTallCoordinates.lastY = CANVAS_HEIGHT - ground.getHeight() - office.officeTop.getHeight() - office.officeMiddle.getHeight()*4 - office.officeBottom.getHeight();
-                cloud1Coordinates.lastY = SCREEN_HEIGHT/18;
                 Log.v(TAG, "HouseSurface constructor finished (loading bitmaps)");
             }
             else
             {
-                if(background == null)
+                if(mDefaultBitmaps.get(Defines.DEFAULT_TYPE.BACKGROUND).mBitmap == null)
                 {   Log.v(TAG, "bitmaps are getting reloaded");
-                    background = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(mResources, R.drawable.sky_gradient4), SKY_SIZE_X/100, SKY_SIZE_Y, true);
+                    mDefaultBitmaps.get(Defines.DEFAULT_TYPE.BACKGROUND).mBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(mResources, R.drawable.sky_gradient4), SKY_SIZE_X/100, SKY_SIZE_Y, true);
                 }
-                if(ground == null)
+                if(mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GROUND).mBitmap == null)
                 {
-                    ground = MyHelper.decodeSampledBitmapFromResource(mResources, R.drawable.ground2, GROUND_HEIGHT);
-                    ground = Bitmap.createScaledBitmap(ground,(int)((float)ground.getWidth()*GROUND_SCALE_FACTOR), GROUND_HEIGHT, true);
+                    mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GROUND).mBitmap = MyHelper.decodeSampledBitmapFromResourceByHeight(mResources, R.drawable.ground2, GROUND_HEIGHT);
+                    mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GROUND).mBitmap = Bitmap.createScaledBitmap(mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GROUND).mBitmap,
+                            (int)((float)mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GROUND).mBitmap.getWidth()*GROUND_SCALE_FACTOR), GROUND_HEIGHT, true);
                 }
-                if(guy == null)
+                if(mDefaultBitmaps.get(Defines.DEFAULT_TYPE.CLOUD1).mBitmap == null) {
+                    mDefaultBitmaps.get(Defines.DEFAULT_TYPE.CLOUD1).mBitmap = MyHelper.decodeSampledBitmapFromResourceByHeight(mResources, R.drawable.cloud_houseview, CLOUD_HEIGHT);
+                    mDefaultBitmaps.get(Defines.DEFAULT_TYPE.CLOUD1).mBitmap = Bitmap.createScaledBitmap(mDefaultBitmaps.get(Defines.DEFAULT_TYPE.CLOUD1).mBitmap,
+                            (int) ((float) mDefaultBitmaps.get(Defines.DEFAULT_TYPE.CLOUD1).mBitmap.getWidth() * CLOUD_SCALE_FACTOR), CLOUD_HEIGHT, true);
+                }
+                if(mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GUY).mBitmap == null)
                 {
-                    guy = MyHelper.decodeSampledBitmapFromResource(mResources, R.drawable.ground_frog, GUY_HEIGHT);
-                    guy = Bitmap.createScaledBitmap(guy,(int)((float)guy.getWidth()*GUY_SCALE_FACTOR), GUY_HEIGHT, true);
+                    mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GUY).mBitmap = MyHelper.decodeSampledBitmapFromResourceByHeight(mResources, R.drawable.ground_frog, GUY_HEIGHT);
+                    mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GUY).mBitmap = Bitmap.createScaledBitmap(mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GUY).mBitmap,
+                            (int)((float)mDefaultBitmaps.get(Defines.DEFAULT_TYPE.GUY).mBitmap.getWidth()*GUY_SCALE_FACTOR), GUY_HEIGHT, true);
                 }
-                if(office.officeBottom == null)
-                {
-                    office.officeBottom = MyHelper.decodeSampledBitmapFromResource(mResources, R.drawable.office_bottom, OFFICE_WIDTH*3);
-                    office.officeBottom = Bitmap.createScaledBitmap(office.officeBottom,OFFICE_WIDTH, (int)((float)office.officeBottom.getHeight()*OFFICEBOT_SCALE_FACTOR), true);
+
+                for (UserBitmap bitmap : mUserBitmaps.values()) {
+                    if(bitmap.mBitmap == null)
+                    {
+                        String name = bitmap.mName;
+                        name = "bitmap_" + name.replaceAll(" ", "_").toLowerCase();
+                        int bitmapWidth =  bitmap.mWidth*MAP_SECTION_WIDTH;
+                        bitmap.mBitmap = decodeSampledBitmapFromResourceByWidth(mResources, mResources.getIdentifier(name, "drawable", MainActivity.PACKAGE_NAME), bitmapWidth);
+                        float scaleFactor = (float)bitmapWidth/(float)bitmap.mBitmap.getWidth();
+                        bitmap.mBitmap = Bitmap.createScaledBitmap(bitmap.mBitmap, bitmapWidth, (int)((float)bitmap.mBitmap.getHeight()*scaleFactor), true);
+                    }
+
                 }
-                if(office.officeMiddle == null)
-                {
-                    office.officeMiddle = MyHelper.decodeSampledBitmapFromResource(mResources, R.drawable.office_middle, OFFICE_WIDTH*3);
-                    office.officeMiddle = Bitmap.createScaledBitmap(office.officeMiddle,OFFICE_WIDTH, (int)((float)office.officeMiddle.getHeight()*OFFICEMID_SCALE_FACTOR), true);
-                }
-                if(office.officeTop == null)
-                {
-                    office.officeTop = MyHelper.decodeSampledBitmapFromResource(mResources, R.drawable.office_top, OFFICE_WIDTH*3);
-                    office.officeTop = Bitmap.createScaledBitmap(office.officeTop,OFFICE_WIDTH,(int)((float)office.officeTop.getHeight()*OFFICETOP_SCALE_FACTOR), true);
-                }
-                if(cloud1 == null)
-                {
-                    cloud1 = MyHelper.decodeSampledBitmapFromResource(mResources, R.drawable.cloud_houseview, CLOUD_HEIGHT);
-                    cloud1 = Bitmap.createScaledBitmap(cloud1,(int)((float)cloud1.getWidth()*CLOUD_SCALE_FACTOR), CLOUD_HEIGHT, true);
-                }
+
+
                 Log.v(TAG, "Done reloading bitmaps into ram");
             }
 
@@ -494,30 +335,169 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
             /* check we havent freed bitmaps (they arent null) before proceeding */
             if(!mFreed)
             {
-                houseCanvasDrawer = new HouseCanvasDrawer(  background,
-                        cloud1,
-                        ground,
-                        guy,
-                        office,
-                        silhouette,
+                mHouseCanvasDrawer = new HouseCanvasDrawer(  mUserBitmaps, mDefaultBitmaps, mSilhouette,
                         SCREEN_WIDTH,CANVAS_HEIGHT,
                         mApplication.pixelFont, mTextColor
                 );
-                if(houseThread != null)
+                if(mHouseThread != null)
                 {
-                    if(!houseThread.isRunning())
+                    if(!mHouseThread.isRunning())
                     {
-                        houseThread.start();
+                        mHouseThread.start();
                         Log.v(TAG, "Thread has started");
-                        houseThread.setRunning(true);
+                        mHouseThread.setRunning(true);
                     }
                 }
                 else
                 {
-                    Log.v(TAG, "houseThread is null, probably left houseview previously");
+                    Log.v(TAG, "mHouseThread is null, probably left houseview previously");
                 }
             }
         }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        float x, y;
+        float backgroundCoordinates_backupX, backgroundCoordinates_backupY;
+        float backgroundCoordinates_lastX, backgroundCoordinates_lastY;
+        backgroundCoordinates_backupX = mDefaultBitmaps.get(Defines.DEFAULT_TYPE.BACKGROUND).mCoordinates.backupx;
+        backgroundCoordinates_backupY = mDefaultBitmaps.get(Defines.DEFAULT_TYPE.BACKGROUND).mCoordinates.backupy;
+        backgroundCoordinates_lastX = mDefaultBitmaps.get(Defines.DEFAULT_TYPE.BACKGROUND).mCoordinates.lastX;
+        backgroundCoordinates_lastY = mDefaultBitmaps.get(Defines.DEFAULT_TYPE.BACKGROUND).mCoordinates.lastY;
+
+        switch (event.getAction() & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_DOWN:
+                x = event.getX(); y = event.getY();
+                mTouchCoordinates.setXY(x, y);
+
+                /* remember the last coordinates */
+                for(UserBitmap userBitmap : mUserBitmaps.values())
+                {
+                    userBitmap.mCoordinates.setBackupXY();
+                }
+                for(DefaultBitmap bitmap : mDefaultBitmaps)
+                {
+                    bitmap.mCoordinates.setBackupXY();
+                }
+                mMode = InteractionMode.PAN;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (mMode == InteractionMode.PAN) {
+                    float new_x = event.getX(); float new_y = event.getY();
+//                    Log.v(TAG, String.format("backgroundCoordinates.x and y are: %f, %f. \nnewxy are: %f, %f", mTouchCoordinates.x, mTouchCoordinates.x, new_x, new_y));
+                    mTouchCoordinates.setdxdy( new_x - mTouchCoordinates.x, new_y - mTouchCoordinates.y);
+
+                    /* calculate new MIN_X/MIN_Y (skyarea max/min) based on scaling. */
+                    MIN_Y = (int)-(SKY_SIZE_Y - CANVAS_HEIGHT/mScaleFactor);
+                    MIN_X = (int)-(SKY_SIZE_X - SCREEN_WIDTH/mScaleFactor);
+
+//                    Log.v(TAG, String.format("x and y are: %f, %f. \ndx and dy are: %f, %f", new_x, new_y, mTouchCoordinates.dx, mTouchCoordinates.dy));
+//                    Log.v(TAG, String.format("scaleFactor is: %f", mScaleFactor));
+//                    Log.v(TAG, String.format("NEW MIN_Y is: %d", MIN_Y));
+//                    Log.v(TAG, String.format("MAXY*scaleFactor is: %d", MAX_Y));
+//                    Log.v(TAG, String.format("backgroundCoordinates.backupy+mTouchCoordinates.dy: %f", backgroundCoordinates.backupy+mTouchCoordinates.dy));
+
+                    //lock the surfaceview area to move around the size of the sky width and height.
+                    if (backgroundCoordinates_backupX+ mTouchCoordinates.dx > MAX_X)
+                    {
+                        float diff = MAX_X-backgroundCoordinates_lastX;
+
+                        for(DefaultBitmap bitmap : mDefaultBitmaps)
+                        {
+                            bitmap.mCoordinates.lastX = bitmap.mCoordinates.lastX + diff;
+                            bitmap.mCoordinates.backupx = bitmap.mCoordinates.lastX;
+                        }
+                        for(UserBitmap userBitmap : mUserBitmaps.values())
+                        {
+                            userBitmap.mCoordinates.lastX = userBitmap.mCoordinates.lastX + diff;
+                            userBitmap.mCoordinates.backupx = userBitmap.mCoordinates.lastX;
+                        }
+                        mTouchCoordinates.x = new_x;
+                    }
+                    else if (backgroundCoordinates_backupX+ mTouchCoordinates.dx < MIN_X)
+                    {
+                        float diff = MIN_X-backgroundCoordinates_lastX;
+
+                        for(DefaultBitmap bitmap : mDefaultBitmaps)
+                        {
+                            bitmap.mCoordinates.lastX = bitmap.mCoordinates.lastX + diff;
+                            bitmap.mCoordinates.backupx = bitmap.mCoordinates.lastX;
+                        }
+                        for(UserBitmap userBitmap : mUserBitmaps.values())
+                        {
+                            userBitmap.mCoordinates.lastX = userBitmap.mCoordinates.lastX + diff;
+                            userBitmap.mCoordinates.backupx = userBitmap.mCoordinates.lastX;
+                        }
+
+                        mTouchCoordinates.x = new_x;
+                    }
+                    else
+                    {
+                        for(UserBitmap userBitmap : mUserBitmaps.values())
+                        {
+                            userBitmap.mCoordinates.lastX = userBitmap.mCoordinates.backupx + mTouchCoordinates.dx;
+                        }
+                        for(DefaultBitmap bitmap : mDefaultBitmaps)
+                        {
+                            bitmap.mCoordinates.lastX = bitmap.mCoordinates.backupx + mTouchCoordinates.dx;
+                        }
+                    }
+//                    MAX_Y-(((float)MIN_Y*mScaleFactor)-MIN_Y)
+                    if (backgroundCoordinates_backupY+ mTouchCoordinates.dy > MAX_Y)
+                    {
+                        float diff = MAX_Y-backgroundCoordinates_lastY;
+
+                        for(DefaultBitmap bitmap : mDefaultBitmaps)
+                        {
+                            bitmap.mCoordinates.lastY = bitmap.mCoordinates.lastY + diff;
+                            bitmap.mCoordinates.backupy = bitmap.mCoordinates.lastY;
+                        }
+                        for(UserBitmap userBitmap : mUserBitmaps.values())
+                        {
+                            userBitmap.mCoordinates.lastY = userBitmap.mCoordinates.lastY + diff;
+                            userBitmap.mCoordinates.backupy = userBitmap.mCoordinates.lastY;
+                        }
+                        mTouchCoordinates.y = new_y;
+                    }
+                    else if (backgroundCoordinates_backupY+ mTouchCoordinates.dy < MIN_Y)
+                    {
+                        float diff = MIN_Y-backgroundCoordinates_lastY;
+
+                        for(DefaultBitmap bitmap : mDefaultBitmaps)
+                        {
+                            bitmap.mCoordinates.lastY = bitmap.mCoordinates.lastY + diff;
+                            bitmap.mCoordinates.backupy = bitmap.mCoordinates.lastY;
+                        }
+                        for(UserBitmap userBitmap : mUserBitmaps.values())
+                        {
+                            userBitmap.mCoordinates.lastY = userBitmap.mCoordinates.lastY + diff;
+                            userBitmap.mCoordinates.backupy = userBitmap.mCoordinates.lastY;
+                        }
+
+                        mTouchCoordinates.y = new_y;
+                    }
+                    else
+                    {
+                        for(DefaultBitmap bitmap : mDefaultBitmaps)
+                        {
+                            bitmap.mCoordinates.lastY = bitmap.mCoordinates.backupy + mTouchCoordinates.dy;
+                        }
+                        for(UserBitmap userBitmap : mUserBitmaps.values())
+                        {
+                            userBitmap.mCoordinates.lastY = userBitmap.mCoordinates.backupy + mTouchCoordinates.dy;
+                        }
+                    }
+//                    CalculateMatrix(true);
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                mMode = InteractionMode.NONE;
+                // tap( calling tap method incase we decide to add in the future.);
+                break;
+        }
+        mScaleDetector.onTouchEvent(event);
+        return true;
     }
 
     private class ReloadBitmaps extends AsyncTask<Void, Void, Void>
@@ -541,41 +521,31 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
     }
     static public void free() {
-        mFreed = true;
         // fix memory leak issues..
+        mFreed = true;
+
         Log.v(TAG, "free() bitmaps called");
-        if(background!=null) {
-            background.recycle();
-            background =null;
+        for (UserBitmap entry : mUserBitmaps.values()) {
+            if(entry.mBitmap != null)
+            {
+                entry.mBitmap.recycle();
+                entry.mBitmap=null;
+            }
         }
-        if(ground!=null) {
-            ground.recycle();
-            ground = null;
+        for (DefaultBitmap bitmap : mDefaultBitmaps) {
+            if(bitmap.mBitmap != null)
+            {
+                bitmap.mBitmap.recycle();
+                bitmap.mBitmap=null;
+            }
         }
-        if(guy!=null) {
-            guy.recycle();
-            guy = null;
+        if(mSilhouette != null)
+        {
+            mSilhouette.recycle();
+            mSilhouette=null;
         }
-        if(house!=null) {
-            house.recycle();
-            house = null;
-        }
-        if(cloud1!=null) {
-            cloud1.recycle();
-            cloud1 = null;
-        }
-        if(office.officeMiddle!= null) {
-            office.officeMiddle.recycle();
-            office.officeMiddle = null;
-        }
-        if(office.officeTop!= null) {
-            office.officeTop.recycle();
-            office.officeTop = null;
-        }
-        if(office.officeBottom!= null) {
-            office.officeBottom.recycle();
-            office.officeBottom = null;
-        }
+
+
     }
 
     private class ScaleListener extends

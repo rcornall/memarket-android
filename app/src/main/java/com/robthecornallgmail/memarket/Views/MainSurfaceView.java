@@ -46,7 +46,7 @@ public class MainSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 //        this.setZOrderOnTop(true);
 
         holder = getHolder();
-//        holder.setFormat(PixelFormat.TRANSPARENT);
+//        mHolder.setFormat(PixelFormat.TRANSPARENT);
         holder.addCallback(this);
 
         setFocusable(true);
@@ -89,20 +89,20 @@ public class MainSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             e.printStackTrace();
         }
         Log.v(TAG, "MainSurfaceView surfaceCreated()");
-        background = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.start_background, SCREEN_HEIGHT);
+        background = MyHelper.decodeSampledBitmapFromResourceByHeight(getResources(), R.drawable.start_background, SCREEN_HEIGHT);
         background = Bitmap.createScaledBitmap(background,SCREEN_WIDTH,SCREEN_HEIGHT, true);
 
         final int MOON_HEIGHT = SCREEN_HEIGHT/9;
-        moon = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.moon,MOON_HEIGHT);
+        moon = MyHelper.decodeSampledBitmapFromResourceByHeight(getResources(), R.drawable.moon,MOON_HEIGHT);
         float SCALE_FACTOR = (float)MOON_HEIGHT/(float)moon.getHeight();
         moon = Bitmap.createScaledBitmap(moon, (int)((float)moon.getWidth()*SCALE_FACTOR), MOON_HEIGHT, true);
 
         final int STARS_HEIGHT = (int) (SCREEN_HEIGHT*0.9);
-        stars = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.moving_stars_cutoff, STARS_HEIGHT);
+        stars = MyHelper.decodeSampledBitmapFromResourceByHeight(getResources(), R.drawable.moving_stars_cutoff, STARS_HEIGHT);
         SCALE_FACTOR = (float)STARS_HEIGHT/(float)stars.getHeight();
         stars = Bitmap.createScaledBitmap(stars, (int)((float)stars.getWidth()*SCALE_FACTOR), STARS_HEIGHT, true);
 
-        clouds_front = MyHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.clouds, SCREEN_HEIGHT);
+        clouds_front = MyHelper.decodeSampledBitmapFromResourceByHeight(getResources(), R.drawable.clouds, SCREEN_HEIGHT);
         clouds_front = Bitmap.createScaledBitmap(clouds_front, SCREEN_WIDTH, SCREEN_HEIGHT, true);
         clouds_front = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.clouds),SCREEN_WIDTH,SCREEN_HEIGHT, true);
 
@@ -135,12 +135,12 @@ public class MainSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 //        public void run() {
 //            spriteClouds = new MainCanvasDrawer(this, movingClouds);
 //            while (isItOK ) {
-//                if (!holder.getSurface().isValid()) {
+//                if (!mHolder.getSurface().isValid()) {
 //                    continue;
 //                }
-//                Canvas c = holder.lockCanvas();
+//                Canvas c = mHolder.lockCanvas();
 //                drawStuff(c);
-//                holder.unlockCanvasAndPost(c);
+//                mHolder.unlockCanvasAndPost(c);
 //
 //            }
 //        }
