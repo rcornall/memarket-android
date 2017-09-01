@@ -1,8 +1,9 @@
-**********Server Stuff
-    digitalocean 5$/month, php-fpm, upgrade to PHP 7.0, Nginx, then caching with redis
-    43434 63420
-    (ALL FINISHED)
+open beta testing on the play store
 
+eventually make website/mailserver  and domain @mememarket.ca
+namecheap acc. mememarket.ca
+
+graph datetime not synced with where the users are
 
 ******add up All values (overall traffic) and get relative stocks from that (sandys idea)
 
@@ -23,5 +24,10 @@ UI / DESIGN:
 
 
 
+
+**********Server Stuff
+    digitalocean 5$/month, php-fpm, upgrade to PHP 7.0, Nginx, then caching with redis
+    43434 63420
+    (ALL FINISHED)
 
 COULD USE SELENIUM AS A BACKUP FOR GETTING TRENDS DATA
