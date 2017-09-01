@@ -1,28 +1,25 @@
-add up All values (overall traffic) and get relative stocks from that (sandys idea)
+**********Server Stuff
+    digitalocean 5$/month, php-fpm, upgrade to PHP 7.0, Nginx, then caching with redis
+    43434 63420
+    (ALL FINISHED)
 
 
+******add up All values (overall traffic) and get relative stocks from that (sandys idea)
 
 
+******view other players houses******
 
 
-
-***view other players houses***
-
-
-*****Chat system*****
-unlock chat emotes using money
+******Chat system******
+    unlock chat emotes using money
 
 ******** (+) add new meme right of edit text, ************
-maintain list of newly submitted memes, users can vote on what to keep.
-drop oldest/least relevant meme
+    maintain list of newly submitted memes, users can vote on what to keep.
+    drop oldest/least relevant meme
 
 UI / DESIGN:
 * like twitch app more spacing for settings button, make them white or grey
 * search bar could pop up new full-screen dialog with recent searches
-* black on bottom tab buttons bar
-* get rid of divider lines in listfragment (minimalist)
-* buy and sell buttons bigger and more subtle background color
-
 
 
 
