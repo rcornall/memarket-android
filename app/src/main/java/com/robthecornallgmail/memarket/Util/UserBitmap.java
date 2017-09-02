@@ -15,12 +15,16 @@ public class UserBitmap {
     public Integer mType;
     public Integer mSubtype;
     public ObjectCoordinates mCoordinates;
-    public UserBitmap(Integer itemID, String name, Integer xCoord, Integer width, Integer type, Integer subtype)
+    public Integer mBitmapWidth;
+    public Integer mBitmapHeight;
+
+    public UserBitmap(Integer itemID, String name, Integer xCoord, Integer width, Integer bitmapWidth, Integer type, Integer subtype)
     {
         mItemID = itemID;
         mName = name;
         mXCoordinate = xCoord;
         mWidth = width;
+        mBitmapWidth = bitmapWidth;
         mType = type;
         mSubtype = subtype;
         mCoordinates = new ObjectCoordinates(0,0);

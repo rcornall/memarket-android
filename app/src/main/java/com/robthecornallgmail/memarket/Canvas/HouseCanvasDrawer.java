@@ -127,7 +127,8 @@ public class HouseCanvasDrawer {
             {
                 float nextX = bitmap.mCoordinates.lastX;
                 while (nextX < (int)((float)SCREEN_WIDTH/scaleFactor)){
-                    if (nextX+mBackgroundWidth >= 0) {
+                    if (nextX+mBackgroundWidth >= 0)
+                    {
                         canvas.drawBitmap(bitmap.mBitmap, nextX, bitmap.mCoordinates.lastY, null);
                     }
                     nextX+=mBackgroundWidth;
@@ -137,7 +138,8 @@ public class HouseCanvasDrawer {
             {
                 float nextX = bitmap.mCoordinates.lastX;
                 while (nextX < (int)((float)SCREEN_WIDTH/scaleFactor)){
-                    if (nextX+mGroundWidth >= 0) {
+                    if (nextX+mGroundWidth >= 0)
+                    {
                         canvas.drawBitmap(bitmap.mBitmap, nextX, bitmap.mCoordinates.lastY, null);
                     }
                     nextX+=mGroundWidth;

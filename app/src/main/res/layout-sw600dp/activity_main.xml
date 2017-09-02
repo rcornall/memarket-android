@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.robthecornallgmail.memarket.Activities.MainActivity">
+    <RelativeLayout
+        android:id="@+id/mainRelativeView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+
+        android:layout_gravity="center_horizontal">
+        <!--<com.robthecornallgmail.memarket.Views.MainSurfaceView-->
+            <!--android:id="@+id/mainSurfaceView"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent" />-->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:background="?android:selectableItemBackground"
+            android:id="@+id/startButton"
+            android:text="START"
+            android:textAllCaps="false"
+            android:textSize="20sp"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true" />
+        <!--<ImageView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:scaleType="centerCrop"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:src="@drawable/start_background"/>-->
+
+
+        <TextView
+            android:textColor="#ffffff"
+            android:id="@+id/titleText"
+            android:textSize="55sp"
+            android:layout_width="230dp"
+            android:layout_height="wrap_content"
+            android:lines="2"
+            android:layout_marginBottom="10dp"
+            android:paddingLeft="5dp"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:text="Meme Market"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="18dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_below="@id/titleText">
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <EditText
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/titleText"
+                    android:textSize="18sp"
+                    android:hint="@string/prompt_email"
+                    android:maxLines="2"
+                    android:layout_centerHorizontal="true"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
+                    android:id="@+id/login_email" />
+            </android.support.design.widget.TextInputLayout>
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <EditText
+                    android:layout_width="450dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/login_email"
+                    android:textSize="18sp"
+                    android:layout_gravity="center"
+                    android:maxLines="1"
+                    android:hint="@string/prompt_password"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="10dp"
+                    android:id="@+id/login_password"
+                    android:inputType="textPassword"/>
+            </android.support.design.widget.TextInputLayout>
+            <Button
+                android:background="?android:selectableItemBackground"
+                android:id="@+id/login_button"
+                android:text="LOGIN"
+                android:textAllCaps="false"
+                android:layout_gravity="center"
+                android:textSize="19sp"
+                android:layout_width="350dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/login_password"
+                android:layout_centerHorizontal="true"/>
+        </LinearLayout>
+
+
+        <!--<ImageButton-->
+            <!--android:id="@+id/pixelPepe"-->
+            <!--android:layout_width="100dp"-->
+            <!--android:layout_height="90dp"-->
+            <!--app:srcCompat="@drawable/pixel_pepe"-->
+            <!--android:scaleType="fitXY"-->
+            <!--android:background="@android:color/transparent"-->
+            <!--android:layout_marginTop="10dp"-->
+            <!--android:layout_marginBottom="10dp"-->
+            <!--android:layout_below="@+id/titleText"-->
+            <!--android:layout_centerHorizontal="true" />-->
+
+    </RelativeLayout>
+    <!--<RelativeLayout-->
+        <!--android:id="@+id/black_fog"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:alpha="0.5"-->
+        <!--android:visibility="gone"-->
+        <!--android:background="#000000">-->
+
+    <!--</RelativeLayout>-->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ProgressBar
+            android:id="@+id/login_progress"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone" />
+    </RelativeLayout>
+    <!--<RelativeLayout-->
+        <!--android:id="@+id/secondRelativeView"-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="wrap_content"-->
+
+        <!--android:layout_gravity="center_horizontal">-->
+    <!--<android.support.v7.widget.AppCompatImageButton-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:scaleType="centerCrop"-->
+        <!--android:layout_above="@+id/bottomSpace"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:id="@+id/mainFrogWalking"-->
+        <!--android:background="@drawable/main_walking_animation" />-->
+    <!--<LinearLayout-->
+        <!--android:id="@+id/bottomSpace"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:orientation="horizontal"-->
+        <!--android:layout_height="30dp"-->
+        <!--android:layout_alignParentBottom="true">-->
+
+    <!--</LinearLayout>-->
+    <!--</RelativeLayout>-->
+</android.support.design.widget.CoordinatorLayout>

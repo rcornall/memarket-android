@@ -44,6 +44,9 @@ public final class Defines
         public static int GROUND = 1;
         public static int CLOUD1 = 2;
         public static int GUY = 3;
+        public static int INSIDE_BUILDING = 4;
+        public static int INSIDE_BUILDING_TOP = 5;
+
     }
 }
 

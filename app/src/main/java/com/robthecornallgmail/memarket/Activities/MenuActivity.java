@@ -3,7 +3,6 @@ package com.robthecornallgmail.memarket.Activities;
 import android.app.ActivityManager;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,7 +14,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.SparseArray;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -66,11 +64,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import com.robthecornallgmail.memarket.Util.Defines;
+import com.robthecornallgmail.memarket.Util.UserBitmap;
 import com.robthecornallgmail.memarket.Util.UserItem;
 import com.robthecornallgmail.memarket.Util.UserRow;
 import com.robthecornallgmail.memarket.Views.HouseSurfaceView;
 import com.robthecornallgmail.memarket.Fragments.LeaderboardDialogFragment;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+import com.robthecornallgmail.memarket.Views.InsideHouseSurfaceView;
 import com.squareup.picasso.Picasso;
 
 import static java.lang.Thread.sleep;
@@ -78,7 +77,9 @@ import static java.lang.Thread.sleep;
 public class MenuActivity extends AppCompatActivity implements ListMemesFragment.OnListFragmentInteractionListener,
         MemeDetailsFragment.OnFragmentInteractionListener,
         LeaderboardDialogFragment.OnLeaderboardFragmentInteractionListener,
-        BagGridFragment.OnBagGridInteractionListener
+        BagGridFragment.OnBagGridInteractionListener,
+
+        HouseSurfaceView.OnBuildingInteractionListener
 {
     private static long timeTillUpdate = 900000;
     private static CountDownTimer mFifteenMinTimer;
@@ -117,6 +118,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     BagGridFragment mBagGridFragment;
 
     HouseSurfaceView mHouseSurfaceView;
+    InsideHouseSurfaceView mInsideHouseSurfaceView;
     // map meme IDs to their respective past Data from server.
     private Map<Integer, MemePastData> mGraphDataObjectMap = new HashMap<>();
 
@@ -141,6 +143,8 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 //        mGraphView = (GraphView) findViewById(R.id.graph);
+        mInsideHouseSurfaceView = (InsideHouseSurfaceView) findViewById(R.id.inside_house_surface_view);
+        mInsideHouseSurfaceView.setVisibility(View.GONE);
         mHouseSurfaceView = (HouseSurfaceView) findViewById(R.id.house_surface_view);
 
         mSettingsWheelButton = (Button) findViewById(R.id.settings_button);
@@ -242,6 +246,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 mHouseSurfaceView.free();
 
                 mHouseSurfaceView.setVisibility(View.INVISIBLE);
+                mInsideHouseSurfaceView.setVisibility(View.INVISIBLE);
                 homeHighlight.setVisibility(View.INVISIBLE);
                 storeHighlight.setVisibility(View.INVISIBLE);
                 findMemesHighlight.setVisibility(View.VISIBLE);
@@ -272,6 +277,8 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 //                mSearchView.setVisibility(View.GONE);
                 searchBar.setVisibility(View.GONE);
                 mHouseSurfaceView.setVisibility(View.VISIBLE);
+                mInsideHouseSurfaceView.setVisibility(View.INVISIBLE);
+
                 dragDownButton.setAlpha(0.95f);
 
 
@@ -570,8 +577,18 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
             fm.popBackStackImmediate();
             mSearchView.setVisibility(View.VISIBLE);
         } else {
-            moveTaskToBack(true);
+            /* hide insidehouse view if visible */
+            if(mInsideHouseSurfaceView.getVisibility() == View.VISIBLE)
+            {
+                mInsideHouseSurfaceView.setVisibility(View.GONE);
+                mHouseSurfaceView.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                moveTaskToBack(true);
+            }
         }
+
     }
 
 //    @Override
@@ -631,6 +648,14 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         Log.v(TAG, "OnBagGridInteraction called ");
     }
 
+    /* create Inside Building view with users building type, employees */
+    @Override
+    public void OnBuildingInteraction(UserBitmap userBitmap){
+        Log.v(TAG, "OnBuildingInteraction() : " + userBitmap.mName.toString());
+        mHouseSurfaceView.setVisibility(View.GONE);
+        mInsideHouseSurfaceView.updateUserBitmap(userBitmap);
+        mInsideHouseSurfaceView.setVisibility(View.VISIBLE);
+    }
 
 // TODO: 03/08/17 NEED TO MAKE SURE ONLY ONE INSTANCE OF THIS THREAD IS RUNNING AT ONCE BEFORE STARTING A NEW ONE 
 

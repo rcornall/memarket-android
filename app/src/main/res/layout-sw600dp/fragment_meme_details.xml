@@ -1,0 +1,260 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.robthecornallgmail.memarket.Fragments.MemeDetailsFragment">
+
+
+
+
+
+<LinearLayout
+    android:id="@+id/details_linear_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+
+
+    <RelativeLayout
+        android:id="@+id/topLayoutDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+    >
+
+        <ImageButton
+            android:id="@+id/memeIcon"
+            app:srcCompat="@drawable/icon_high_guy_meme"
+            android:background="@android:drawable/picture_frame"
+            android:backgroundTint="@color/pictureFrame"
+            android:layout_marginStart="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:scaleType="centerCrop"/>
+        <TextView
+            android:id="@+id/detail_meme_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:textColor="@color/greenWhite"
+            android:text="Name of meme"
+            />
+
+        <TextView
+            android:id="@+id/detail_meme_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/memeIcon"
+            android:layout_toLeftOf="@id/memeIcon"
+            android:text="$0"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:textColor="@color/monokaiGreen"
+            />
+
+
+        <TextView
+            android:id="@+id/dataFromServer"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_below="@id/detail_meme_title"
+            android:text="Loading a description of the meme from knowyourmeme.com: description description description description description description description description ."
+
+            android:minLines="2"
+            android:maxLines="6"
+            android:ellipsize="none"
+            android:scrollHorizontally="false"
+            android:textSize="10sp"
+            android:textColor="@color/greenWhite"
+            android:layout_toLeftOf="@+id/memeIcon"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:id="@+id/YouOwnSentence"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/memeIcon"
+            android:layout_marginBottom="6dp"
+            android:text="Shares Currently Held "
+            android:textColor="@color/greenWhite"
+            android:textStyle="bold"/>
+        <TextView
+            android:id="@+id/stocks_owned"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/YouOwnSentence"
+            android:layout_alignBottom="@id/memeIcon"
+            android:layout_marginBottom="6dp"
+            android:layout_marginLeft="2dp"
+            android:text="0"
+            android:textStyle="bold"
+            android:textColor="@color/monokaiGreen"/>
+
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        >
+
+
+        <LinearLayout
+            android:id="@+id/linearLayoutButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:layout_marginBottom="10dp">
+
+            <Button
+            android:id="@+id/sell_stock_button"
+            android:background="?attr/selectableItemBackground"
+            android:text="SELL"
+            android:clickable="true"
+            android:focusable="true"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_marginLeft="13dp"
+            android:layout_marginStart="13dp"
+            android:layout_marginRight="1dp"
+            android:layout_weight="50" />
+
+            <View
+            android:layout_width="1dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"/>
+            <Button
+            android:id="@+id/buy_stock_button"
+            android:background="?attr/selectableItemBackground"
+            android:text="BUY"
+            android:clickable="true"
+            android:focusable="true"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_marginRight="12dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginLeft="5dp"
+            android:layout_weight="50" />
+        </LinearLayout>
+
+        <com.jjoe64.graphview.GraphView
+            android:layout_width="match_parent"
+            android:layout_height="200dip"
+            android:id="@+id/graph"
+            android:layout_below="@+id/linearLayoutGraphTitle"
+            android:layout_alignParentBottom="true"
+            android:layout_alignLeft="@+id/linearLayoutGraphButtons"
+            android:layout_alignStart="@+id/linearLayoutGraphButtons"
+            android:layout_marginLeft="33dp"
+            android:layout_marginStart="33dp" />
+        <LinearLayout
+            android:id="@+id/linearLayoutGraphTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@+id/graph"
+            android:layout_alignLeft="@+id/graph"
+            android:layout_below="@+id/linearLayoutButtons"
+            android:gravity="center">
+
+            <TextView
+                android:text="Loading..."
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:id="@+id/graphTitle"
+                android:textColor="@color/monokaiGreen"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/linearLayoutGraphButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/graph"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+
+            android:layout_alignParentBottom="true"
+            android:orientation="vertical">
+            <ToggleButton
+                android:textOn="DAY"
+                android:textOff="DAY"
+                android:layout_width="30dp"
+                android:layout_height="wrap_content"
+                style="@style/graph_button_style"
+                android:id="@+id/DayButton"
+                android:background="@drawable/button_with_border"
+                android:layout_weight="25"
+                />
+            <View
+                android:layout_width="30dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="@color/colorMyBetweenGrey"/>
+
+            <ToggleButton
+                android:textOn="WEEK"
+                android:textOff="WEEK"
+                android:layout_width="30dp"
+                android:layout_height="wrap_content"
+                style="@style/graph_button_style"
+                android:id="@+id/WeekButton"
+                android:background="@drawable/button_with_border"
+                android:layout_weight="25"
+                />
+            <View
+                android:layout_width="30dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="@color/colorMyBetweenGrey"/>
+            <ToggleButton
+                android:textOn="MONTH"
+                android:textOff="MONTH"
+                android:layout_width="30dp"
+                android:layout_height="wrap_content"
+                style="@style/graph_button_style"
+                android:textSize="8sp"
+                android:id="@+id/MonthButton"
+                android:background="@drawable/button_with_border"
+                android:layout_weight="25"
+                />
+            <View
+                android:layout_width="30dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="@color/colorMyBetweenGrey"/>
+            <ToggleButton
+                android:textOn="YEAR"
+                android:textOff="YEAR"
+                android:layout_width="30dp"
+                android:layout_height="wrap_content"
+                style="@style/graph_button_style"
+                android:id="@+id/YearButton"
+                android:background="@drawable/button_with_border"
+                android:layout_weight="25"
+                />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+
+</LinearLayout>
+
+    <ImageView
+    android:id="@+id/expanded_image"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="invisible" />
+</FrameLayout>

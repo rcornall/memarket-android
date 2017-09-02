@@ -3,6 +3,7 @@ package com.robthecornallgmail.memarket.Threads;
 import android.graphics.Canvas;
 import android.util.Log;
 import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 
 import com.robthecornallgmail.memarket.Views.HouseSurfaceView;
 import com.robthecornallgmail.memarket.Views.MainSurfaceView;
@@ -14,28 +15,33 @@ import com.robthecornallgmail.memarket.Views.MainSurfaceView;
 public class HouseThread extends Thread {
     String TAG = "HouseThread";
     private final SurfaceHolder surfaceHolder;
-    private HouseSurfaceView houseSurfaceView;
+    private SurfaceView mHouseSurfaceView;
     private Canvas canvas;
     long startTime, doneTime;
     private volatile boolean running = false;
 
-    public HouseThread(SurfaceHolder surfaceHolder, HouseSurfaceView houseSurfaceView) {
+    public HouseThread(SurfaceHolder surfaceHolder, SurfaceView houseSurfaceView) {
         super();
         this.surfaceHolder = surfaceHolder;
-        this.houseSurfaceView = houseSurfaceView;
+        this.mHouseSurfaceView = houseSurfaceView;
     }
     @Override
     public void run() {
 
         running = true;
         while(running){
-        Log.v(TAG, "run()");
+            try {
+                /* sleeping here fixes bug where UI gets blocked trying to join this thread some reason */
+                sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             canvas = null;
             startTime = System.currentTimeMillis();
             try {
                 canvas = this.surfaceHolder.lockCanvas();
                 synchronized (surfaceHolder) {
-                    this.houseSurfaceView.draw(canvas);
+                    this.mHouseSurfaceView.draw(canvas);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

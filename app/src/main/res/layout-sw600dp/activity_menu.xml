@@ -34,12 +34,6 @@
                 android:layout_height="match_parent"
                 android:layout_below="@+id/space"
                 android:layout_above="@+id/linearLayoutTabButtons" />
-            <com.robthecornallgmail.memarket.Views.InsideHouseSurfaceView
-                android:id="@+id/inside_house_surface_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@+id/space"
-                android:layout_above="@+id/linearLayoutTabButtons" />
             <View
                 android:id="@+id/line_above_bottom_buttons"
                 android:layout_width="match_parent"

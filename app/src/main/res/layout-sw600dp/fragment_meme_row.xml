@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?attr/selectableItemBackground"
+    android:orientation="horizontal">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?attr/selectableItemBackground">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.17"
+            android:gravity="center_vertical">
+            <TextView
+                android:id="@+id/MemeName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="4"
+                android:textStyle=""
+                android:textSize="14sp"
+                android:text="hi"
+                android:layout_marginLeft="13dp"
+                android:textColor="@color/greenWhite"
+                android:textAppearance="?attr/textAppearanceListItem" />
+        </LinearLayout>
+
+        1<LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.30"
+        android:gravity="center_vertical|end">
+        <ImageView
+            android:id="@+id/UpDownArrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@mipmap/ic_action_arrow_drop_up"
+            />
+        <TextView
+            android:id="@+id/MemePriceDifference"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:text="hi"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="10dp"
+            android:textAppearance="?attr/textAppearanceListItem"
+            />
+        <TextView
+            android:id="@+id/MemePrice"
+            android:textSize="15sp"
+            android:text="hi"
+            android:textStyle=""
+            android:layout_marginLeft="6dp"
+            android:layout_marginRight="6dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceListItem" />
+    </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:gravity="end"
+            android:layout_weight="0.22">
+            <android.support.v7.widget.AppCompatImageButton
+                android:id="@+id/MemeImage"
+
+                android:src="@drawable/icon_high_guy_meme"
+                android:background="@android:drawable/picture_frame"
+                android:backgroundTint="@color/pictureFrame"
+                android:layout_width="match_parent"
+                android:layout_height="fill_parent"
+                android:layout_gravity="end"
+                android:gravity="end"
+                android:scaleType="centerCrop"
+                />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
