@@ -76,7 +76,6 @@ public class InsideHouseSurfaceView extends SurfaceView implements SurfaceHolder
         setFocusable(true);
 
         mDefaultBitmaps.clear();
-        mUserWorkerBitmaps.clear();
 
         mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
     }
