@@ -9,7 +9,7 @@ import android.graphics.Typeface;
 
 import com.robthecornallgmail.memarket.Util.Defines;
 import com.robthecornallgmail.memarket.Util.Office;
-import com.robthecornallgmail.memarket.Util.UserBitmap;
+import com.robthecornallgmail.memarket.Util.UserBuildingBitmap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +21,7 @@ import java.util.HashMap;
 public class HouseCanvasDrawer {
     String TAG = "HouseCanvasDrawer";
 
-    HashMap<Integer, UserBitmap> mUserBitmaps;
+    HashMap<Integer, UserBuildingBitmap> mUserBitmaps;
     ArrayList<DefaultBitmap> mDefaultBitmaps;
 
 
@@ -50,7 +50,7 @@ public class HouseCanvasDrawer {
 
     int cloud1_dx = 0;
 
-    public HouseCanvasDrawer(HashMap<Integer, UserBitmap> userBitmaps, ArrayList<DefaultBitmap> defaultBitmaps, Bitmap silhouette,
+    public HouseCanvasDrawer(HashMap<Integer, UserBuildingBitmap> userBitmaps, ArrayList<DefaultBitmap> defaultBitmaps, Bitmap silhouette,
                              int SCREEN_WIDTH, int SCREEN_HEIGHT, Typeface pixelFont, int mTextColor) {
         mUserBitmaps = userBitmaps;
         mDefaultBitmaps = defaultBitmaps;
@@ -156,8 +156,8 @@ public class HouseCanvasDrawer {
             cloud1_dx=CLOUD_RIGHT_EDGE;
         }
 
-        for (UserBitmap userBitmap : mUserBitmaps.values()) {
-            canvas.drawBitmap(userBitmap.mBitmap, userBitmap.mCoordinates.lastX, userBitmap.mCoordinates.lastY, null);
+        for (UserBuildingBitmap userBuildingBitmap : mUserBitmaps.values()) {
+            canvas.drawBitmap(userBuildingBitmap.mBitmap, userBuildingBitmap.mCoordinates.lastX, userBuildingBitmap.mCoordinates.lastY, null);
         }
 
         int guyX = calculateGuyOffsets(guyFrame, mGuyWidth);

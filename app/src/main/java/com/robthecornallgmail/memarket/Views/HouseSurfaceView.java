@@ -27,11 +27,13 @@ import com.robthecornallgmail.memarket.Util.ItemObject;
 import com.robthecornallgmail.memarket.Util.MovementCoordinates;
 import com.robthecornallgmail.memarket.Util.MyApplication;
 import com.robthecornallgmail.memarket.Util.MyHelper;
-import com.robthecornallgmail.memarket.Util.UserBitmap;
+import com.robthecornallgmail.memarket.Util.UserBuildingBitmap;
 import com.robthecornallgmail.memarket.Util.UserItem;
+import com.robthecornallgmail.memarket.Util.UserWorkerBitmap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.robthecornallgmail.memarket.Util.MyHelper.decodeSampledBitmapFromResourceByWidth;
@@ -68,7 +70,8 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
 
     /* list of bitmaps and their coordinates, types, etc. */
-    static HashMap<Integer,UserBitmap> mUserBitmaps = new HashMap<>();
+    static HashMap<Integer,UserBuildingBitmap> mUserBuildings = new HashMap<>();
+    HashMap<Integer,UserWorkerBitmap> mUserWorkers = new HashMap<>();
     /* default bitmaps are things like sky, clouds, ground etc. */
     static ArrayList<DefaultBitmap> mDefaultBitmaps = new ArrayList<>();
     static Bitmap mSilhouette;
@@ -98,8 +101,19 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                     Integer width = itemObj.mWidth;
                     Integer xCoord = itemIDtoUser.getValue().mXCoordinate;
                     Integer bitmapWidth =  width*MAP_SECTION_WIDTH;
-                    mUserBitmaps.put(itemIDtoUser.getKey(),new UserBitmap(itemID,name,xCoord,width,bitmapWidth,type,subType));
+                    mUserBuildings.put(itemIDtoUser.getKey(),new UserBuildingBitmap(itemID,name,xCoord,width,bitmapWidth,type,subType));
                 }
+            }
+            else if(itemObj.mType == Defines.ITEM_TYPE.WORKER)
+            {
+                String name = itemObj.mName;
+                Integer type = itemObj.mType;
+                Integer subType = itemObj.mSubtype;
+                Integer workingAt = itemIDtoUser.getValue().mWorkingAt;
+                Integer workingPosition = itemIDtoUser.getValue().mWorkingPosition;
+                Integer workerLevel = itemIDtoUser.getValue().mWorkerLevel;
+                Integer bitmapWidth = SCREEN_WIDTH-MAP_SECTION_WIDTH;
+                mUserWorkers.put(itemIDtoUser.getKey(), new UserWorkerBitmap(itemID,name,type,subType,workingAt,workingPosition,workerLevel,bitmapWidth));
             }
         }
         LoadBitmaps loadBitmaps = new LoadBitmaps(getResources());
@@ -107,7 +121,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
     }
 
     public interface OnBuildingInteractionListener {
-        void OnBuildingInteraction(UserBitmap userBitmap);
+        void OnBuildingInteraction(Map.Entry<Integer, UserBuildingBitmap> userBuildingBitmap, HashMap<Integer, UserWorkerBitmap> mUserWorkers);
     }
 
     public HouseSurfaceView(Context context, AttributeSet attrs) {
@@ -257,20 +271,58 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                 mDefaultBitmaps.add(new DefaultBitmap(background, Defines.DEFAULT_TYPE.BACKGROUND, - (float) ( (SKY_SIZE_X - SCREEN_WIDTH)/2 ), - (float) (SKY_SIZE_Y - CANVAS_HEIGHT) ));
                 mDefaultBitmaps.add(new DefaultBitmap(ground, Defines.DEFAULT_TYPE.GROUND, - (float) ( (SKY_SIZE_X - HouseSurfaceView.SCREEN_WIDTH)/2 ), CANVAS_HEIGHT - ground.getHeight()));
                 mDefaultBitmaps.add(new DefaultBitmap(cloud1, Defines.DEFAULT_TYPE.CLOUD1, SCREEN_WIDTH-SCREEN_WIDTH/3, SCREEN_HEIGHT/18));
-                mDefaultBitmaps.add(new DefaultBitmap(guy, Defines.DEFAULT_TYPE.GUY, (mUserBitmaps.get(4).mXCoordinate - 14)*(SCREEN_WIDTH/9), CANVAS_HEIGHT - ground.getHeight() - guy.getHeight() + ground.getHeight() / 12));
+                mDefaultBitmaps.add(new DefaultBitmap(guy, Defines.DEFAULT_TYPE.GUY, (mUserBuildings.get(4).mXCoordinate - 14)*(SCREEN_WIDTH/9), CANVAS_HEIGHT - ground.getHeight() - guy.getHeight() + ground.getHeight() / 12));
 
+                HashMap<Integer,String> added = new HashMap<>();
             /* load appropriate bitmaps which the user owns */
-                for (UserBitmap entry : mUserBitmaps.values()) {
-                    Log.v(TAG,"ENTRY mName: " + entry.mName);
-                    String name = entry.mName;
+                for (Map.Entry<Integer, UserBuildingBitmap> entry : mUserBuildings.entrySet()) {
+                    Log.v(TAG,"ENTRY mName: " + entry.getValue().mName + " KEY: " + entry.getKey());
+                    String name = entry.getValue().mName;
+                    for(Map.Entry<Integer,String> addedAlready : added.entrySet())
+                    {
+
+                        if(name.equals(addedAlready.getValue())) {
+                            Log.v(TAG, "ALREADY ADDED: " + addedAlready.getValue());
+                            entry.getValue().mBitmap = mUserBuildings.get(addedAlready.getKey()).mBitmap;
+                            entry.getValue().mBitmapHeight = entry.getValue().mBitmap.getHeight();
+                            entry.getValue().mCoordinates.setLastXY((entry.getValue().mXCoordinate - 14) * MAP_SECTION_WIDTH, CANVAS_HEIGHT - ground.getHeight() - entry.getValue().mBitmap.getHeight());
+                            continue;
+                        }
+                    }
+                    added.put(entry.getKey(), entry.getValue().mName);
                     name = "bitmap_" + name.replaceAll(" ", "_").toLowerCase();
-                    entry.mBitmap = decodeSampledBitmapFromResourceByWidth(mResources, mResources.getIdentifier(name, "drawable", MainActivity.PACKAGE_NAME), entry.mBitmapWidth);
-                    float scaleFactor = (float)entry.mBitmapWidth/(float)entry.mBitmap.getWidth();
-                    entry.mBitmap = Bitmap.createScaledBitmap(entry.mBitmap, entry.mBitmapWidth, (int)((float)entry.mBitmap.getHeight()*scaleFactor), true);
-                    entry.mBitmapHeight = entry.mBitmap.getHeight();
+                    entry.getValue().mBitmap = decodeSampledBitmapFromResourceByWidth(mResources, mResources.getIdentifier(name, "drawable", MainActivity.PACKAGE_NAME), entry.getValue().mBitmapWidth);
+                    float scaleFactor = (float)entry.getValue().mBitmapWidth/(float)entry.getValue().mBitmap.getWidth();
+                    entry.getValue().mBitmap = Bitmap.createScaledBitmap(entry.getValue().mBitmap, entry.getValue().mBitmapWidth, (int)((float)entry.getValue().mBitmap.getHeight()*scaleFactor), true);
+                    entry.getValue().mBitmapHeight = entry.getValue().mBitmap.getHeight();
 
                     /* set coordinates using 1-36 section x coordinates, and placing at appropriate y coordinate */
-                    entry.mCoordinates.setLastXY((entry.mXCoordinate-14)*MAP_SECTION_WIDTH, CANVAS_HEIGHT-ground.getHeight()-entry.mBitmap.getHeight());
+                    entry.getValue().mCoordinates.setLastXY((entry.getValue().mXCoordinate-14)*MAP_SECTION_WIDTH, CANVAS_HEIGHT-ground.getHeight()-entry.getValue().mBitmap.getHeight());
+                }
+
+                for(Map.Entry<Integer, UserWorkerBitmap> entry : mUserWorkers.entrySet()) {
+                    Log.v(TAG,"ENTRY mName: " + entry.getValue().mName + " KEY: " + entry.getKey());
+                    String name = entry.getValue().mName;
+                    //for(Map.Entry<Integer,String> addedAlready : added.entrySet())
+                    //{
+
+                    //    if(name.equals(addedAlready.getValue())) {
+                    //        Log.v(TAG, "ALREADY ADDED: " + addedAlready.getValue());
+                    //        entry.getValue().mBitmap = mUserBuildings.get(addedAlready.getKey()).mBitmap;
+                    //        entry.getValue().mBitmapHeight = entry.getValue().mBitmap.getHeight();
+                    //        entry.getValue().mCoordinates.setLastXY((entry.getValue().mXCoordinate - 14) * MAP_SECTION_WIDTH, CANVAS_HEIGHT - ground.getHeight() - entry.getValue().mBitmap.getHeight());
+                    //        continue;
+                    //    }
+                    //}
+                    added.put(entry.getKey(), entry.getValue().mName);
+                    name = "sprite_" + name.replaceAll(" ", "_").toLowerCase();
+                    entry.getValue().mBitmap = decodeSampledBitmapFromResourceByWidth(mResources, mResources.getIdentifier(name, "drawable", MainActivity.PACKAGE_NAME), entry.getValue().mBitmapWidth);
+                    float scaleFactor = (float)entry.getValue().mBitmapWidth/(float)entry.getValue().mBitmap.getWidth();
+                    entry.getValue().mBitmap = Bitmap.createScaledBitmap(entry.getValue().mBitmap, entry.getValue().mBitmapWidth, (int)((float)entry.getValue().mBitmap.getHeight()*scaleFactor), true);
+                    entry.getValue().mBitmapHeight = entry.getValue().mBitmap.getHeight();
+
+                    /* set coordinates using worker position */
+                    entry.getValue().mCoordinates.setLastXY(((entry.getValue().mWorkingPosition-1)%3*entry.getValue().mBitmap.getWidth()/4) + SCREEN_WIDTH/4, CANVAS_HEIGHT-entry.getValue().mBitmapHeight);
                 }
 
 
@@ -304,7 +356,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                     mSilhouette = Bitmap.createScaledBitmap(mSilhouette,(int)((float) mSilhouette.getWidth()*SILHOUETTE_SCALE_FACTOR), SILHOUETTE_HEIGHT, true);
                 }
 
-                for (UserBitmap bitmap : mUserBitmaps.values()) {
+                for (UserBuildingBitmap bitmap : mUserBuildings.values()) {
                     if(bitmap.mBitmap == null)
                     {
                         String name = bitmap.mName;
@@ -331,7 +383,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
             /* check we havent freed bitmaps (they arent null) before proceeding */
             if(!mFreed)
             {
-                mHouseCanvasDrawer = new HouseCanvasDrawer(  mUserBitmaps, mDefaultBitmaps, mSilhouette,
+                mHouseCanvasDrawer = new HouseCanvasDrawer(mUserBuildings, mDefaultBitmaps, mSilhouette,
                         SCREEN_WIDTH,CANVAS_HEIGHT,
                         mApplication.pixelFont, mTextColor
                 );
@@ -373,9 +425,9 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                 mTouchCoordinates.setXY(x, y);
 
                 /* remember the last coordinates */
-                for(UserBitmap userBitmap : mUserBitmaps.values())
+                for(UserBuildingBitmap userBuildingBitmap : mUserBuildings.values())
                 {
-                    userBitmap.mCoordinates.setBackupXY();
+                    userBuildingBitmap.mCoordinates.setBackupXY();
                 }
                 for(DefaultBitmap bitmap : mDefaultBitmaps)
                 {
@@ -403,10 +455,10 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                             bitmap.mCoordinates.lastX = bitmap.mCoordinates.lastX + diff;
                             bitmap.mCoordinates.backupx = bitmap.mCoordinates.lastX;
                         }
-                        for(UserBitmap userBitmap : mUserBitmaps.values())
+                        for(UserBuildingBitmap userBuildingBitmap : mUserBuildings.values())
                         {
-                            userBitmap.mCoordinates.lastX = userBitmap.mCoordinates.lastX + diff;
-                            userBitmap.mCoordinates.backupx = userBitmap.mCoordinates.lastX;
+                            userBuildingBitmap.mCoordinates.lastX = userBuildingBitmap.mCoordinates.lastX + diff;
+                            userBuildingBitmap.mCoordinates.backupx = userBuildingBitmap.mCoordinates.lastX;
                         }
                         mTouchCoordinates.x = new_x;
                     }
@@ -419,19 +471,19 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                             bitmap.mCoordinates.lastX = bitmap.mCoordinates.lastX + diff;
                             bitmap.mCoordinates.backupx = bitmap.mCoordinates.lastX;
                         }
-                        for(UserBitmap userBitmap : mUserBitmaps.values())
+                        for(UserBuildingBitmap userBuildingBitmap : mUserBuildings.values())
                         {
-                            userBitmap.mCoordinates.lastX = userBitmap.mCoordinates.lastX + diff;
-                            userBitmap.mCoordinates.backupx = userBitmap.mCoordinates.lastX;
+                            userBuildingBitmap.mCoordinates.lastX = userBuildingBitmap.mCoordinates.lastX + diff;
+                            userBuildingBitmap.mCoordinates.backupx = userBuildingBitmap.mCoordinates.lastX;
                         }
 
                         mTouchCoordinates.x = new_x;
                     }
                     else
                     {
-                        for(UserBitmap userBitmap : mUserBitmaps.values())
+                        for(UserBuildingBitmap userBuildingBitmap : mUserBuildings.values())
                         {
-                            userBitmap.mCoordinates.lastX = userBitmap.mCoordinates.backupx + mTouchCoordinates.dx;
+                            userBuildingBitmap.mCoordinates.lastX = userBuildingBitmap.mCoordinates.backupx + mTouchCoordinates.dx;
                         }
                         for(DefaultBitmap bitmap : mDefaultBitmaps)
                         {
@@ -449,10 +501,10 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                             bitmap.mCoordinates.lastY = bitmap.mCoordinates.lastY + diff;
                             bitmap.mCoordinates.backupy = bitmap.mCoordinates.lastY;
                         }
-                        for(UserBitmap userBitmap : mUserBitmaps.values())
+                        for(UserBuildingBitmap userBuildingBitmap : mUserBuildings.values())
                         {
-                            userBitmap.mCoordinates.lastY = userBitmap.mCoordinates.lastY + diff;
-                            userBitmap.mCoordinates.backupy = userBitmap.mCoordinates.lastY;
+                            userBuildingBitmap.mCoordinates.lastY = userBuildingBitmap.mCoordinates.lastY + diff;
+                            userBuildingBitmap.mCoordinates.backupy = userBuildingBitmap.mCoordinates.lastY;
                         }
                         mTouchCoordinates.y = new_y;
                     }
@@ -465,10 +517,10 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                             bitmap.mCoordinates.lastY = bitmap.mCoordinates.lastY + diff;
                             bitmap.mCoordinates.backupy = bitmap.mCoordinates.lastY;
                         }
-                        for(UserBitmap userBitmap : mUserBitmaps.values())
+                        for(UserBuildingBitmap userBuildingBitmap : mUserBuildings.values())
                         {
-                            userBitmap.mCoordinates.lastY = userBitmap.mCoordinates.lastY + diff;
-                            userBitmap.mCoordinates.backupy = userBitmap.mCoordinates.lastY;
+                            userBuildingBitmap.mCoordinates.lastY = userBuildingBitmap.mCoordinates.lastY + diff;
+                            userBuildingBitmap.mCoordinates.backupy = userBuildingBitmap.mCoordinates.lastY;
                         }
 
                         mTouchCoordinates.y = new_y;
@@ -479,9 +531,9 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                         {
                             bitmap.mCoordinates.lastY = bitmap.mCoordinates.backupy + mTouchCoordinates.dy;
                         }
-                        for(UserBitmap userBitmap : mUserBitmaps.values())
+                        for(UserBuildingBitmap userBuildingBitmap : mUserBuildings.values())
                         {
-                            userBitmap.mCoordinates.lastY = userBitmap.mCoordinates.backupy + mTouchCoordinates.dy;
+                            userBuildingBitmap.mCoordinates.lastY = userBuildingBitmap.mCoordinates.backupy + mTouchCoordinates.dy;
                         }
                     }
                     /* CalculateMatrix(true); */
@@ -510,15 +562,15 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
     /* check if touch is in dimensions of users buildings */
     private void touch(float x, float y) {
-        for (UserBitmap entry : mUserBitmaps.values()) {
-            Log.v(TAG, "object location: " + entry.mCoordinates.lastX + ", " + (entry.mCoordinates.lastX + entry.mBitmapWidth));
-            if(entry.mType == Defines.ITEM_TYPE.BUILDING &&
-                    x > entry.mCoordinates.lastX*mScaleFactor && x < (entry.mCoordinates.lastX + entry.mBitmapWidth)*mScaleFactor &&
-                    y > entry.mCoordinates.lastY*mScaleFactor && y < (entry.mCoordinates.lastY + entry.mBitmapHeight)*mScaleFactor)
+        for (Map.Entry<Integer, UserBuildingBitmap> entry : mUserBuildings.entrySet()) {
+            Log.v(TAG, "object location: " + entry.getValue().mCoordinates.lastX + ", " + (entry.getValue().mCoordinates.lastX + entry.getValue().mBitmapWidth));
+            if(entry.getValue().mType == Defines.ITEM_TYPE.BUILDING &&
+                    x > entry.getValue().mCoordinates.lastX*mScaleFactor && x < (entry.getValue().mCoordinates.lastX + entry.getValue().mBitmapWidth)*mScaleFactor &&
+                    y > entry.getValue().mCoordinates.lastY*mScaleFactor && y < (entry.getValue().mCoordinates.lastY + entry.getValue().mBitmapHeight)*mScaleFactor)
             {
-                Log.v(TAG, "touched building: " + entry.mName.toString());
+                Log.v(TAG, "touched building: " + entry.getValue().mName.toString() + "buildingID: " + entry.getValue().mItemID);
                 /* callback to menuActivity */
-                mListener.OnBuildingInteraction(entry);
+                mListener.OnBuildingInteraction(entry,mUserWorkers);
 
             }
         }
@@ -550,7 +602,7 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
         Log.v(TAG, "free() bitmaps called");
 
-        for (UserBitmap entry : mUserBitmaps.values()) {
+        for (UserBuildingBitmap entry : mUserBuildings.values()) {
             if(entry.mBitmap != null)
             {
                 entry.mBitmap.recycle();

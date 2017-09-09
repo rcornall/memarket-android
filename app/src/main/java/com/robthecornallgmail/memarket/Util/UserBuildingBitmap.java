@@ -6,7 +6,7 @@ import android.graphics.Bitmap;
  * Created by rob on 28/08/17.
  */
 /* stores all info needed to draw on canvas at coordinates x,y */
-public class UserBitmap {
+public class UserBuildingBitmap {
     public Integer mItemID;
     public String mName;
     public Bitmap mBitmap;
@@ -18,7 +18,7 @@ public class UserBitmap {
     public Integer mBitmapWidth;
     public Integer mBitmapHeight;
 
-    public UserBitmap(Integer itemID, String name, Integer xCoord, Integer width, Integer bitmapWidth, Integer type, Integer subtype)
+    public UserBuildingBitmap(Integer itemID, String name, Integer xCoord, Integer width, Integer bitmapWidth, Integer type, Integer subtype)
     {
         mItemID = itemID;
         mName = name;
@@ -28,9 +28,5 @@ public class UserBitmap {
         mType = type;
         mSubtype = subtype;
         mCoordinates = new ObjectCoordinates(0,0);
-    }
-    public void addBitmap(Bitmap bitmap)
-    {
-        mBitmap = bitmap;
     }
 }

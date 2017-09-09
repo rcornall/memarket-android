@@ -28,18 +28,23 @@
                 android:layout_height="69dp"/>
 
 
-            <com.robthecornallgmail.memarket.Views.HouseSurfaceView
-                android:id="@+id/house_surface_view"
+            <RelativeLayout
+                android:id="@+id/surface_views"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_below="@+id/space"
-                android:layout_above="@+id/linearLayoutTabButtons" />
-            <com.robthecornallgmail.memarket.Views.InsideHouseSurfaceView
-                android:id="@+id/inside_house_surface_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@+id/space"
-                android:layout_above="@+id/linearLayoutTabButtons" />
+                android:layout_above="@+id/linearLayoutTabButtons">
+
+                <com.robthecornallgmail.memarket.Views.HouseSurfaceView
+                    android:id="@+id/house_surface_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                     />
+                <com.robthecornallgmail.memarket.Views.InsideHouseSurfaceView
+                    android:id="@+id/inside_house_surface_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </RelativeLayout>
             <View
                 android:id="@+id/line_above_bottom_buttons"
                 android:layout_width="match_parent"
@@ -93,7 +98,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
-                android:layout_below="@id/house_surface_view">
+                android:layout_below="@id/surface_views">
                 <View
                     android:id="@+id/find_memes_highlight"
                     android:layout_weight="33.33333"

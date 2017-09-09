@@ -34,6 +34,15 @@ public final class Defines
             public static int HOUSE_SMALL_SOMETHING = 3;
         }
 
+        public static final class WORKER_TYPE {
+            public static int INTERN_TRADER = 1;
+            public static int JUNIOR_TRADER = 2;
+            public static int SENIOR_TRADER = 3;
+            public static int INTERN_ANALYST = 4;
+            public static int JUNIOR_ANALYST = 5;
+            public static int SENIOR_ANALYST = 6;
+        }
+
 
         public static int EQUIPPED = 1;
         public static int NOT_EQUIPPED = 0;

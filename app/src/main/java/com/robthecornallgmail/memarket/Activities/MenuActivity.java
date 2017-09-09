@@ -64,9 +64,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import com.robthecornallgmail.memarket.Util.Defines;
-import com.robthecornallgmail.memarket.Util.UserBitmap;
+import com.robthecornallgmail.memarket.Util.UserBuildingBitmap;
 import com.robthecornallgmail.memarket.Util.UserItem;
 import com.robthecornallgmail.memarket.Util.UserRow;
+import com.robthecornallgmail.memarket.Util.UserWorkerBitmap;
 import com.robthecornallgmail.memarket.Views.HouseSurfaceView;
 import com.robthecornallgmail.memarket.Fragments.LeaderboardDialogFragment;
 import com.robthecornallgmail.memarket.Views.InsideHouseSurfaceView;
@@ -650,133 +651,14 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
     /* create Inside Building view with users building type, employees */
     @Override
-    public void OnBuildingInteraction(UserBitmap userBitmap){
-        Log.v(TAG, "OnBuildingInteraction() : " + userBitmap.mName.toString());
+    public void OnBuildingInteraction(Map.Entry<Integer, UserBuildingBitmap> userBuildingBitmap, HashMap<Integer, UserWorkerBitmap> userWorkers){
+        Log.v(TAG, "OnBuildingInteraction() : " + userBuildingBitmap.getValue().mName.toString());
         mHouseSurfaceView.setVisibility(View.GONE);
-        mInsideHouseSurfaceView.updateUserBitmap(userBitmap);
+        mInsideHouseSurfaceView.updateUserBitmap(userBuildingBitmap, userWorkers);
         mInsideHouseSurfaceView.setVisibility(View.VISIBLE);
     }
 
-// TODO: 03/08/17 NEED TO MAKE SURE ONLY ONE INSTANCE OF THIS THREAD IS RUNNING AT ONCE BEFORE STARTING A NEW ONE 
 
-    public class PurchaseStockFromServer extends AsyncTask<String,Void,Boolean>
-    {
-        private String serverResponse;
-        private final Integer mUserID;
-        private final Integer mMemeID;
-        private final Integer mAmount;
-        private Integer mNewMoney;
-        private Integer mNewStocks;
-        PurchaseStockFromServer(Integer user_id, Integer meme_id, Integer amount)
-        {
-            mUserID = user_id;
-            mMemeID = meme_id;
-            mAmount = amount;
-        }
-        @Override
-        protected Boolean doInBackground(String... strings)
-        {
-            URL url;
-            HttpURLConnection urlConnection;
-            String charset = "UTF-8";
-            int responseCode;
-
-            try {
-                url = new URL(strings[0]);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setConnectTimeout(7000);
-                urlConnection.setReadTimeout(7000);
-                urlConnection.setRequestMethod("POST");
-                urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=" + charset);
-                OutputStream out = urlConnection.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(out, "UTF-8"));
-
-                String query = String.format("Content-Type: application/json&charset=%s&user=%d&meme=%d&amount=%d",
-                        URLEncoder.encode(charset, charset),
-                        mUserID,mMemeID,mAmount);
-                Log.v(TAG, "query is: " + query);
-                writer.write(query);
-
-                writer.flush();
-                writer.close();
-                out.close();
-                try {
-                    responseCode = urlConnection.getResponseCode();
-                } catch (IOException e)
-                {
-                    responseCode = urlConnection.getResponseCode();
-                }
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    Log.v(TAG, "purchase: we got 200");
-                    serverResponse = MyHelper.readHttpStream(urlConnection.getInputStream());
-                } else {
-                    Log.v(TAG, "purchase we got " + responseCode);
-                    return false;
-                }
-            } catch (SocketTimeoutException e) {
-                e.printStackTrace();
-                Log.e(TAG, "http timeout on purchase.. probably no internet:" + e);
-                return false;
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-                Log.e(TAG, "malformed url exception: " + e);
-                return false;
-            } catch (IOException e) {
-                Log.e(TAG, "IOException: " + e);
-                e.printStackTrace();
-                return false;
-            }
-
-            try {
-                JSONObject jsonObject = new JSONObject(serverResponse);
-                Log.v(TAG, jsonObject.getString("result"));
-                String result = jsonObject.getString("result");
-                if (result.equals("true"))
-                {
-                    mNewMoney = jsonObject.getInt("new_money");
-                    mNewStocks = jsonObject.getInt("new_stocks");
-                    mMemeIDtoAmountHeld.put(mMemeID, mNewStocks);
-                    return true;
-                }
-                else
-                {
-                    String err = jsonObject.getString("error");
-                    Integer code = jsonObject.getInt("code");
-                    Log.e(TAG, "Error purchasing stock: " + code + ": " + err);
-                    return false;
-                }
-            } catch (JSONException e) {
-                Log.e(TAG, "Error parsing data " + e.toString());
-                e.printStackTrace();
-                return false;
-            }
-        }
-        @Override
-        protected void onPostExecute(Boolean Result)
-        {
-            if (Result)
-            {
-                Log.v(TAG, "newStocks:" + mNewStocks);
-                TextView moneyTextView = (TextView) findViewById(R.id.money_text);
-                Animation shrinkAnim = AnimationUtils.loadAnimation(MenuActivity.this, R.anim.shrink_money);
-                Animation growAnim = AnimationUtils.loadAnimation(MenuActivity.this, R.anim.shrink_money);
-
-                moneyTextView.clearAnimation();
-                moneyTextView.startAnimation(shrinkAnim);
-                moneyTextView.setText("$" + mNewMoney.toString());
-                moneyTextView.startAnimation(growAnim);
-
-                TextView sharesOwnedView = (TextView) findViewById(R.id.stocks_owned);
-                sharesOwnedView.setText(mNewStocks.toString());
-
-                mMemeIDtoAmountHeld.put(mMemeID, mNewStocks);
-                mApplication.userData.setMoney(mNewMoney);
-
-            }
-            return;
-        }
-    }
     public class GetDataFromServer extends AsyncTask<String , Void , MyHelper.results>
     {
         private String serverResponse;
@@ -876,9 +758,21 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                         Integer USER_ITEM_ID = jsonObject.getInt("USER_ITEM_ID");
                         Integer ITEM_ID = jsonObject.getInt("ITEM_ID");
                         Integer ITEM_AMOUNT = jsonObject.getInt("ITEM_AMOUNT");
-                        Integer EQUIPPED = jsonObject.getInt("EQUIPPED");
-                        Integer X_COORDINATE = jsonObject.getInt("X_COORDINATE");
-                        mUserItemIdToUsersItems.put(USER_ITEM_ID, new UserItem(ITEM_ID,ITEM_AMOUNT,EQUIPPED,X_COORDINATE));
+                        Integer EQUIPPED = 0;
+                        Integer X_COORDINATE = 0;
+                        Integer WORKING_AT = 0;
+                        Integer WORKING_POSITION = 0;
+                        Integer WORKER_LEVEL = 0;
+                        try{
+                            EQUIPPED = jsonObject.getInt("EQUIPPED");
+                            X_COORDINATE = jsonObject.getInt("X_COORDINATE");
+                            WORKING_AT = jsonObject.getInt("WORKING_AT");
+                            WORKING_POSITION = jsonObject.getInt("WORKING_POSITION");
+                            WORKER_LEVEL = jsonObject.getInt("WORKER_LEVEL");
+                        } catch (JSONException e) {
+                            Log.v(TAG, e.toString());
+                        }
+                        mUserItemIdToUsersItems.put(USER_ITEM_ID, new UserItem(ITEM_ID,ITEM_AMOUNT,EQUIPPED,X_COORDINATE,WORKING_AT,WORKING_POSITION, WORKER_LEVEL));
                     } else {
                         Result.success = false;
                         Log.e(TAG, "params wrong..");
@@ -1112,6 +1006,127 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    // TODO: 03/08/17 NEED TO MAKE SURE ONLY ONE INSTANCE OF THIS THREAD IS RUNNING AT ONCE BEFORE STARTING A NEW ONE
+
+    public class PurchaseStockFromServer extends AsyncTask<String,Void,Boolean>
+    {
+        private String serverResponse;
+        private final Integer mUserID;
+        private final Integer mMemeID;
+        private final Integer mAmount;
+        private Integer mNewMoney;
+        private Integer mNewStocks;
+        PurchaseStockFromServer(Integer user_id, Integer meme_id, Integer amount)
+        {
+            mUserID = user_id;
+            mMemeID = meme_id;
+            mAmount = amount;
+        }
+        @Override
+        protected Boolean doInBackground(String... strings)
+        {
+            URL url;
+            HttpURLConnection urlConnection;
+            String charset = "UTF-8";
+            int responseCode;
+
+            try {
+                url = new URL(strings[0]);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setConnectTimeout(7000);
+                urlConnection.setReadTimeout(7000);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=" + charset);
+                OutputStream out = urlConnection.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(out, "UTF-8"));
+
+                String query = String.format("Content-Type: application/json&charset=%s&user=%d&meme=%d&amount=%d",
+                        URLEncoder.encode(charset, charset),
+                        mUserID,mMemeID,mAmount);
+                Log.v(TAG, "query is: " + query);
+                writer.write(query);
+
+                writer.flush();
+                writer.close();
+                out.close();
+                try {
+                    responseCode = urlConnection.getResponseCode();
+                } catch (IOException e)
+                {
+                    responseCode = urlConnection.getResponseCode();
+                }
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    Log.v(TAG, "purchase: we got 200");
+                    serverResponse = MyHelper.readHttpStream(urlConnection.getInputStream());
+                } else {
+                    Log.v(TAG, "purchase we got " + responseCode);
+                    return false;
+                }
+            } catch (SocketTimeoutException e) {
+                e.printStackTrace();
+                Log.e(TAG, "http timeout on purchase.. probably no internet:" + e);
+                return false;
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                Log.e(TAG, "malformed url exception: " + e);
+                return false;
+            } catch (IOException e) {
+                Log.e(TAG, "IOException: " + e);
+                e.printStackTrace();
+                return false;
+            }
+
+            try {
+                JSONObject jsonObject = new JSONObject(serverResponse);
+                Log.v(TAG, jsonObject.getString("result"));
+                String result = jsonObject.getString("result");
+                if (result.equals("true"))
+                {
+                    mNewMoney = jsonObject.getInt("new_money");
+                    mNewStocks = jsonObject.getInt("new_stocks");
+                    mMemeIDtoAmountHeld.put(mMemeID, mNewStocks);
+                    return true;
+                }
+                else
+                {
+                    String err = jsonObject.getString("error");
+                    Integer code = jsonObject.getInt("code");
+                    Log.e(TAG, "Error purchasing stock: " + code + ": " + err);
+                    return false;
+                }
+            } catch (JSONException e) {
+                Log.e(TAG, "Error parsing data " + e.toString());
+                e.printStackTrace();
+                return false;
+            }
+        }
+        @Override
+        protected void onPostExecute(Boolean Result)
+        {
+            if (Result)
+            {
+                Log.v(TAG, "newStocks:" + mNewStocks);
+                TextView moneyTextView = (TextView) findViewById(R.id.money_text);
+                Animation shrinkAnim = AnimationUtils.loadAnimation(MenuActivity.this, R.anim.shrink_money);
+                Animation growAnim = AnimationUtils.loadAnimation(MenuActivity.this, R.anim.shrink_money);
+
+                moneyTextView.clearAnimation();
+                moneyTextView.startAnimation(shrinkAnim);
+                moneyTextView.setText("$" + mNewMoney.toString());
+                moneyTextView.startAnimation(growAnim);
+
+                TextView sharesOwnedView = (TextView) findViewById(R.id.stocks_owned);
+                sharesOwnedView.setText(mNewStocks.toString());
+
+                mMemeIDtoAmountHeld.put(mMemeID, mNewStocks);
+                mApplication.userData.setMoney(mNewMoney);
+
+            }
+            return;
         }
     }
 

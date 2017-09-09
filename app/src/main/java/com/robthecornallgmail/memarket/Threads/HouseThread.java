@@ -18,6 +18,7 @@ public class HouseThread extends Thread {
     private SurfaceView mHouseSurfaceView;
     private Canvas canvas;
     long startTime, doneTime;
+    int frameTime = 18;
     private volatile boolean running = false;
 
     public HouseThread(SurfaceHolder surfaceHolder, SurfaceView houseSurfaceView) {
@@ -60,10 +61,10 @@ public class HouseThread extends Thread {
             try {
                 doneTime = System.currentTimeMillis();
                 long timeDelta = doneTime-startTime;
-                if (timeDelta >= 20) {
+                if (timeDelta >= frameTime) {
                     continue;
                 } else {
-                    sleep(20-timeDelta);
+                    sleep(frameTime-timeDelta);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();

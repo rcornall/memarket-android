@@ -1,3 +1,7 @@
+SQL need stuff for which workers you own
+what clothes they have
+
+
 open beta testing on the play store
 
 eventually make website/mailserver  and domain @mememarket.ca
