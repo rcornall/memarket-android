@@ -1,9 +1,12 @@
 package com.robthecornallgmail.memarket.Activities;
 
 import android.app.ActivityManager;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -22,6 +25,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -43,7 +47,6 @@ import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import android.util.Log;
-import android.widget.Toast;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
@@ -51,8 +54,10 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import com.robthecornallgmail.memarket.Fragments.BagGridFragment;
 import com.robthecornallgmail.memarket.Fragments.ListMemesFragment;
 import com.robthecornallgmail.memarket.Fragments.MemeDetailsFragment;
+import com.robthecornallgmail.memarket.Fragments.OrdersListFragment;
 import com.robthecornallgmail.memarket.Util.BagGrid;
 import com.robthecornallgmail.memarket.Util.ItemObject;
+import com.robthecornallgmail.memarket.Util.MemeObject;
 import com.robthecornallgmail.memarket.Util.MemePastData;
 import com.robthecornallgmail.memarket.Util.MemeRow;
 import com.robthecornallgmail.memarket.Util.MyApplication;
@@ -64,6 +69,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import com.robthecornallgmail.memarket.Util.Defines;
+import com.robthecornallgmail.memarket.Util.OrderRow;
 import com.robthecornallgmail.memarket.Util.UserBuildingBitmap;
 import com.robthecornallgmail.memarket.Util.UserItem;
 import com.robthecornallgmail.memarket.Util.UserRow;
@@ -78,6 +84,7 @@ import static java.lang.Thread.sleep;
 public class MenuActivity extends AppCompatActivity implements ListMemesFragment.OnListFragmentInteractionListener,
         MemeDetailsFragment.OnFragmentInteractionListener,
         LeaderboardDialogFragment.OnLeaderboardFragmentInteractionListener,
+        OrdersListFragment.OnOrdersListFragmentInteractionListener,
         BagGridFragment.OnBagGridInteractionListener,
 
         HouseSurfaceView.OnBuildingInteractionListener
@@ -89,34 +96,34 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
     private static final String TAG = "Menu";
 
-    private Button mSettingsWheelButton, mLeaderboardButton;
+    private ProgressDialog mProgressDialog;
 
+    private Button mSettingsWheelButton, mLeaderboardButton;
     /*graph stuff*/
     private GraphView mGraphView;
     private GetGraphData mGetGraphTask;
-    private DateRange mDateRange = DateRange.DAY;
 
+    private DateRange mDateRange = DateRange.DAY;
     /*maps holding various data*/
-    private Map<String, Integer> mMemeNametoIDMap = new HashMap<>();
+    static HashMap<Integer, MemeObject> mMemeIdtoObject = new HashMap<>();
     private Map<Integer, LineGraphSeries<DataPoint>> mMemeIDtoSeriesMap = new HashMap<>();
-    private Map<String, Integer> mMemeNametoStockMap = new HashMap<>();
-    private Map<Integer, Integer> mMemeIDtoAmountHeld = new HashMap<>();
-    private Map<String, Integer> mMemeNametoLastStockMap= new HashMap<>();
     private Map<String,Integer> mLeaderboardUsersToMoneyMap = new LinkedHashMap<>(); //preserves ordering in HashMap
     private HashMap<Integer, ItemObject> mItemsIdToObject = new HashMap<>();
-    private HashMap<Integer, UserItem> mUserItemIdToUsersItems = new HashMap<>();
 
+    private HashMap<Integer, UserItem> mUserItemIdToUsersItems = new HashMap<>();
     /*selected meme for list/detail fragments*/
     private String mSelectedName;
+
     private Integer mSelectedMemeID;
 
     EditText mSearchView;
-
     /*fragments*/
     ListMemesFragment mMemeListFragment;
-    LeaderboardDialogFragment mLeaderboardDialogFragment;
     MemeDetailsFragment mMemeDetailsFragment;
+    OrdersListFragment mOrdersListFragment;
+    LeaderboardDialogFragment mLeaderboardDialogFragment;
     BagGridFragment mBagGridFragment;
+
 
     HouseSurfaceView mHouseSurfaceView;
     InsideHouseSurfaceView mInsideHouseSurfaceView;
@@ -136,7 +143,9 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         Log.v(TAG, "memoryClass: " + Integer.toString(memoryClass));
 
         mMemeListFragment = new ListMemesFragment();
+        mOrdersListFragment = new OrdersListFragment();
         mBagGridFragment = new BagGridFragment();
+
 
 //        mLeaderboardDialogFragment = new LeaderboardDialogFragment();
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -322,7 +331,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 //refresh stock values:
                 new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getData.php?action", "GETTING_DATA");
                 try{
-                    new GetGraphData(mMemeNametoIDMap.get(mSelectedName)).execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
+                    new GetGraphData(mSelectedMemeID).execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
                 } catch (NullPointerException e) {
                     Log.v(TAG, e.toString());
                 }
@@ -364,7 +373,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 //refresh stock values:
                 new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getData.php?action", "GETTING_DATA");
                 try{
-                    new GetGraphData(mMemeNametoIDMap.get(mSelectedName)).execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
+                    new GetGraphData(mSelectedMemeID).execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
                 } catch (NullPointerException e) {
                     Log.v(TAG, e.toString());
                 }
@@ -524,21 +533,26 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     @Override
     public void onListFragmentInteraction(MemeRow row)
     {
-        mSelectedName = row.getName();
-        Integer amountOwned = 0;
+        mSelectedMemeID = row.mID;
+        Integer mAmountOwned = 0;
         try {
-            mSelectedMemeID = mMemeNametoIDMap.get(mSelectedName);
-            amountOwned = mMemeIDtoAmountHeld.get(mSelectedMemeID);
-        } catch (NullPointerException e)
-        {
+            mAmountOwned = mMemeIdtoObject.get(mSelectedMemeID).mSharesHeld;
+            if(mAmountOwned == null)
+            {
+                throw new NullPointerException("sldk");
+            }
+        } catch (NullPointerException e) {
+            Log.v(TAG, "couldntget sharesheld: " + e.toString());
             e.printStackTrace();
         }
+
+
         if(mMemeDetailsFragment != null) {
             mMemeDetailsFragment = null;
-            System.gc();
+//            System.gc();
         }
-        mMemeDetailsFragment = MemeDetailsFragment.newInstance(mSelectedName, row.getPrice(), (amountOwned != null ? amountOwned:0));
-        Log.v(TAG, "onListFragmentInteraction called" + mSelectedName);
+        mMemeDetailsFragment = MemeDetailsFragment.newInstance(mSelectedMemeID, mMemeIdtoObject.get(mSelectedMemeID), mAmountOwned);
+        Log.v(TAG, "onListFragmentInteraction called" + mMemeIdtoObject.get(mSelectedMemeID).mName);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.anim.enter_from_bottom, 0);
         transaction.addToBackStack(null);
@@ -546,34 +560,35 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         transaction.commit();
         mSearchView.setVisibility(View.GONE);
 
+        mMemeDetailsFragment.setGraphProgressDialog(true);
+
         try {
-            if (!mGraphDataObjectMap.get(mMemeNametoIDMap.get(mSelectedName)).isDoneAlready()) {
-                Log.v(TAG, "done already? " + mGraphDataObjectMap.get(mMemeNametoIDMap.get(mSelectedName)).isDoneAlready().toString());
-                mGetGraphTask = new GetGraphData(mMemeNametoIDMap.get(mSelectedName));
+            if (!mGraphDataObjectMap.get(mSelectedMemeID).isDoneAlready()) {
+                Log.v(TAG, "done already? " + mGraphDataObjectMap.get(mSelectedMemeID).isDoneAlready().toString());
+                mGetGraphTask = new GetGraphData(mSelectedMemeID);
                 mGetGraphTask.execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
             }
             else
             {
                 Log.v(TAG, "AlreadyDone is true, adding existing series to graph");
                 //still need to refresh graph, need to use a new thread so that this UI thread can finish.
-                updateGraph ug = new updateGraph(mMemeIDtoSeriesMap.get(mMemeNametoIDMap.get(mSelectedName)),mDateRange,mMemeDetailsFragment);
+                updateGraph ug = new updateGraph(mMemeIDtoSeriesMap.get(mSelectedMemeID),mDateRange,mMemeDetailsFragment);
                 ug.execute("");
 
             }
         } catch (NullPointerException e) {
             Log.v(TAG, "exception, getting graph data");
-            mGetGraphTask = new GetGraphData(mMemeNametoIDMap.get(mSelectedName));
+            mGetGraphTask = new GetGraphData(mSelectedMemeID);
             mGetGraphTask.execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
         } catch (Exception e) {Log.e(TAG, e.toString());}
     }
 
 
 
-
     @Override
     public void onBackPressed() {
         FragmentManager fm = getSupportFragmentManager();
-        if (fm.getBackStackEntryCount() == 2) {
+        if (fm.getBackStackEntryCount() >= 2) {
             Log.i("MainActivity", "popping backstack");
             fm.popBackStackImmediate();
             mSearchView.setVisibility(View.VISIBLE);
@@ -612,30 +627,48 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         Log.v(TAG, "onListFragmentInteraction called: " + arg);
         if (arg.equals("buy"))
         {
-            if (mApplication.userData.getMoney() < mMemeNametoStockMap.get(mSelectedName) + 5)
-            {
-                Toast.makeText(getBaseContext(), "Not enough money!",
-                        Toast.LENGTH_SHORT).show();
-            }
-            else
-            {
-                new MenuActivity.PurchaseStockFromServer(mApplication.userData.getID(), mMemeNametoIDMap.get(mSelectedName), 1).execute(Defines.SERVER_ADDRESS + "/purchaseStock.php");
-            }
+//            if (mApplication.userData.getMoney() < mMemeIdtoObject.get(mSelectedMemeID).mPrice + 5)
+//            {
+//                Toast.makeText(getBaseContext(), "Not enough money!",
+//                        Toast.LENGTH_SHORT).show();
+//            }
+//            else
+//            {
+//                new MenuActivity.PurchaseStockFromServer(mApplication.userData.getID(), mSelectedMemeID, 1).execute(Defines.SERVER_ADDRESS + "/purchaseStock.php");
+//            }
+//            setProgressDialog(true);
+            Log.v(TAG, "buy called" + mMemeIdtoObject.get(mSelectedMemeID).mName);
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.setCustomAnimations(R.anim.enter_from_bottom, 0);
+            transaction.addToBackStack(null);
+            transaction.add(R.id.orders_list_fragment, mOrdersListFragment);
+            transaction.commit();
+
+            new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getOrders.php?buy=true", "GETTING_BUY_ORDERS");
         }
         else
         {
-            if (mMemeIDtoAmountHeld.get(mSelectedMemeID) == null)
-                Toast.makeText(getBaseContext(), "Still loading, Try again",
-                        Toast.LENGTH_SHORT).show();
-            if (mMemeIDtoAmountHeld.get(mSelectedMemeID) == 0)
-            {
-                Toast.makeText(getBaseContext(), "Not enough Stocks!",
-                        Toast.LENGTH_SHORT).show();
-            }
-            else
-            {
-                new MenuActivity.PurchaseStockFromServer(mApplication.userData.getID(), mMemeNametoIDMap.get(mSelectedName), 1).execute(Defines.SERVER_ADDRESS + "/sellStock.php");
-            }
+//            if (mMemeIdtoObject.get(mSelectedMemeID).mSharesHeld == null)
+//                Toast.makeText(getBaseContext(), "Still loading, Try again",
+//                        Toast.LENGTH_SHORT).show();
+//            else if (mMemeIdtoObject.get(mSelectedMemeID).mSharesHeld == 0)
+//            {
+//                Toast.makeText(getBaseContext(), "Not enough Stocks!",
+//                        Toast.LENGTH_SHORT).show();
+//            }
+//            else
+//            {
+//                new MenuActivity.PurchaseStockFromServer(mApplication.userData.getID(), mSelectedMemeID, 1).execute(Defines.SERVER_ADDRESS + "/sellStock.php");
+//            }
+            setProgressDialog(true);
+            Log.v(TAG, "sell called" + mMemeIdtoObject.get(mSelectedMemeID).mName);
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.setCustomAnimations(R.anim.enter_from_bottom, 0);
+            transaction.addToBackStack(null);
+            transaction.add(R.id.orders_list_fragment, mOrdersListFragment);
+            transaction.commit();
+
+            new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getOrders.php?sell=true", "GETTING_SELL_ORDERS");
         }
     }
 
@@ -656,6 +689,11 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         mHouseSurfaceView.setVisibility(View.GONE);
         mInsideHouseSurfaceView.updateUserBitmap(userBuildingBitmap, userWorkers);
         mInsideHouseSurfaceView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onOrdersListFragmentInteraction(OrderRow orderRow) {
+
     }
 
 
@@ -732,13 +770,25 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                         String NAME = jsonObject.getString("NAME");
                         Integer CURRENT_STOCK = jsonObject.getInt("CURRENT_STOCK");
                         Integer LAST_STOCK = jsonObject.getInt("LAST_STOCK");
-                        mMemeNametoIDMap.put(NAME, ID);
-                        mMemeNametoStockMap.put(NAME, CURRENT_STOCK);
-                        mMemeNametoLastStockMap.put(NAME, LAST_STOCK);
+                        String LINK = "http://knowyourmeme.com";
+                        try{
+                            LINK = jsonObject.getString("KYM_URL");
+                        } catch (JSONException e) {
+                            Log.v(TAG, "no knowyourmeme url for this meme: " + e.toString());
+                        }
+                        if (mMemeIdtoObject.get(ID) == null)
+                        {
+                            mMemeIdtoObject.put(ID, new MemeObject(NAME, CURRENT_STOCK,LAST_STOCK,LINK));
+                        }
+                        else
+                        {
+                            mMemeIdtoObject.get(ID).mPrice = CURRENT_STOCK;
+                            mMemeIdtoObject.get(ID).mLastPrice = LAST_STOCK;
+                        }
                     } else if (strings[1].equals("GETTING_USER_STOCKS")) {
                         Integer MEME_ID = jsonObject.getInt("MEME_ID");
                         Integer AMOUNT = jsonObject.getInt("AMOUNT");
-                        mMemeIDtoAmountHeld.put(MEME_ID, AMOUNT);
+                        mMemeIdtoObject.get(MEME_ID).mSharesHeld = AMOUNT;
                     } else if (strings[1].equals("GETTING_LEADERBOARD")) {
                         String NAME = jsonObject.getString("USER_DISPLAY_NAME");
                         Integer MONEY = jsonObject.getInt("MONEY");
@@ -810,18 +860,17 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 //            newTextView.setText(mMemeNametoStockMap.get("10 guy") + " --- ");
 
             Log.v(TAG,"Response is: " + Result.response);
-            Log.v(TAG, mMemeNametoIDMap.toString());
 
             if (Result.success) {
 //                mFraLgment = (ListMemesFragment) getSupportFragmentManager().findFragmentById(R.id.meme_list_fragment);
                 if (mRequest.equals("GETTING_DATA")) {
                     try {
-                        mMemeListFragment.updateList(mMemeNametoStockMap, mMemeNametoLastStockMap);
+                        mMemeListFragment.updateList(mMemeIdtoObject);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                     try{
-                        mMemeDetailsFragment.updateStockPrice(mMemeNametoStockMap.get(mSelectedName));
+                        mMemeDetailsFragment.updateStockPrice(mMemeIdtoObject.get(mSelectedMemeID).mPrice);
                     } catch (NullPointerException e) {
                         Log.v(TAG, e.toString());
                     }
@@ -838,8 +887,10 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+                } else if(mRequest.equals("GETTING_USER_STOCKS")){
+//                    mMemeDetailsFragment.updateOwned(mMemeIdtoObject.get(mSelectedMemeID).mSharesHeld);
                 } else {
-                    Log.v(TAG, "getting user stocks?? not updating any lists");
+                    Log.v(TAG, "NOT SPECIFIED REQUEST TYPE");
                 }
             }
             else
@@ -1088,7 +1139,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 {
                     mNewMoney = jsonObject.getInt("new_money");
                     mNewStocks = jsonObject.getInt("new_stocks");
-                    mMemeIDtoAmountHeld.put(mMemeID, mNewStocks);
+                    mMemeIdtoObject.get(mMemeID).mSharesHeld = mNewStocks;
                     return true;
                 }
                 else
@@ -1122,7 +1173,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 TextView sharesOwnedView = (TextView) findViewById(R.id.stocks_owned);
                 sharesOwnedView.setText(mNewStocks.toString());
 
-                mMemeIDtoAmountHeld.put(mMemeID, mNewStocks);
+                mMemeIdtoObject.get(mMemeID).mSharesHeld = mNewStocks;
                 mApplication.userData.setMoney(mNewMoney);
 
             }
@@ -1180,10 +1231,24 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         protected void onPostExecute(Boolean result) {
             if(!result)
             {
-                mGetGraphTask = new GetGraphData(mMemeNametoIDMap.get(mSelectedName));
+                mGetGraphTask = new GetGraphData(mSelectedMemeID);
                 mGetGraphTask.execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
             }
         }
     }
+
+    private void setProgressDialog(boolean wait) {
+
+        if (wait) {
+            mProgressDialog= ProgressDialog.show(this,null,null);
+            mProgressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            mProgressDialog.setContentView(new ProgressBar(this));
+        } else {
+            mProgressDialog.dismiss();
+        }
+
+    }
+
+
 
 }

@@ -6,6 +6,8 @@
     <string name="title_activity_login">Sign in</string>
 
     <string name="question_mark">\?</string>
+    <string name="hyper_link"><a href="http://www.knowyourmeme.com/memes/cash-me-ousside-howbow-dah">[KnowYourMeme]</a></string>
+    <string name="defaultpassword">User Guide <a href="http://www.cleverfinger.com.au/user-guide/">http://www.cleverfinger.com.au/user-guide/</a></string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>

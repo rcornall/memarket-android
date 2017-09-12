@@ -191,6 +191,13 @@
                     android:id="@+id/meme_list_fragment">
 
                 </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/orders_list_fragment">
+
+                </FrameLayout>
             </LinearLayout>
         </RelativeLayout>
 

@@ -7,18 +7,20 @@ import android.support.v7.widget.util.SortedListAdapterCallback;
  */
 
 public class MemeRow{
-    private String mName;
-    private Integer mPrice;
-    private Integer mLastPrice;
+    public Integer mID;
+    public String mName;
+    public Integer mPrice;
+    public Integer mLastPrice;
 
 
     public MemeRow() {
     }
 
-    public MemeRow(String name, Integer price, Integer lastPrice) {
-        this.mName = name;
-        this.mPrice = price;
-        this.mLastPrice = lastPrice;
+    public MemeRow(Integer id, String name, Integer price, Integer lastPrice) {
+        mID = id;
+        mName = name;
+        mPrice = price;
+        mLastPrice = lastPrice;
     }
 
     public String getName() {

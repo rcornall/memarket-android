@@ -1,43 +1,28 @@
 package com.robthecornallgmail.memarket.Fragments;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.Fragment;
-import android.support.v7.view.menu.ExpandedMenuView;
-import android.support.v7.widget.AppCompatImageButton;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.jjoe64.graphview.DefaultLabelFormatter;
@@ -47,17 +32,16 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.robthecornallgmail.memarket.Activities.DateRange;
 import com.robthecornallgmail.memarket.Activities.MainActivity;
-import com.robthecornallgmail.memarket.Activities.MenuActivity;
 import com.robthecornallgmail.memarket.R;
-import com.robthecornallgmail.memarket.Util.Defines;
+import com.robthecornallgmail.memarket.Util.MemeObject;
 import com.robthecornallgmail.memarket.Util.MyApplication;
 import com.robthecornallgmail.memarket.Util.MyHelper;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import org.apache.commons.lang3.text.WordUtils;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -65,8 +49,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-import static android.R.attr.width;
-import static android.support.v7.appcompat.R.attr.height;
 import static java.lang.Thread.sleep;
 
 /**
@@ -78,23 +60,19 @@ import static java.lang.Thread.sleep;
  * create an instance of this fragment.
  */
 public class MemeDetailsFragment extends Fragment {
-    private MyApplication mApplication;
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-    private static final String ARG_PARAM3 = "param3";
     private static final String TAG = "Details";
-    // TODO: Rename and change types of parameters
+    private MyApplication mApplication;
+    private static String mName;
+
+
+    static MemeObject mMemeObject;
+
     private View mView;
-    private String mMemeName;
-    private Integer mMemeID;
-    private Integer mMemePrice;
-    private Integer mStocksOwned;
     private TextView mMemeTitleView;
     private TextView mPriceView;
     private ImageButton mImageView;
     private Integer mIconId;
+    private TextView mDifference;
     private TextView mStocksOwnedView;
     private Button mSellButton;
     private Button mBuyButton;
@@ -117,6 +95,8 @@ public class MemeDetailsFragment extends Fragment {
     private  MotionEvent mMotionEvent;
 
     private ProgressDialog mProgressDialog;
+    private ImageView mUpDownArrowView;
+    private TextView mKYMURL;
 
     public MemeDetailsFragment() {
         // Required empty public constructor
@@ -128,16 +108,17 @@ public class MemeDetailsFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
+     * @param price
+     * @param mAmountOwned
      * @return A new instance of fragment MemeDetailsFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static MemeDetailsFragment newInstance(String name, Integer price, Integer owned) {
+    public static MemeDetailsFragment newInstance(Integer ID, MemeObject selectedMemeObject, Integer amountOwned) {
         MemeDetailsFragment fragment = new MemeDetailsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, name);
-        args.putInt(ARG_PARAM2, price);
-        args.putInt(ARG_PARAM3, owned);
-        fragment.setArguments(args);
+        mMemeObject = selectedMemeObject;
+        mMemeObject.mSharesHeld = amountOwned;
+
+
         return fragment;
     }
 
@@ -150,13 +131,7 @@ public class MemeDetailsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mMemeName = getArguments().getString(ARG_PARAM1);
-            mMemePrice = getArguments().getInt(ARG_PARAM2);
-            mStocksOwned = getArguments().getInt(ARG_PARAM3);
-            Log.e(TAG, "memename: " + mMemeName);
-            Log.e(TAG, "memename: " + mMemePrice.toString());
-        }
+        Log.e(TAG, "memename: " + mMemeObject.mPrice.toString());
 
         //create motion event for hacky fix graphview bug
         long downTime = SystemClock.uptimeMillis();
@@ -188,6 +163,9 @@ public class MemeDetailsFragment extends Fragment {
             mApplication = (MyApplication) getActivity().getApplicationContext();
             mMemeTitleView = (TextView) mView.findViewById(R.id.detail_meme_title);
             mPriceView = (TextView) mView.findViewById(R.id.detail_meme_price);
+            mDifference = (TextView) mView.findViewById(R.id.detail_meme_price_difference);
+            mKYMURL = (TextView) mView.findViewById(R.id.kym_url);
+            mUpDownArrowView = (ImageView) mView.findViewById(R.id.detail_updown_arrow);
             mImageView = (ImageButton) mView.findViewById(R.id.memeIcon);
             mStocksOwnedView = (TextView) mView.findViewById(R.id.stocks_owned);
             mSellButton = (Button) mView.findViewById(R.id.sell_stock_button);
@@ -200,24 +178,46 @@ public class MemeDetailsFragment extends Fragment {
             mYearButton = (ToggleButton) mView.findViewById(R.id.YearButton);
             final ImageView expandedImageView = (ImageView) mView.findViewById(R.id.expanded_image);
 
-            String nameToDisplay = mMemeName.replace("meme", "");
+            String nameToDisplay = mMemeObject.mName.replace("meme", "");
             nameToDisplay = WordUtils.capitalize(nameToDisplay);
             mMemeTitleView.setText(nameToDisplay);
-            mPriceView.setText("$"+mMemePrice.toString());
+            mPriceView.setText("$"+mMemeObject.mPrice.toString());
 
-            mStocksOwnedView.setText(mStocksOwned.toString());
-            mGraphTitle.setText(mMemeName + "'s stock trend" );
+            DecimalFormat df = new DecimalFormat("#0.0#");
+            float priceDiff = mMemeObject.mPrice - mMemeObject.mLastPrice;
+            if(priceDiff != 0)
+            {
+                priceDiff = (priceDiff/(float)mMemeObject.mPrice)*100;
+            }
+            if(priceDiff>=0)
+            {
+                mDifference.setText("+" + df.format(priceDiff) + "%");
+                mUpDownArrowView.setBackgroundResource(R.mipmap.ic_action_arrow_drop_up);
+                mDifference.setTextColor(mView.getResources().getColor(R.color.accent));
+            }
+            else
+            {
+                mDifference.setText(df.format(priceDiff) + "%");
+                mUpDownArrowView.setBackgroundResource(R.mipmap.ic_action_arrow_drop_down);
+                mDifference.setTextColor(mView.getResources().getColor(R.color.myRed));
+            }
 
-            String iconName = "icon_" + mMemeName.replaceAll(" ", "_").toLowerCase();
+            try{
+                mStocksOwnedView.setText(mMemeObject.mSharesHeld.toString());
+            } catch (NullPointerException e ) {
+                Log.v(TAG, e.toString());
+            }
+            mGraphTitle.setText(mMemeObject.mName + "'s stock trend" );
+
+            mKYMURL.setText(Html.fromHtml(String.format("<a href=\"%s\">[KnowYourMeme.com]</a>",mMemeObject.mLink)));
+            mKYMURL.setMovementMethod(LinkMovementMethod.getInstance());
+
+
+            String iconName = "icon_" + mMemeObject.mName.replaceAll(" ", "_").toLowerCase();
             mIconId = getResources().getIdentifier(iconName, "drawable", MainActivity.PACKAGE_NAME);
             Log.e(TAG, mImageView.toString());
             Picasso.with(mView.getContext()).load(mIconId).fit().centerCrop().into(mImageView);
 
-//            Blurry.with(mView.getContext()).capture(detailsLinearLayout).into(expandedImageView);
-//            Blurry.with(mView.getContext()).radius(25).sampling(2).async().animate(500).onto(detailsLinearLayout);
-//
-            mProgressDialog = new ProgressDialog(mView.getContext());
-            mProgressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             mImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -226,11 +226,11 @@ public class MemeDetailsFragment extends Fragment {
                     detailsLinearLayout.setAlpha(0.4f);
                     detailsLinearLayout.setBackground(new ColorDrawable(0xE6000000));
 
-                            mProgressDialog.show();
+                    setProgressDialog(true);
                     Picasso.with(mView.getContext()).load(mIconId).fit().centerInside().into(expandedImageView, new Callback() {
                         @Override
                         public void onSuccess() {
-                            mProgressDialog.dismiss();
+                            setProgressDialog(false);
                             MyHelper.zoomImageFromThumb(mImageView, expandedImageView, mView, detailsLinearLayout);
                         }
 
@@ -489,9 +489,8 @@ public class MemeDetailsFragment extends Fragment {
         return true;
     }
 
-    public void updateOwned(Map<Integer, Integer> owned, Map<String , Integer> nametoID) {
-        mMemeIDtoAmountHeld = owned;
-        mMemeNametoIDMap = nametoID;
+    public void updateOwned(Integer owned) {
+        mMemeObject.mSharesHeld = owned;
     }
 
     public void updateStocksOwned(Integer owned) {
@@ -517,6 +516,13 @@ public class MemeDetailsFragment extends Fragment {
         mPriceView.setText("$" + price.toString());
     }
 
+    public void setGraphProgressDialog(boolean wait) {
+
+        /*TODO: graphview loading*/
+        return;
+
+    }
+
 
     /**
      * This interface must be implemented by activities that contain this
@@ -531,5 +537,18 @@ public class MemeDetailsFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onMemeDetailsFragmentInteraction(String arg);
+    }
+
+
+    private void setProgressDialog(boolean wait) {
+
+        if (wait) {
+            mProgressDialog=ProgressDialog.show(this.getContext(),null,null);
+            mProgressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            mProgressDialog.setContentView(new ProgressBar(this.getContext()));
+        } else {
+            mProgressDialog.dismiss();
+        }
+
     }
 }

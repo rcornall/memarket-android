@@ -13,12 +13,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+
+import com.robthecornallgmail.memarket.Util.MemeObject;
 import com.robthecornallgmail.memarket.Util.MyDividerItemDecoration;
 
 import com.robthecornallgmail.memarket.R;
 import com.robthecornallgmail.memarket.Util.MemeRow;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -115,12 +118,12 @@ public class ListMemesFragment extends Fragment {
         mListener = null;
     }
 
-    public void updateList(Map<String, Integer> stocks, Map<String, Integer> lastStocks) {
+    public void updateList(HashMap<Integer,MemeObject> memeIDtoObject) {
         if(memeRowList != null && !memeRowList.isEmpty()) {
             memeRowList.clear();
         }
-        for (Map.Entry<String , Integer> entry: stocks.entrySet()) {
-            MemeRow meme = new MemeRow(entry.getKey(), entry.getValue(), lastStocks.get(entry.getKey()));
+        for (Map.Entry<Integer , MemeObject> entry: memeIDtoObject.entrySet()) {
+            MemeRow meme = new MemeRow(entry.getKey(), entry.getValue().mName, entry.getValue().mPrice, entry.getValue().mLastPrice);
             memeRowList.add(meme);
             mAdapter.mItemsCopy.add(meme);
         }
