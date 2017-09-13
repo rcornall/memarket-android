@@ -1,6 +1,7 @@
 package com.robthecornallgmail.memarket.Fragments;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,9 @@ import android.widget.TextView;
 import com.robthecornallgmail.memarket.R;
 import com.robthecornallgmail.memarket.Util.OrderRow;
 
+import org.w3c.dom.Text;
+
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -29,12 +33,15 @@ public class OrdersListAdapter extends RecyclerView.Adapter<OrdersListAdapter.Vi
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.leaderboard_row, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_order_row, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, final int position) {
+        holder.mUsernameView.setText(mRows.get(position).mName);
+        holder.mAmount.setText(mRows.get(position).mAmount.toString());
+        holder.mPrice.setText(mRows.get(position).mPrice.toString());
 
     }
 
@@ -46,17 +53,17 @@ public class OrdersListAdapter extends RecyclerView.Adapter<OrdersListAdapter.Vi
     public class ViewHolder extends RecyclerView.ViewHolder{
 
         public final TextView mUsernameView;
-        public final TextView mMoneyView;
-        public final TextView mPositionView;
+        public final TextView mAmount;
+        public final TextView mPrice;
 
         public final View mView;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mUsernameView = (TextView) view.findViewById(R.id.leaderboard_username);
-            mMoneyView = (TextView) view.findViewById(R.id.leaderboard_money);
-            mPositionView = (TextView) view.findViewById(R.id.leaderboard_position);
+            mUsernameView = (TextView) view.findViewById(R.id.order_user_name);
+            mAmount = (TextView) view.findViewById(R.id.order_amount);
+            mPrice = (TextView) view.findViewById(R.id.order_price);
         }
 
     }

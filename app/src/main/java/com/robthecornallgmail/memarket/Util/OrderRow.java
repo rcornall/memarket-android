@@ -4,6 +4,7 @@ package com.robthecornallgmail.memarket.Util;
  * Created by rob on 12/09/17.
  */
 public class OrderRow {
+    public Integer mOrderID;
     public Integer mUserID;
     public String mName;
     public Integer mMemeID;

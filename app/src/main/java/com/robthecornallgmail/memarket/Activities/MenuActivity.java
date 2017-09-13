@@ -10,6 +10,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
@@ -99,6 +100,8 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     private ProgressDialog mProgressDialog;
 
     private Button mSettingsWheelButton, mLeaderboardButton;
+    RelativeLayout mAddMemeLayout;
+    FloatingActionButton mAddMemeButton;
     /*graph stuff*/
     private GraphView mGraphView;
     private GetGraphData mGetGraphTask;
@@ -106,6 +109,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     private DateRange mDateRange = DateRange.DAY;
     /*maps holding various data*/
     static HashMap<Integer, MemeObject> mMemeIdtoObject = new HashMap<>();
+    HashMap<Integer, OrderRow> mOrderIdtoOrderRow = new HashMap<>();
     private Map<Integer, LineGraphSeries<DataPoint>> mMemeIDtoSeriesMap = new HashMap<>();
     private Map<String,Integer> mLeaderboardUsersToMoneyMap = new LinkedHashMap<>(); //preserves ordering in HashMap
     private HashMap<Integer, ItemObject> mItemsIdToObject = new HashMap<>();
@@ -123,6 +127,8 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     OrdersListFragment mOrdersListFragment;
     LeaderboardDialogFragment mLeaderboardDialogFragment;
     BagGridFragment mBagGridFragment;
+
+    FrameLayout mMemeListFrameLayout, mMemeDetailsFrameLayout, mMemeOrdersFrameLayout;
 
 
     HouseSurfaceView mHouseSurfaceView;
@@ -194,6 +200,20 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
             }
         });
 
+        mAddMemeLayout = (RelativeLayout) findViewById(R.id.add_meme_layout);
+        mAddMemeLayout.setVisibility(View.GONE);
+        mAddMemeButton = (FloatingActionButton) findViewById(R.id.add_meme_fab);
+        mAddMemeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                /*TODO: fragment for adding a new meme submission
+                * initial investment
+                * image
+                * */
+            }
+        });
+
+
 
         final ImageView characterIcon = (ImageView) findViewById(R.id.character_icon);
         characterIcon.post(new Runnable() {
@@ -225,8 +245,9 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         linearLayoutTabButtons.setBackgroundColor(getResources().getColor(R.color.backgroundGrey));
 
         /* get framelayouts for fragments*/
-        final FrameLayout flListFragment = (FrameLayout) findViewById(R.id.meme_list_fragment);
-        final FrameLayout flDetailsFragment = (FrameLayout) findViewById(R.id.meme_details_fragment);
+        mMemeListFrameLayout = (FrameLayout) findViewById(R.id.meme_list_fragment);
+        mMemeDetailsFrameLayout = (FrameLayout) findViewById(R.id.meme_details_fragment);
+        mMemeOrdersFrameLayout = (FrameLayout) findViewById(R.id.orders_list_fragment);
 
         /* add list fragment and hide it first (for home view to show) */
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -235,7 +256,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         /* add bag grid fragment (first to show as default) */
         transaction.add(R.id.inventory_bag_fragment, mBagGridFragment);
         transaction.commit();
-        flListFragment.setVisibility(View.GONE);
+        mMemeListFrameLayout.setVisibility(View.GONE);
 
 
 
@@ -263,8 +284,12 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 Log.v(TAG, "SET TO INVISIBLE DONE");
 //                mSearchView.setVisibility(View.VISIBLE);
                 searchBar.setVisibility(View.VISIBLE);
-                flListFragment.setVisibility(View.VISIBLE);
-                flDetailsFragment.setVisibility(View.VISIBLE);
+                mMemeOrdersFrameLayout.setVisibility(View.VISIBLE);
+                mMemeListFrameLayout.setVisibility(View.VISIBLE);
+                mMemeDetailsFrameLayout.setVisibility(View.VISIBLE);
+                if(getSupportFragmentManager().getBackStackEntryCount() == 1){
+                    mAddMemeLayout.setVisibility(View.VISIBLE);
+                }
                 dragDownButton.setAlpha(0.5f);
 //                try {
 //                    mMemeListFragment.updateList(mMemeNametoStockMap);
@@ -282,10 +307,12 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 storeHighlight.setVisibility(View.INVISIBLE);
                 findMemesHighlight.setVisibility(View.INVISIBLE);
 
-                flDetailsFragment.setVisibility(View.GONE);
-                flListFragment.setVisibility(View.GONE);
+                mMemeDetailsFrameLayout.setVisibility(View.GONE);
+                mMemeListFrameLayout.setVisibility(View.GONE);
+                mMemeOrdersFrameLayout.setVisibility(View.GONE);
 //                mSearchView.setVisibility(View.GONE);
                 searchBar.setVisibility(View.GONE);
+                mAddMemeLayout.setVisibility(View.GONE);
                 mHouseSurfaceView.setVisibility(View.VISIBLE);
                 mInsideHouseSurfaceView.setVisibility(View.INVISIBLE);
 
@@ -559,6 +586,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         transaction.add(R.id.meme_details_fragment, mMemeDetailsFragment);
         transaction.commit();
         mSearchView.setVisibility(View.GONE);
+        mAddMemeLayout.setVisibility(View.GONE);
 
         mMemeDetailsFragment.setGraphProgressDialog(true);
 
@@ -588,10 +616,14 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     @Override
     public void onBackPressed() {
         FragmentManager fm = getSupportFragmentManager();
-        if (fm.getBackStackEntryCount() >= 2) {
-            Log.i("MainActivity", "popping backstack");
+        if (fm.getBackStackEntryCount() > 2) {
+            Log.i("MainActivity", "popping backstack  > 2");
+            fm.popBackStackImmediate();
+        } else if (fm.getBackStackEntryCount() == 2) {
+            Log.i("MainActivity", "popping backstack == 2");
             fm.popBackStackImmediate();
             mSearchView.setVisibility(View.VISIBLE);
+            mAddMemeLayout.setVisibility(View.VISIBLE);
         } else {
             /* hide insidehouse view if visible */
             if(mInsideHouseSurfaceView.getVisibility() == View.VISIBLE)
@@ -760,6 +792,9 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
             }
 
             try {
+                if (strings[1].equals("GETTING_BUY_ORDERS") || strings[1].equals("GETTING_SELL_ORDERS")) {
+//                    mOrderIdtoOrderRow.clear(); /*refresh with new values*/
+                }
                 JSONArray jsonArray = new JSONArray(serverResponse);
                 for(int i=0; i < jsonArray.length(); i++)
                 {
@@ -823,11 +858,30 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                             Log.v(TAG, e.toString());
                         }
                         mUserItemIdToUsersItems.put(USER_ITEM_ID, new UserItem(ITEM_ID,ITEM_AMOUNT,EQUIPPED,X_COORDINATE,WORKING_AT,WORKING_POSITION, WORKER_LEVEL));
+                    } else if (strings[1].equals("GETTING_BUY_ORDERS") || strings[1].equals("GETTING_SELL_ORDERS")) {
+                        /*TODO: put buy orders in then in postexecute update adapter, then load views into each row of adapter with data, then make new buy order button work*/
+
+                        Integer ORDER_ID;
+                        if(strings[1].equals("GETTING_BUY_ORDERS")) {
+                            ORDER_ID = jsonObject.getInt("buy_order_id");
+                        } else {
+                            ORDER_ID = jsonObject.getInt("sell_order_id");
+                        }
+                        Integer USER_ID = jsonObject.getInt("user_id");
+                        Integer MEME_ID = jsonObject.getInt("meme_id");
+                        String USER_NAME = jsonObject.getString("user_name");
+                        Integer AMOUNT = jsonObject.getInt("amount");
+                        Integer PRICE = jsonObject.getInt("price");
+                        String DATE = jsonObject.getString("date");
+                        mOrderIdtoOrderRow.put(ORDER_ID, new OrderRow(USER_ID,USER_NAME,MEME_ID,AMOUNT,PRICE,DATE));
                     } else {
                         Result.success = false;
                         Log.e(TAG, "params wrong..");
                         return  Result;
                     }
+                }
+                for(OrderRow order  :mOrderIdtoOrderRow.values()) {
+                    Log.v(TAG, "order: " + order.mAmount);
                 }
                 Result.success = true;
             } catch (JSONException e) {
@@ -889,6 +943,10 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                     }
                 } else if(mRequest.equals("GETTING_USER_STOCKS")){
 //                    mMemeDetailsFragment.updateOwned(mMemeIdtoObject.get(mSelectedMemeID).mSharesHeld);
+                } else if(mRequest.equals("GETTING_BUY_ORDERS") || mRequest.equals("GETTING_SELL_ORDERS")){
+                    mOrdersListFragment.updateList(mOrderIdtoOrderRow);
+                    Log.v(TAG, mOrderIdtoOrderRow.get(1).mName);
+                    Log.v(TAG, "getting buy or sell orders");
                 } else {
                     Log.v(TAG, "NOT SPECIFIED REQUEST TYPE");
                 }

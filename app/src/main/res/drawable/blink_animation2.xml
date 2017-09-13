@@ -4,31 +4,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:drawable="@drawable/character_icon0"
-        android:duration="3400" />
-    <item
-        android:drawable="@drawable/character_icon1"
-        android:duration="100" />
-    <item
-        android:drawable="@drawable/character_icon2"
-        android:duration="100" />
-    <item
-        android:drawable="@drawable/character_icon1"
-        android:duration="150" />
-    <item
-        android:drawable="@drawable/character_icon0"
-        android:duration="3400" />
-    <item
-        android:drawable="@drawable/character_icon1"
-        android:duration="100" />
-    <item
-        android:drawable="@drawable/character_icon2"
-        android:duration="100" />
-    <item
-        android:drawable="@drawable/character_icon1"
-        android:duration="150" />
-    <item
-        android:drawable="@drawable/character_icon0"
-        android:duration="3000" />
+        android:duration="2400" />
     <item
         android:drawable="@drawable/character_icon1"
         android:duration="100" />
@@ -52,7 +28,31 @@
         android:duration="150" />
     <item
         android:drawable="@drawable/character_icon0"
-        android:duration="3700" />
+        android:duration="2500" />
+    <item
+        android:drawable="@drawable/character_icon1"
+        android:duration="100" />
+    <item
+        android:drawable="@drawable/character_icon2"
+        android:duration="100" />
+    <item
+        android:drawable="@drawable/character_icon1"
+        android:duration="150" />
+    <item
+        android:drawable="@drawable/character_icon0"
+        android:duration="2000" />
+    <item
+        android:drawable="@drawable/character_icon1"
+        android:duration="100" />
+    <item
+        android:drawable="@drawable/character_icon2"
+        android:duration="100" />
+    <item
+        android:drawable="@drawable/character_icon1"
+        android:duration="150" />
+    <item
+        android:drawable="@drawable/character_icon0"
+        android:duration="2700" />
     <item
         android:drawable="@drawable/character_icon1"
         android:duration="100" />
