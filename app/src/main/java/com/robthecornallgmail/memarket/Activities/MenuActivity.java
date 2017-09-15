@@ -560,6 +560,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     @Override
     public void onListFragmentInteraction(MemeRow row)
     {
+        mOrdersListFragment.clearList();
         mSelectedMemeID = row.mID;
         Integer mAmountOwned = 0;
         try {
@@ -675,7 +676,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
             transaction.addToBackStack(null);
             transaction.add(R.id.orders_list_fragment, mOrdersListFragment);
             transaction.commit();
-
+//            mOrdersListFragment.show(getFragmentManager(), TAG);
             new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getOrders.php?buy=true", "GETTING_BUY_ORDERS");
         }
         else
@@ -699,6 +700,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
             transaction.addToBackStack(null);
             transaction.add(R.id.orders_list_fragment, mOrdersListFragment);
             transaction.commit();
+//            mOrdersListFragment.show(getFragmentManager(), TAG);
 
             new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getOrders.php?sell=true", "GETTING_SELL_ORDERS");
         }
@@ -859,7 +861,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                         }
                         mUserItemIdToUsersItems.put(USER_ITEM_ID, new UserItem(ITEM_ID,ITEM_AMOUNT,EQUIPPED,X_COORDINATE,WORKING_AT,WORKING_POSITION, WORKER_LEVEL));
                     } else if (strings[1].equals("GETTING_BUY_ORDERS") || strings[1].equals("GETTING_SELL_ORDERS")) {
-                        /*TODO: put buy orders in then in postexecute update adapter, then load views into each row of adapter with data, then make new buy order button work*/
+                        /*TODO: make new buy order button work*/
 
                         Integer ORDER_ID;
                         if(strings[1].equals("GETTING_BUY_ORDERS")) {
@@ -943,10 +945,14 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                     }
                 } else if(mRequest.equals("GETTING_USER_STOCKS")){
 //                    mMemeDetailsFragment.updateOwned(mMemeIdtoObject.get(mSelectedMemeID).mSharesHeld);
-                } else if(mRequest.equals("GETTING_BUY_ORDERS") || mRequest.equals("GETTING_SELL_ORDERS")){
-                    mOrdersListFragment.updateList(mOrderIdtoOrderRow);
+                } else if(mRequest.equals("GETTING_BUY_ORDERS")) {
+                    mOrdersListFragment.updateList(mOrderIdtoOrderRow, mSelectedMemeID, mMemeIdtoObject.get(mSelectedMemeID), "Sell");
                     Log.v(TAG, mOrderIdtoOrderRow.get(1).mName);
-                    Log.v(TAG, "getting buy or sell orders");
+                    Log.v(TAG, "getting  buy orders");
+                } else if(mRequest.equals("GETTING_SELL_ORDERS")) {
+                    mOrdersListFragment.updateList(mOrderIdtoOrderRow, mSelectedMemeID, mMemeIdtoObject.get(mSelectedMemeID), "Buy");
+                    Log.v(TAG, mOrderIdtoOrderRow.get(1).mName);
+                    Log.v(TAG, "getting  sell orders");
                 } else {
                     Log.v(TAG, "NOT SPECIFIED REQUEST TYPE");
                 }

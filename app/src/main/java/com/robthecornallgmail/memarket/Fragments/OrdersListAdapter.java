@@ -39,6 +39,12 @@ public class OrdersListAdapter extends RecyclerView.Adapter<OrdersListAdapter.Vi
 
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
+        if( position%2 == 0) {
+            holder.mView.setBackgroundColor(holder.mView.getResources().getColor(R.color.colorMySlightlyBetweenGreylight));
+        }
+        else {
+            holder.mView.setBackgroundColor(holder.mView.getResources().getColor(R.color.colorMySlightlyBetweenGreyDark));
+        }
         holder.mUsernameView.setText(mRows.get(position).mName);
         holder.mAmount.setText(mRows.get(position).mAmount.toString());
         holder.mPrice.setText(mRows.get(position).mPrice.toString());

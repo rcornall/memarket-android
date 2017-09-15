@@ -344,7 +344,7 @@ public class MemeDetailsFragment extends Fragment {
                     }
                 }
             });
-            mBuyButton.setBackgroundColor(getResources().getColor(R.color.colorMySlightlyBetweenGreylight));
+            mBuyButton.setBackgroundColor(getResources().getColor(R.color.colorMySlightlyBetweenGreyDark));
             mBuyButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -353,7 +353,7 @@ public class MemeDetailsFragment extends Fragment {
                 }
             });
 
-            mSellButton.setBackgroundColor(getResources().getColor(R.color.colorMySlightlyBetweenGreylight));
+            mSellButton.setBackgroundColor(getResources().getColor(R.color.colorMySlightlyBetweenGreyDark));
             mSellButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
