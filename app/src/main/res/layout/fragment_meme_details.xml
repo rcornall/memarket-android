@@ -9,7 +9,7 @@
 
 
 
-<LinearLayout
+    <LinearLayout
     android:id="@+id/details_linear_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -17,7 +17,7 @@
     >
 
 
-    <RelativeLayout
+        <RelativeLayout
         android:id="@+id/topLayoutDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -28,25 +28,25 @@
     >
 
 
-        <LinearLayout
+            <LinearLayout
             android:id="@+id/title_and_percent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/memeIcon">
+            android:layout_toStartOf="@+id/memeIcon">
 
-            <TextView
+                <TextView
                 android:id="@+id/detail_meme_title"
                 android:layout_width="0dp"
                 android:layout_weight="86.6"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
+                android:layout_marginBottom="2dp"
                 android:textStyle="bold"
                 android:textSize="18sp"
                 android:textColor="@color/greenWhite"
                 android:text="Name of Mememe"
                 />
 
-            <ImageView
+                <ImageView
                 android:id="@+id/detail_updown_arrow"
                 android:layout_marginTop="-2dp"
                 android:layout_marginRight="-7dp"
@@ -54,7 +54,7 @@
                 android:layout_height="30dp"
                 android:layout_toLeftOf="@+id/detail_meme_price_difference"
                 android:background="@mipmap/ic_action_arrow_drop_up"/>
-            <TextView
+                <TextView
 
                 android:id="@+id/detail_meme_price_difference"
                 android:layout_width="wrap_content"
@@ -66,60 +66,69 @@
                 android:textSize="18sp"
                 android:textColor="@color/monokaiGreen"
                 />
-        </LinearLayout>
-        <ImageButton
-        android:id="@+id/memeIcon"
-        app:srcCompat="@drawable/icon_high_guy_meme"
-        android:background="@android:drawable/picture_frame"
-        android:backgroundTint="@color/pictureFrame"
-        android:layout_marginStart="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:scaleType="centerCrop"/>
-        <TextView
-            android:id="@+id/starting_at"
+            </LinearLayout>
+            <ImageButton
+                android:id="@+id/memeIcon"
+                app:srcCompat="@drawable/icon_high_guy_meme"
+                android:background="@android:drawable/picture_frame"
+                android:backgroundTint="@color/pictureFrame"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:scaleType="centerCrop"/>
+            <View
+            android:id="@+id/line_below_title"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginBottom="4dp"
+            android:layout_toStartOf="@id/memeIcon"
             android:layout_below="@id/title_and_percent"
+            android:background="@color/greenWhiteFaded"/>
+            <TextView
+            android:id="@+id/starting_at"
+            android:layout_below="@id/line_below_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Starting At: "
             android:textColor="@color/greenWhite"
             />
-        <TextView
+            <TextView
             android:id="@+id/detail_meme_price"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/title_and_percent"
+            android:layout_below="@id/line_below_title"
             android:layout_toRightOf="@+id/starting_at"
             android:layout_toEndOf="@+id/starting_at"
             android:text="$0"
             android:textColor="@android:color/white"
             />
-        <TextView
+            <TextView
             android:id="@+id/buyers_amount_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""/>
 
 
-        <!--<TextView-->
+            <!--<TextView-->
             <!--android:id="@+id/dataFromServer"-->
             <!--android:layout_height="wrap_content"-->
             <!--android:layout_width="wrap_content"-->
             <!--android:layout_below="@id/detail_meme_title"-->
             <!--android:text="Loading a description of the meme from knowyourmeme.com: description description description description description description description description ."-->
 
+
             <!--android:minLines="2"-->
-            <!--android:maxLines="6"-->
-            <!--android:ellipsize="none"-->
-            <!--android:scrollHorizontally="false"-->
-            <!--android:textSize="10sp"-->
-            <!--android:textColor="@color/greenWhite"-->
-            <!--android:layout_toLeftOf="@+id/memeIcon"-->
-            <!--android:layout_alignParentLeft="true"-->
-            <!--android:layout_alignParentStart="true" />-->
+        <!--android:maxLines="6"-->
+        <!--android:ellipsize="none"-->
+        <!--android:scrollHorizontally="false"-->
+        <!--android:textSize="10sp"-->
+        <!--android:textColor="@color/greenWhite"-->
+        <!--android:layout_toLeftOf="@+id/memeIcon"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_alignParentStart="true" />-->
 
 
         <TextView
@@ -167,7 +176,7 @@
 
             <Button
                 android:id="@+id/buy_stock_button"
-                android:background="?attr/selectableItemBackground"
+                android:background="@drawable/buy_sell_button"
                 android:text="BUY"
                 android:clickable="true"
                 android:focusable="true"
@@ -184,7 +193,7 @@
 
             <Button
                 android:id="@+id/sell_stock_button"
-                android:background="?attr/selectableItemBackground"
+                android:background="@drawable/buy_sell_button"
                 android:text="SELL"
                 android:clickable="true"
                 android:focusable="true"
@@ -239,7 +248,7 @@
                 android:layout_height="wrap_content"
                 style="@style/graph_button_style"
                 android:id="@+id/DayButton"
-                android:background="@drawable/button_with_border"
+                android:background="@drawable/buy_order_button"
                 android:layout_weight="25"
                 />
             <View
@@ -255,7 +264,7 @@
                 android:layout_height="wrap_content"
                 style="@style/graph_button_style"
                 android:id="@+id/WeekButton"
-                android:background="@drawable/button_with_border"
+                android:background="@drawable/buy_order_button"
                 android:layout_weight="25"
                 />
             <View
@@ -271,7 +280,7 @@
                 style="@style/graph_button_style"
                 android:textSize="8sp"
                 android:id="@+id/MonthButton"
-                android:background="@drawable/button_with_border"
+                android:background="@drawable/buy_order_button"
                 android:layout_weight="25"
                 />
             <View
@@ -286,7 +295,7 @@
                 android:layout_height="wrap_content"
                 style="@style/graph_button_style"
                 android:id="@+id/YearButton"
-                android:background="@drawable/button_with_border"
+                android:background="@drawable/buy_order_button"
                 android:layout_weight="25"
                 />
         </LinearLayout>

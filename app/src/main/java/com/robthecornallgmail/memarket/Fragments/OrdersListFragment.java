@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -37,6 +38,7 @@ public class OrdersListFragment  extends Fragment {
     OnOrdersListFragmentInteractionListener mListener;
     TextView mTitle;
     ImageView mIcon;
+    Button mPlaceBuyOrder;
 
     public OrdersListFragment() {
         mOrderRows = new ArrayList<>();
@@ -54,6 +56,7 @@ public class OrdersListFragment  extends Fragment {
 //        view.setBackgroundColor(getResources().getColor(R.color.colorMyGrey)); /* covers up drop down arrow */
         mTitle = (TextView) view.findViewById(R.id.orders_text_title);
         mIcon = (ImageView) view.findViewById(R.id.orders_meme_icon);
+        mPlaceBuyOrder = (Button) view.findViewById(R.id.new_buy_order_button);
         RecyclerView rview = (RecyclerView) view.findViewById(R.id.orders_list_rv);
         rview.setLayoutManager(new LinearLayoutManager(view.getContext()));
         rview.setAdapter(mAdapter);
@@ -71,6 +74,11 @@ public class OrdersListFragment  extends Fragment {
     public void updateList(HashMap<Integer, OrderRow> orderIDtoRow, Integer selectedMemeID, MemeObject memeObject, String sell) {
         mOrderRows.clear();
         mTitle.setText(sell + " orders for " + memeObject.mName);
+        if(sell == "SELL") {
+            mPlaceBuyOrder.setText("PLACE BUY ORDER");
+        } else {
+            mPlaceBuyOrder.setText("PLACE SELL ORDER");
+        }
         String iconName = "icon_" + memeObject.mName.replaceAll(" ", "_").toLowerCase();
 
         int iconId = getContext().getResources().getIdentifier(iconName, "drawable", MainActivity.PACKAGE_NAME);

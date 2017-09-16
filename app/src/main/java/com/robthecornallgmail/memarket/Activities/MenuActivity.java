@@ -693,7 +693,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 //            {
 //                new MenuActivity.PurchaseStockFromServer(mApplication.userData.getID(), mSelectedMemeID, 1).execute(Defines.SERVER_ADDRESS + "/sellStock.php");
 //            }
-            setProgressDialog(true);
+//            setProgressDialog(true);
             Log.v(TAG, "sell called" + mMemeIdtoObject.get(mSelectedMemeID).mName);
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.setCustomAnimations(R.anim.enter_from_bottom, 0);

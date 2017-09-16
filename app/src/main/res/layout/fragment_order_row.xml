@@ -49,13 +49,14 @@
 
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="49dp"
         android:layout_weight="30">
         <Button
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="Purchase"
-            android:background="@drawable/my_buy_background"/>
+            android:textColor="@color/accent"
+            android:background="@drawable/purchase_button"/>
     </LinearLayout>
 
 
