@@ -10,9 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:paddingTop="@dimen/activity_vertical_margin"
-
-        android:background="@color/colorMyGrey">
+        android:paddingTop="@dimen/activity_vertical_margin">
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -46,14 +44,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
                 android:layout_marginTop="4dp"
-                android:layout_marginBottom="4dp"
-                android:background="@color/colorMyOffGrey"
+                android:layout_marginBottom="5dp"
+                android:background="@color/greenWhiteFaded"
                 android:layout_below="@id/orders_meme_icon"/>
         </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin">
             <LinearLayout
                 android:id="@+id/orders_title_layout"
                 android:layout_marginLeft="18dp"
@@ -61,18 +61,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <TextView
+                    android:id="@+id/order_maker"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="SELLER"
                     android:textColor="@color/greenWhiter"
-                    android:layout_weight="35"/>
+                    android:layout_weight="25"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:text="AMOUNT"
                     android:textColor="@color/greenWhiter"
-                    android:layout_weight="17.5"/>
+                    android:layout_weight="20"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -90,9 +91,8 @@
             <View
                 android:id="@+id/order_bottom"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_alignParentBottom="true"
-                android:background="@color/colorMyGrey"/>
+                android:layout_height="6dp"
+                android:layout_alignParentBottom="true"/>
             <Button
                 android:id="@+id/new_buy_order_button"
                 android:layout_width="match_parent"

@@ -47,7 +47,7 @@ public class OrdersListAdapter extends RecyclerView.Adapter<OrdersListAdapter.Vi
         }
         holder.mUsernameView.setText(mRows.get(position).mName);
         holder.mAmount.setText(mRows.get(position).mAmount.toString());
-        holder.mPrice.setText(mRows.get(position).mPrice.toString());
+        holder.mPrice.setText("$ " + mRows.get(position).mPrice.toString());
 
     }
 

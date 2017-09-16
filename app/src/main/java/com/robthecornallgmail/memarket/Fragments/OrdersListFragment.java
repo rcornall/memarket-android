@@ -22,6 +22,8 @@ import com.robthecornallgmail.memarket.Util.MemeObject;
 import com.robthecornallgmail.memarket.Util.OrderRow;
 import com.squareup.picasso.Picasso;
 
+import org.apache.commons.lang3.text.WordUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +38,7 @@ public class OrdersListFragment  extends Fragment {
     List<OrderRow> mOrderRows;
     OrdersListAdapter mAdapter;
     OnOrdersListFragmentInteractionListener mListener;
-    TextView mTitle;
+    TextView mTitle, mOrderMaker;
     ImageView mIcon;
     Button mPlaceBuyOrder;
 
@@ -55,6 +57,7 @@ public class OrdersListFragment  extends Fragment {
         View view = inflater.inflate(R.layout.fragment_orders_list, container, false);
 //        view.setBackgroundColor(getResources().getColor(R.color.colorMyGrey)); /* covers up drop down arrow */
         mTitle = (TextView) view.findViewById(R.id.orders_text_title);
+        mOrderMaker = (TextView) view.findViewById(R.id.order_maker);
         mIcon = (ImageView) view.findViewById(R.id.orders_meme_icon);
         mPlaceBuyOrder = (Button) view.findViewById(R.id.new_buy_order_button);
         RecyclerView rview = (RecyclerView) view.findViewById(R.id.orders_list_rv);
@@ -73,11 +76,13 @@ public class OrdersListFragment  extends Fragment {
 
     public void updateList(HashMap<Integer, OrderRow> orderIDtoRow, Integer selectedMemeID, MemeObject memeObject, String sell) {
         mOrderRows.clear();
-        mTitle.setText(sell + " orders for " + memeObject.mName);
-        if(sell == "SELL") {
+        mTitle.setText(sell + " orders for " + WordUtils.capitalize(memeObject.mName));
+        if(sell.toUpperCase().equals("SELL")) {
             mPlaceBuyOrder.setText("PLACE BUY ORDER");
+            mOrderMaker.setText("SELLER");
         } else {
             mPlaceBuyOrder.setText("PLACE SELL ORDER");
+            mOrderMaker.setText("BUYER");
         }
         String iconName = "icon_" + memeObject.mName.replaceAll(" ", "_").toLowerCase();
 

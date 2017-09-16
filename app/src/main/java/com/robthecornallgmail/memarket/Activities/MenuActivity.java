@@ -365,8 +365,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
                 //clear old graph data so we forced to get new ones
                 try {
-                    for(MemePastData it : mGraphDataObjectMap.values())
-                    {
+                    for(MemePastData it : mGraphDataObjectMap.values()){
                         it.setNotDone();
                     }
                 } catch (Exception e) {
