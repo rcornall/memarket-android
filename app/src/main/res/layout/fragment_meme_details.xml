@@ -39,7 +39,6 @@
                 android:layout_width="0dp"
                 android:layout_weight="86.6"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="2dp"
                 android:textStyle="bold"
                 android:textSize="18sp"
                 android:textColor="@color/greenWhite"
@@ -82,8 +81,9 @@
             <View
             android:id="@+id/line_below_title"
             android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginBottom="4dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="8dp"
             android:layout_toLeftOf="@id/memeIcon"
             android:layout_toStartOf="@id/memeIcon"
             android:layout_below="@id/title_and_percent"
@@ -106,11 +106,6 @@
             android:text="$0"
             android:textColor="@android:color/white"
             />
-            <TextView
-            android:id="@+id/buyers_amount_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""/>
 
 
             <!--<TextView-->
@@ -147,17 +142,28 @@
             android:layout_below="@+id/detail_meme_price"
             android:layout_marginLeft="2dp"
             android:text="0"
-            android:textColor="@color/greenWhiter"/>
+            android:textColor="@android:color/white"/>
+            <View
+                android:id="@+id/line_below_shares_held"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:layout_toLeftOf="@id/memeIcon"
+                android:layout_toStartOf="@id/memeIcon"
+                android:layout_below="@id/YouOwnSentence"
+                android:background="@color/greenWhiteFaded"/>
         <TextView
             android:id="@+id/kym_url"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/memeIcon"
+            android:layout_below="@+id/line_below_shares_held"
             android:text="@string/hyper_link"
             android:textColor="@color/greenWhite"
             android:layout_marginBottom="6dp"/>
 
     </RelativeLayout>
+
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

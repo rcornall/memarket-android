@@ -25,10 +25,11 @@
                 android:layout_height="wrap_content"
                 android:layout_toLeftOf="@+id/orders_meme_icon"
                 android:layout_toStartOf="@+id/orders_meme_icon"
+                android:layout_alignBottom="@id/orders_meme_icon"
+                android:layout_marginBottom="3dp"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:textSize="20dp"
-                android:text=""
                 android:textStyle="bold"
                 android:textColor="@color/greenWhite"/>
             <ImageView
@@ -38,13 +39,13 @@
                 android:scaleType="centerCrop"
                 android:layout_gravity="end"
                 android:layout_alignParentRight="true"
-                android:layout_width="65dp"
-                android:layout_height="50dp" />
+                android:layout_width="75dp"
+                android:layout_height="55dp" />
             <View
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="5dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="7dp"
+                android:layout_marginBottom="8dp"
                 android:background="@color/greenWhiteFaded"
                 android:layout_below="@id/orders_meme_icon"/>
         </RelativeLayout>
@@ -110,6 +111,16 @@
                 android:layout_below="@+id/orders_title_layout"
                 android:layout_above="@id/new_buy_order_button"
                 tools:listitem="@layout/fragment_order_row"
+                />
+            <TextView
+                android:id="@+id/orders_nothing_here"
+                android:layout_below="@id/orders_title_layout"
+                android:layout_above="@id/new_buy_order_button"
+                android:layout_centerHorizontal="true"
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textColor="@color/greenWhiteFaded"
                 />
         </RelativeLayout>
     </LinearLayout>

@@ -1,17 +1,14 @@
 package com.robthecornallgmail.memarket.Fragments;
 
-import android.app.DialogFragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -38,18 +35,20 @@ public class OrdersListFragment  extends Fragment {
     List<OrderRow> mOrderRows;
     OrdersListAdapter mAdapter;
     OnOrdersListFragmentInteractionListener mListener;
-    TextView mTitle, mOrderMaker;
+    TextView mTitle, mOrderMaker, mNothingHere;
     ImageView mIcon;
     Button mPlaceBuyOrder;
+    Boolean mIsBuy;
 
     public OrdersListFragment() {
         mOrderRows = new ArrayList<>();
+        mIsBuy = true;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mAdapter = new OrdersListAdapter(mOrderRows, mListener);
+        mAdapter = new OrdersListAdapter(mOrderRows, mIsBuy, mListener);
     }
 
     @Override
@@ -60,6 +59,7 @@ public class OrdersListFragment  extends Fragment {
         mOrderMaker = (TextView) view.findViewById(R.id.order_maker);
         mIcon = (ImageView) view.findViewById(R.id.orders_meme_icon);
         mPlaceBuyOrder = (Button) view.findViewById(R.id.new_buy_order_button);
+        mNothingHere = (TextView) view.findViewById(R.id.orders_nothing_here);
         RecyclerView rview = (RecyclerView) view.findViewById(R.id.orders_list_rv);
         rview.setLayoutManager(new LinearLayoutManager(view.getContext()));
         rview.setAdapter(mAdapter);
@@ -80,14 +80,18 @@ public class OrdersListFragment  extends Fragment {
         if(sell.toUpperCase().equals("SELL")) {
             mPlaceBuyOrder.setText("PLACE BUY ORDER");
             mOrderMaker.setText("SELLER");
+            mIsBuy = true;
         } else {
             mPlaceBuyOrder.setText("PLACE SELL ORDER");
             mOrderMaker.setText("BUYER");
+            mIsBuy = false;
         }
+        mAdapter.setBuyOrSell(mIsBuy);
         String iconName = "icon_" + memeObject.mName.replaceAll(" ", "_").toLowerCase();
 
-        int iconId = getContext().getResources().getIdentifier(iconName, "drawable", MainActivity.PACKAGE_NAME);
+
         try {
+            int iconId = getContext().getResources().getIdentifier(iconName, "drawable", MainActivity.PACKAGE_NAME);
             Picasso.with(getContext()).load(iconId).centerCrop().fit().into(mIcon);
         } catch (Exception e ) {
             Log.v(TAG,e.toString());
@@ -100,7 +104,14 @@ public class OrdersListFragment  extends Fragment {
                 mOrderRows.add(order.getValue());
             }
         }
-
+        if(mOrderRows.isEmpty())
+        {
+            mNothingHere.setText("No orders right now...");
+        }
+        else
+        {
+            mNothingHere.setText(null);
+        }
         mAdapter.notifyDataSetChanged();
     }
 
