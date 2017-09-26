@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorMyGrey"
+    android:padding="@dimen/activity_horizontal_margin">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/new_order_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textSize="20dp"
+            android:text="New Order"
+            android:textColor="@color/greenWhiter"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="7dp"
+            android:layout_marginBottom="8dp"
+            android:background="@color/greenWhiteFaded"
+            />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/new_order_subtitle"
+                android:layout_centerHorizontal="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Buying Pepe Frog"
+                android:textColor="@color/greenWhiteFadedLess"
+                />
+            <LinearLayout
+                android:id="@+id/number_picker_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_below="@id/new_order_subtitle"
+                android:layout_marginBottom="2dp">
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.2"/>
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight=".3">
+
+                    <TextView
+                        android:id="@+id/amountText"
+                        android:layout_centerHorizontal="true"
+                        android:layout_width="wrap_content"
+                        android:layout_marginTop="@dimen/activity_horizontal_margin"
+                        android:layout_marginBottom="6dp"
+                        android:layout_height="wrap_content"
+                        android:text="Amount"
+                        android:textColor="@color/greenWhiter"/>
+                    <NumberPicker
+                        android:id="@+id/number_picker_amount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:theme="@style/NumberPickerText"
+                        android:layout_below="@id/amountText"
+                        />
+
+                </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.2">
+
+                    <TextView
+                        android:id="@+id/textspace"
+                        android:layout_marginTop="@dimen/activity_horizontal_margin"
+                        android:layout_marginBottom="6dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_below="@id/textspace"
+                        android:text="X"
+                        android:gravity="center"
+                        android:textColor="@color/accent"/>
+                </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3">
+                    <TextView
+                        android:id="@+id/priceText"
+                        android:layout_centerHorizontal="true"
+                        android:layout_width="wrap_content"
+                        android:layout_marginTop="@dimen/activity_horizontal_margin"
+                        android:layout_marginBottom="6dp"
+                        android:layout_height="wrap_content"
+                        android:text="Price"
+                        android:textColor="@color/greenWhiter"/>
+                    <NumberPicker
+                        android:id="@+id/number_picker_price"
+                        android:layout_width="wrap_content"
+                        android:theme="@style/NumberPickerText"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/priceText"
+                        />
+                </RelativeLayout>
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.2"/>
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/sentence_linear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="4dp"
+                android:layout_below="@id/number_picker_layout"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/pricing_sentence_buying"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:textColor="@color/greenWhiteFadedLess"
+                    android:text="Buying " />
+                <TextView
+                    android:id="@+id/pricing_sentence_buying_n"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@id/number_picker_layout"
+                    android:textColor="@android:color/white"/>
+                <TextView
+                    android:id="@+id/pricing_sentence_shares"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@id/number_picker_layout"
+                    android:textColor="@color/greenWhiteFadedLess"
+                    android:text=" shares x "/>
+                <TextView
+                    android:id="@+id/pricing_sentence_price_n"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@id/number_picker_layout"
+                    android:textColor="@android:color/white"/>
+                <TextView
+                    android:id="@+id/pricing_sentence_pershare"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@id/number_picker_layout"
+                    android:textColor="@color/greenWhiteFadedLess"
+                    android:text="/share = "/>
+                <TextView
+                    android:id="@+id/pricing_sentence_total_n"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@id/number_picker_layout"
+                    android:textColor="@android:color/white"/>
+                <TextView
+                    android:id="@+id/pricing_sentence_total"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@id/number_picker_layout"
+                    android:textColor="@color/greenWhiteFadedLess"
+                    android:text=" total"/>
+            </LinearLayout>
+            <Button
+                android:id="@+id/place_new_order"
+                android:layout_marginTop="6dp"
+                android:layout_below="@id/sentence_linear"
+                android:layout_centerHorizontal="true"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:text="PLACE ORDER"
+                android:textColor="@color/accent"
+                android:background="@drawable/buy_order_button"
+                />
+        </RelativeLayout>
+
+    </LinearLayout>
+
+
+</RelativeLayout>

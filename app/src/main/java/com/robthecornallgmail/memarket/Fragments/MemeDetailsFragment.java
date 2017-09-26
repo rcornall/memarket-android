@@ -236,7 +236,7 @@ public class MemeDetailsFragment extends Fragment {
 
                         @Override
                         public void onError() {
-                            mProgressDialog.dismiss();
+                            setProgressDialog(false);
                         }
                     });
                 }

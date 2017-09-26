@@ -30,7 +30,6 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:textSize="20dp"
-                android:textStyle="bold"
                 android:textColor="@color/greenWhite"/>
             <ImageView
                 android:id="@+id/orders_meme_icon"
@@ -41,6 +40,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_width="75dp"
                 android:layout_height="55dp" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
@@ -52,75 +52,103 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:layout_marginLeft="@dimen/activity_horizontal_margin">
-            <LinearLayout
-                android:id="@+id/orders_title_layout"
-                android:layout_marginLeft="18dp"
-                android:layout_marginBottom="3dp"
+            android:layout_height="match_parent">
+
+            <RelativeLayout
+                android:id="@+id/recycler_layout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <TextView
-                    android:id="@+id/order_maker"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="SELLER"
-                    android:textColor="@color/greenWhiter"
-                    android:layout_weight="25"/>
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
-                    android:text="AMOUNT"
-                    android:textColor="@color/greenWhiter"
-                    android:layout_weight="20"/>
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
-                    android:text="PRICE"
-                    android:textColor="@color/greenWhiter"
-                    android:layout_weight="17.5"/>
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/new_buy_order_button"
+                >
+                <LinearLayout
+                    android:id="@+id/orders_title_layout"
+                    android:layout_marginBottom="3dp"
+                    android:layout_width="match_parent"
+                    android:layout_marginRight="@dimen/activity_horizontal_margin"
+                    android:layout_marginLeft="34dp"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:id="@+id/order_maker"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="SELLER"
+                        android:textColor="@color/greenWhiter"
+                        android:layout_weight="25"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
+                        android:text="AMOUNT"
+                        android:textColor="@color/greenWhiter"
+                        android:layout_weight="20"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
+                        android:text="PRICE"
+                        android:textColor="@color/greenWhiter"
+                        android:layout_weight="17.5"/>
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_weight="30"/>
+
+                </LinearLayout>
                 <View
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_weight="30"/>
+                    android:id="@+id/line_below_subtitles"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/black"
+                    android:layout_below="@id/orders_title_layout"/>
 
-            </LinearLayout>
+                <!--<View-->
+                    <!--android:id="@+id/order_bottom"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="6dp"-->
+                    <!--android:layout_alignParentBottom="true"/>-->
+                <!--<Button-->
+                    <!--android:id="@+id/new_buy_order_button1"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="40dp"-->
+                    <!--android:text="Place Buy Order"-->
+                    <!--android:textColor="@color/accent"-->
+                    <!--android:layout_above="@id/order_bottom"-->
+                    <!--android:background="@drawable/buy_order_button"-->
+                    <!--/>-->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_below="@+id/line_below_subtitles"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorMyBetweenGrey">
 
-            <View
-                android:id="@+id/order_bottom"
-                android:layout_width="match_parent"
-                android:layout_height="6dp"
-                android:layout_alignParentBottom="true"/>
+                    <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+                        xmlns:tools="http://schemas.android.com/tools"
+                        android:id="@+id/orders_list_rv"
+                        android:layout_width="match_parent"
+                        android:layout_marginRight="@dimen/activity_horizontal_margin"
+                        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                        android:layout_height="match_parent"
+                        tools:listitem="@layout/fragment_order_row"
+                        />
+                </LinearLayout>
+                <TextView
+                    android:id="@+id/orders_nothing_here"
+                    android:layout_below="@id/orders_title_layout"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textColor="@color/greenWhiteFaded"
+                    />
+            </RelativeLayout>
             <Button
+                android:layout_alignParentBottom="true"
                 android:id="@+id/new_buy_order_button"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:background="@drawable/place_order_button"
+                android:layout_height="45dp"
                 android:text="Place Buy Order"
-                android:textColor="@color/greenWhiter"
-                android:layout_above="@id/order_bottom"
-                android:background="@drawable/buy_order_button"
-                />
-            <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:id="@+id/orders_list_rv"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@+id/orders_title_layout"
-                android:layout_above="@id/new_buy_order_button"
-                tools:listitem="@layout/fragment_order_row"
-                />
-            <TextView
-                android:id="@+id/orders_nothing_here"
-                android:layout_below="@id/orders_title_layout"
-                android:layout_above="@id/new_buy_order_button"
-                android:layout_centerHorizontal="true"
-                android:gravity="center"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:textColor="@color/greenWhiteFaded"
+                android:textColor="@color/accent"
                 />
         </RelativeLayout>
     </LinearLayout>

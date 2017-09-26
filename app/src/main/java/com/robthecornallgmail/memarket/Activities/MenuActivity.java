@@ -92,7 +92,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 {
     private static long timeTillUpdate = 900000;
     private static CountDownTimer mFifteenMinTimer;
-    private MyApplication mApplication;
+    private static MyApplication mApplication;
     private static Calendar calendar;
 
     private static final String TAG = "Menu";
@@ -123,8 +123,8 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     EditText mSearchView;
     /*fragments*/
     ListMemesFragment mMemeListFragment;
-    MemeDetailsFragment mMemeDetailsFragment;
-    OrdersListFragment mOrdersListFragment;
+    static MemeDetailsFragment mMemeDetailsFragment;
+    static OrdersListFragment mOrdersListFragment;
     LeaderboardDialogFragment mLeaderboardDialogFragment;
     BagGridFragment mBagGridFragment;
 
@@ -135,6 +135,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     InsideHouseSurfaceView mInsideHouseSurfaceView;
     // map meme IDs to their respective past Data from server.
     private Map<Integer, MemePastData> mGraphDataObjectMap = new HashMap<>();
+    private static TextView mMoney;
 
 
     @Override
@@ -227,8 +228,8 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         TextView username = (TextView) findViewById(R.id.username_text);
         username.setText(mApplication.userData.getUsername());
 
-        final TextView money = (TextView) findViewById(R.id.money_text);
-        money.setText("$" + mApplication.userData.getMoney().toString());
+        mMoney = (TextView) findViewById(R.id.money_text);
+        mMoney.setText("$" + mApplication.userData.getMoney().toString());
 
         mSearchView = (EditText) findViewById(R.id.search_meme_view);
 //        mSearchView.getBackground().setColorFilter(getResources().getColor(R.color.colorMyOffGrey), PorterDuff.Mode.SRC_IN);
@@ -676,7 +677,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
             transaction.add(R.id.orders_list_fragment, mOrdersListFragment);
             transaction.commit();
 //            mOrdersListFragment.show(getFragmentManager(), TAG);
-            new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getOrders.php?buy=true", "GETTING_BUY_ORDERS");
+            new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getOrders.php?sell=true", "GETTING_SELL_ORDERS");
         }
         else
         {
@@ -701,7 +702,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
             transaction.commit();
 //            mOrdersListFragment.show(getFragmentManager(), TAG);
 
-            new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getOrders.php?sell=true", "GETTING_SELL_ORDERS");
+            new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getOrders.php?buy=true", "GETTING_BUY_ORDERS");
         }
     }
 
@@ -794,7 +795,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
             try {
                 if (strings[1].equals("GETTING_BUY_ORDERS") || strings[1].equals("GETTING_SELL_ORDERS")) {
-//                    mOrderIdtoOrderRow.clear(); /*refresh with new values*/
+                    mOrderIdtoOrderRow.clear(); /*refresh with new values*/
                 }
                 JSONArray jsonArray = new JSONArray(serverResponse);
                 for(int i=0; i < jsonArray.length(); i++)
@@ -945,12 +946,10 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 } else if(mRequest.equals("GETTING_USER_STOCKS")){
 //                    mMemeDetailsFragment.updateOwned(mMemeIdtoObject.get(mSelectedMemeID).mSharesHeld);
                 } else if(mRequest.equals("GETTING_BUY_ORDERS")) {
-                    mOrdersListFragment.updateList(mOrderIdtoOrderRow, mSelectedMemeID, mMemeIdtoObject.get(mSelectedMemeID), "Sell");
-                    Log.v(TAG, mOrderIdtoOrderRow.get(1).mName);
+                    mOrdersListFragment.updateList(mOrderIdtoOrderRow, mSelectedMemeID, mMemeIdtoObject.get(mSelectedMemeID), "Buy");
                     Log.v(TAG, "getting  buy orders");
                 } else if(mRequest.equals("GETTING_SELL_ORDERS")) {
-                    mOrdersListFragment.updateList(mOrderIdtoOrderRow, mSelectedMemeID, mMemeIdtoObject.get(mSelectedMemeID), "Buy");
-                    Log.v(TAG, mOrderIdtoOrderRow.get(1).mName);
+                    mOrdersListFragment.updateList(mOrderIdtoOrderRow, mSelectedMemeID, mMemeIdtoObject.get(mSelectedMemeID), "Sell");
                     Log.v(TAG, "getting  sell orders");
                 } else {
                     Log.v(TAG, "NOT SPECIFIED REQUEST TYPE");
@@ -1125,19 +1124,23 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
     // TODO: 03/08/17 NEED TO MAKE SURE ONLY ONE INSTANCE OF THIS THREAD IS RUNNING AT ONCE BEFORE STARTING A NEW ONE
 
-    public class PurchaseStockFromServer extends AsyncTask<String,Void,Boolean>
+    public static class PlaceOrder extends AsyncTask<String,Void,Boolean>
     {
         private String serverResponse;
         private final Integer mUserID;
         private final Integer mMemeID;
         private final Integer mAmount;
+        private final Integer mPrice;
         private Integer mNewMoney;
         private Integer mNewStocks;
-        PurchaseStockFromServer(Integer user_id, Integer meme_id, Integer amount)
+        Integer mMoneyDiff, mStocksDiff, mNoOrders;
+        String mOrderCompleted;
+        public PlaceOrder(Integer user_id, Integer meme_id, Integer amount, Integer price)
         {
             mUserID = user_id;
             mMemeID = meme_id;
             mAmount = amount;
+            mPrice = price;
         }
         @Override
         protected Boolean doInBackground(String... strings)
@@ -1158,9 +1161,9 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 BufferedWriter writer = new BufferedWriter(
                         new OutputStreamWriter(out, "UTF-8"));
 
-                String query = String.format("Content-Type: application/json&charset=%s&user=%d&meme=%d&amount=%d",
+                String query = String.format("Content-Type: application/json&charset=%s&user=%d&meme=%d&amount=%d&price=%d",
                         URLEncoder.encode(charset, charset),
-                        mUserID,mMemeID,mAmount);
+                        mUserID,mMemeID,mAmount,mPrice);
                 Log.v(TAG, "query is: " + query);
                 writer.write(query);
 
@@ -1202,6 +1205,10 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 {
                     mNewMoney = jsonObject.getInt("new_money");
                     mNewStocks = jsonObject.getInt("new_stocks");
+                    mMoneyDiff = jsonObject.getInt("money_diff");
+                    mStocksDiff = jsonObject.getInt("stocks_diff");
+                    mNoOrders = jsonObject.getInt("no_orders");
+                    mOrderCompleted = jsonObject.getString("completed");
                     mMemeIdtoObject.get(mMemeID).mSharesHeld = mNewStocks;
                     return true;
                 }
@@ -1221,23 +1228,30 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         @Override
         protected void onPostExecute(Boolean Result)
         {
-            if (Result)
-            {
+            if (Result) {
                 Log.v(TAG, "newStocks:" + mNewStocks);
-                TextView moneyTextView = (TextView) findViewById(R.id.money_text);
-                Animation shrinkAnim = AnimationUtils.loadAnimation(MenuActivity.this, R.anim.shrink_money);
-                Animation growAnim = AnimationUtils.loadAnimation(MenuActivity.this, R.anim.shrink_money);
-
-                moneyTextView.clearAnimation();
-                moneyTextView.startAnimation(shrinkAnim);
-                moneyTextView.setText("$" + mNewMoney.toString());
-                moneyTextView.startAnimation(growAnim);
-
-                TextView sharesOwnedView = (TextView) findViewById(R.id.stocks_owned);
-                sharesOwnedView.setText(mNewStocks.toString());
+//                Animation shrinkAnim = AnimationUtils.loadAnimation(MenuActivity.this, R.anim.shrink_money);
+//                Animation growAnim = AnimationUtils.loadAnimation(MenuActivity.this, R.anim.shrink_money);
+//
+//                moneyTextView.clearAnimation();
+//                moneyTextView.startAnimation(shrinkAnim);
+//                moneyTextView.setText("$" + mNewMoney.toString());
+//                moneyTextView.startAnimation(growAnim);
+//
+//                TextView sharesOwnedView = (TextView) findViewById(R.id.stocks_owned);
+//                sharesOwnedView.setText(mNewStocks.toString());
 
                 mMemeIdtoObject.get(mMemeID).mSharesHeld = mNewStocks;
                 mApplication.userData.setMoney(mNewMoney);
+                mMoney.setText(String.format("$%s", mNewMoney));
+                mMemeDetailsFragment.updateStocksOwned(mNewStocks);
+                mOrdersListFragment.orderResponse(mNewMoney, mNewStocks, mMoneyDiff, mStocksDiff,
+                        mNoOrders, mOrderCompleted);
+
+
+
+            }
+            else {
 
             }
             return;

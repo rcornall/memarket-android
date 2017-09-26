@@ -21,6 +21,7 @@
     <color name="settingsColor">#748d43</color>
     <color name="monokaiBlue">#66D9EF</color>
     <color name="greenWhiteFaded">#757e6f</color>
+    <color name="greenWhiteFadedLess">#9ba792</color>
     <color name="greenWhite">#bdcbb3</color>
     <color name="greenWhiter">#d8e3cf</color>
     <color name="lesserWhite">#bdcbb3</color>

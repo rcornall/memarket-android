@@ -66,4 +66,7 @@
         <item name="android:textColor">@color/greenWhite</item>
         <item name="android:fontFamily">sans-serif</item>
     </style>
+    <style name="NumberPickerText">
+        <item name="android:textSize">22dp</item>
+    </style>
 </resources>
