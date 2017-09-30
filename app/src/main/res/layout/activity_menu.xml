@@ -127,20 +127,69 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/space"
                 android:id="@+id/TopBarSeperator">
-                <EditText
-                    android:id="@+id/search_meme_view"
+                <LinearLayout
+                    android:id="@+id/search_meme_layout"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Search"
-                    android:drawableLeft="@mipmap/search_icon"
-                    android:textColor="@color/greenWhite"
-                    android:textCursorDrawable="@null"
-                    android:paddingLeft="15dp"
-                    android:paddingStart="15dp"
-                    android:drawablePadding="7dp"
-                    android:maxLines="1"
-                    android:textColorHint="@color/colorMyOffGrey"
-                    />
+                    android:layout_height="wrap_content">
+
+                    <EditText
+                        android:id="@+id/search_meme_edittext"
+                        android:clickable="true"
+                        android:layout_width="0dp"
+                        android:layout_weight="0.3"
+                        android:layout_height="wrap_content"
+                        android:hint="Search"
+                        android:drawableLeft="@mipmap/search_icon"
+                        android:textColor="@color/greenWhite"
+                        android:textCursorDrawable="@null"
+                        android:paddingLeft="15dp"
+                        android:paddingStart="15dp"
+                        android:drawablePadding="7dp"
+                        android:maxLines="1"
+                        android:textColorHint="@color/colorMyOffGrey"
+                        />
+                    <Button
+                        android:id="@+id/active_listing_button"
+                        style="@style/active_listing_button"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.3"
+                        android:text="Active Listings"/>
+
+                    <Button
+                        android:id="@+id/fresh_memes_button"
+                        style="@style/active_listing_button"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.3"
+                        android:text="Fresh Memes"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:layout_below="@id/search_meme_layout">
+                    <View
+                        android:id="@+id/search_memes_highlight"
+                        android:layout_weight="33.33333"
+                        android:layout_width="wrap_content"
+                        android:layout_height="2dp"
+                        android:background="@color/accent"
+                        android:alpha="0.7"/>
+                    <View
+                        android:id="@+id/active_listing_highlight"
+                        android:layout_weight="33.33333"
+                        android:layout_width="wrap_content"
+                        android:layout_height="2dp"
+                        android:background="@color/accent"
+                        android:alpha="0.7"/>
+                    <View
+                        android:id="@+id/fresh_memes_highlight"
+                        android:layout_weight="33.33333"
+                        android:layout_width="wrap_content"
+                        android:layout_height="2dp"
+                        android:background="@color/accent"
+                        android:alpha="0.7"/>
+                </LinearLayout>
 
             </RelativeLayout>
             <RelativeLayout

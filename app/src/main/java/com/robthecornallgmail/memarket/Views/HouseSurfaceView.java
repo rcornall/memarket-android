@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.robthecornallgmail.memarket.Activities.MenuActivity.mApplication;
 import static com.robthecornallgmail.memarket.Util.MyHelper.decodeSampledBitmapFromResourceByWidth;
 import static java.lang.Thread.sleep;
 
@@ -45,7 +46,7 @@ import static java.lang.Thread.sleep;
 
 public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     static String TAG = "HouseSurfaceView";
-    MyApplication mApplication;
+//    MyApplication mApplication;
     OnBuildingInteractionListener mListener;
     int mTextColor;
     public static int SCREEN_WIDTH,SCREEN_HEIGHT,CANVAS_HEIGHT, MAP_SECTION_WIDTH;
@@ -130,7 +131,6 @@ public class HouseSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         // but if screen size is not 16:9 then sprites may be stretched, which is ok.
         super(context, attrs);
         Log.v(TAG, "surface view constructor, sleeping to let previous activity destroy");
-        mApplication = (MyApplication) context.getApplicationContext();
         mListener = (OnBuildingInteractionListener) context;
         mTextColor = context.getResources().getColor(R.color.monokaiBetweenGreen);
 //        try {

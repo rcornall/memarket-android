@@ -75,4 +75,13 @@
         <item name="android:text">OK</item>
         <item name="android:background">@color/colorMyGrey</item>
     </style>
+    <style name="active_listing_button">
+        <item name="android:layout_gravity">center</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:background">@color/backgroundGrey</item>
+        <item name="android:textColor">@color/accent</item>
+    </style>
+
 </resources>

@@ -324,11 +324,7 @@ public class OrdersListAdapter extends RecyclerView.Adapter<OrdersListAdapter.Vi
             }
         });
 
-        if(mBuy.equals("Buy")) {
-//            new MenuActivity.GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getOrders.php?sell=true", "GETTING_SELL_ORDERS");
-        } else {
-//            new MenuActivity.GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getOrders.php?buy=true", "GETTING_BUY_ORDERS");
-        }
+        mListener.refreshList(mIsBuy);
     }
     public void orderFailed() {
         setProgressDialog(false, mView);

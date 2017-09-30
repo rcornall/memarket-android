@@ -18,9 +18,8 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -55,7 +54,6 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import com.robthecornallgmail.memarket.Fragments.BagGridFragment;
 import com.robthecornallgmail.memarket.Fragments.ListMemesFragment;
 import com.robthecornallgmail.memarket.Fragments.MemeDetailsFragment;
-import com.robthecornallgmail.memarket.Fragments.OrdersListAdapter;
 import com.robthecornallgmail.memarket.Fragments.OrdersListFragment;
 import com.robthecornallgmail.memarket.Util.BagGrid;
 import com.robthecornallgmail.memarket.Util.ItemObject;
@@ -109,8 +107,8 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
     private DateRange mDateRange = DateRange.DAY;
     /*maps holding various data*/
-    private HashMap<Integer, MemeObject> mMemeIdtoObject = new HashMap<>();
-    private HashMap<Integer, OrderRow> mOrderIdtoOrderRow = new HashMap<>();
+    private HashMap<Integer, MemeObject> mMemeIdtoObject = new LinkedHashMap<>();
+    private HashMap<Integer, OrderRow> mOrderIdtoOrderRow = new LinkedHashMap<>();
     private Map<Integer, LineGraphSeries<DataPoint>> mMemeIDtoSeriesMap = new HashMap<>();
     private Map<String,Integer> mLeaderboardUsersToMoneyMap = new LinkedHashMap<>(); //preserves ordering in HashMap
     private HashMap<Integer, ItemObject> mItemsIdToObject = new HashMap<>();
@@ -121,7 +119,8 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
     private Integer mSelectedMemeID;
 
-    private EditText mSearchView;
+    private RelativeLayout mSearchView;
+    private EditText mSearchMemes;
 
     /*fragments*/
     private ListMemesFragment mMemeListFragment;
@@ -137,6 +136,8 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     // map meme IDs to their respective past Data from server.
     private Map<Integer, MemePastData> mGraphDataObjectMap = new HashMap<>();
     private TextView mMoney;
+    private Button mActiveListingBtn;
+    private Button mFreshMemesBtn;
 
 
     @Override
@@ -232,9 +233,10 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         mMoney = (TextView) findViewById(R.id.money_text);
         mMoney.setText("$" + mApplication.userData.getMoney().toString());
 
-        mSearchView = (EditText) findViewById(R.id.search_meme_view);
+        mSearchView = (RelativeLayout) findViewById(R.id.TopBarSeperator);
+        mSearchMemes = (EditText) findViewById(R.id.search_meme_edittext);
 //        mSearchView.getBackground().setColorFilter(getResources().getColor(R.color.colorMyOffGrey), PorterDuff.Mode.SRC_IN);
-        mSearchView.setBackgroundColor(getResources().getColor(R.color.backgroundGrey));
+        mSearchMemes.setBackgroundColor(getResources().getColor(R.color.backgroundGrey));
 //        mSearchView.setVisibility(View.GONE);
         final RelativeLayout searchBar = (RelativeLayout) findViewById(R.id.TopBarSeperator);
         final RelativeLayout dragDownButton = (RelativeLayout) findViewById(R.id.drag_down_line);
@@ -259,7 +261,6 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         transaction.add(R.id.inventory_bag_fragment, mBagGridFragment);
         transaction.commit();
         mMemeListFrameLayout.setVisibility(View.GONE);
-
 
 
         /* Setup highlights for bottom tab buttons e.g. home find store*/
@@ -333,7 +334,54 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
             }
         });
 
-        mSearchView.addTextChangedListener(new TextWatcher() {
+        /* setup search memes, activing listings, fresh memes layout */
+
+        /* Setup highlights for bottom tab buttons e.g. home find store*/
+        final View searchMemesHighlight = findViewById(R.id.search_memes_highlight);
+        final View activeListingHighlight = findViewById(R.id.active_listing_highlight);
+        final View freshMemesHighlight = findViewById(R.id.fresh_memes_highlight);
+        activeListingHighlight.setVisibility(View.INVISIBLE);
+        freshMemesHighlight.setVisibility(View.INVISIBLE);
+
+        mActiveListingBtn = (Button) findViewById(R.id.active_listing_button);
+        mFreshMemesBtn = (Button) findViewById(R.id.fresh_memes_button);
+
+        mSearchMemes.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                searchMemesHighlight.setVisibility(View.VISIBLE);
+                activeListingHighlight.setVisibility(View.INVISIBLE);
+                freshMemesHighlight.setVisibility(View.INVISIBLE);
+
+                mSearchMemes.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_search_white_24dp, 0,0,0);
+                return false;
+            }
+        });
+        mActiveListingBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchMemesHighlight.setVisibility(View.INVISIBLE);
+                activeListingHighlight.setVisibility(View.VISIBLE);
+                freshMemesHighlight.setVisibility(View.INVISIBLE);
+
+                mSearchMemes.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_arrow_back_black_24dp, 0,0,0);
+            }
+        });
+        mFreshMemesBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchMemesHighlight.setVisibility(View.INVISIBLE);
+                activeListingHighlight.setVisibility(View.INVISIBLE);
+                freshMemesHighlight.setVisibility(View.VISIBLE);
+
+                mSearchMemes.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_arrow_back_black_24dp, 0,0,0);
+            }
+        });
+
+
+
+
+        mSearchMemes.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
@@ -737,6 +785,15 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         /* clicking direct buy */
         new PlaceOrder(mApplication.userData.getID(), memeID, orderID, amount, 0)
                 .execute(Defines.SERVER_ADDRESS + String.format("/%sOrder.php", buy.toLowerCase()), "ORDER_FROM_USER");
+    }
+
+    @Override
+    public void refreshList(Boolean isBuy) {
+        if(isBuy) {
+            new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getOrders.php?sell=true", "GETTING_SELL_ORDERS");
+        } else {
+            new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getOrders.php?buy=true", "GETTING_BUY_ORDERS");
+        }
     }
 
 
@@ -1200,7 +1257,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                     responseCode = urlConnection.getResponseCode();
                 }
                 if (responseCode == HttpURLConnection.HTTP_OK) {
-                    Log.v(TAG, "purchase: we got 200");
+                    Log.v(TAG, "git purchase: we got 200");
                     serverResponse = MyHelper.readHttpStream(urlConnection.getInputStream());
                 } else {
                     Log.v(TAG, "purchase we got " + responseCode);

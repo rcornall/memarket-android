@@ -205,7 +205,7 @@ public class OrdersListFragment  extends Fragment {
                             dBuilder.setView(dlogView);
                             mResponseAD = dBuilder.create();
                             mResponseAD.show();
-                            TextView sent = (TextView) dlogView.findViewById(R.id.response_ok_btn);
+                            TextView sent = (TextView) dlogView.findViewById(R.id.invalid_order_sent);
                             sent.setText("Not enough Stocks to sell!");
                             Button ok = (Button) dlogView.findViewById(R.id.response_ok_btn);
                             ok.setOnClickListener(new View.OnClickListener() {
@@ -220,7 +220,7 @@ public class OrdersListFragment  extends Fragment {
                             dBuilder.setView(dlogView);
                             mResponseAD = dBuilder.create();
                             mResponseAD.show();
-                            TextView sent = (TextView) dlogView.findViewById(R.id.response_ok_btn);
+                            TextView sent = (TextView) dlogView.findViewById(R.id.invalid_order_sent);
                             sent.setText("Can not " + mBuy + " $0 of stock!");
                             Button ok = (Button) dlogView.findViewById(R.id.response_ok_btn);
                             ok.setOnClickListener(new View.OnClickListener() {
@@ -423,11 +423,7 @@ public class OrdersListFragment  extends Fragment {
         });
 
         /* refresh list */
-        if(mBuy.equals("Buy")) {
-//            new MenuActivity.GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getOrders.php?sell=true", "GETTING_SELL_ORDERS");
-        } else {
-//            new MenuActivity.GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getOrders.php?buy=true", "GETTING_BUY_ORDERS");
-        }
+        mListener.refreshList(mIsBuy);
     }
 
     public void orderResponseDirect(Integer mNewMoney, Integer mNewStocks, Integer mAmount) {
@@ -469,6 +465,8 @@ public class OrdersListFragment  extends Fragment {
         void onOrdersListNewOrder(Integer memeID, Integer amount, Integer price, Boolean isBuy, String buy);
 
         void onOrdersListDirectOrder(Integer memeID, Integer orderID, Integer amount, Boolean isBuy, String buy);
+
+        void refreshList(Boolean isBuy);
     }
 
     private void setProgressDialog(boolean wait) {

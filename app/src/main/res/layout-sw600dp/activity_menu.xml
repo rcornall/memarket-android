@@ -117,7 +117,7 @@
                 android:layout_below="@+id/space"
                 android:id="@+id/TopBarSeperator">
                 <EditText
-                    android:id="@+id/search_meme_view"
+                    android:id="@+id/search_meme_edittext"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Search"
