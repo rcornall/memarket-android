@@ -17,12 +17,6 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:background="@color/greenWhiteFaded"/>
-    <TextView
-        android:id="@+id/response_sentence_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/greenWhite"
-        android:text="Your order was placed, it will be consumed when another user places an order which satisfies your pricing.\n\nIt can be cancelled from your active orders page."/>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -42,16 +36,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/greenWhite"/>
-        <TextView
-            android:id="@+id/response_orders_n"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/white"/>
-        <TextView
-            android:id="@+id/response_transactions"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/greenWhite"/>
 
     </LinearLayout>
 
@@ -62,12 +46,6 @@
         android:textColor="@color/greenWhite"
         android:text="\nYou can view the transaction details in your order history page."/>
 
-    <TextView
-        android:id="@+id/response_rest_of_order"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/greenWhite"
-        android:text="\nThe remaining part of your order has been placed, you can check it at your active orders page."/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />

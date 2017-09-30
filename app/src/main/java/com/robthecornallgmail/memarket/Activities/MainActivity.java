@@ -44,16 +44,16 @@ import static java.lang.Thread.sleep;
 public class MainActivity extends AppCompatActivity implements TaskCallback
 {
     public static String PACKAGE_NAME;
-    static final String TAG = "MainActivity";
+    private static final String TAG = "MainActivity";
 
     private MainActivity.UserLoginTask mAuthTask = null;
     private MyApplication mApplication;
 
-    Button mStartButton, mLoginButton, mRegisterButton;
-    EditText mEmail, mPassword;
-    View mProgressView;
+    private Button mStartButton, mLoginButton, mRegisterButton;
+    private EditText mEmail, mPassword;
+    private View mProgressView;
 
-    MediaPlayer mp3Player;
+    private MediaPlayer mp3Player;
 
 //    View mBlackFog;
     @Override

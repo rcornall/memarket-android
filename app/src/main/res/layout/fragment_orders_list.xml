@@ -116,9 +116,10 @@
                     <!--android:background="@drawable/buy_order_button"-->
                     <!--/>-->
                 <LinearLayout
+                    android:id="@+id/orders_list_recycler_layout"
                     android:layout_width="wrap_content"
                     android:layout_below="@+id/line_below_subtitles"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:background="@color/colorMyBetweenGrey">
 
                     <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"

@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.BoringLayout;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -17,6 +18,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -36,33 +38,39 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.logging.Handler;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
+import static com.robthecornallgmail.memarket.Fragments.MemeDetailsFragment.mMemeObject;
 
 /**
  * Created by rob on 12/09/17.
  */
 
 public class OrdersListFragment  extends Fragment {
-    String TAG = "OrdersListFragment";
-    MyApplication mApplication;
-    List<OrderRow> mOrderRows;
-    OrdersListAdapter mAdapter;
-    OnOrdersListFragmentInteractionListener mListener;
-    TextView mTitle, mOrderMaker, mNothingHere;
-    ImageView mIcon;
-    Button mPlaceBuyOrder;
-    Boolean mIsBuy;
+    private String TAG = "OrdersListFragment";
+    private MyApplication mApplication;
+    private List<OrderRow> mOrderRows;
+    private OrdersListAdapter mAdapter;
+    private OnOrdersListNewOrderListener mListener;
+    private TextView mTitle, mOrderMaker, mNothingHere;
+    private ImageView mIcon;
+    private Button mPlaceBuyOrder;
+    private Boolean mIsBuy;
+    private LinearLayout mLayoutRView;
     private boolean mReady=false;
     private String mSubTitle;
     private String mBuying;
     private Integer mSelectedMemeID;
     private String mBuy;
-    AlertDialog mMakeOrderAD, mConfirmOrderAD, mResponseAD;
-    ProgressDialog mProgressDialog;
+    private AlertDialog mMakeOrderAD, mConfirmOrderAD, mResponseAD;
+    private ProgressDialog mProgressDialog;
     private String mName;
     private String mCostingYou;
     private String mBought;
+    private String mFrom;
 
     public OrdersListFragment() {
         mOrderRows = new ArrayList<>();
@@ -72,7 +80,7 @@ public class OrdersListFragment  extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mAdapter = new OrdersListAdapter(mOrderRows, mIsBuy, mListener);
+        mAdapter = new OrdersListAdapter(mOrderRows, mListener);
     }
 
     @Override
@@ -86,12 +94,13 @@ public class OrdersListFragment  extends Fragment {
         mIcon = (ImageView) view.findViewById(R.id.orders_meme_icon);
         mPlaceBuyOrder = (Button) view.findViewById(R.id.new_buy_order_button);
         mNothingHere = (TextView) view.findViewById(R.id.orders_nothing_here);
+        mLayoutRView = (LinearLayout) view.findViewById(R.id.orders_list_recycler_layout);
         RecyclerView rview = (RecyclerView) view.findViewById(R.id.orders_list_rv);
         rview.setLayoutManager(new LinearLayoutManager(view.getContext()));
         rview.setAdapter(mAdapter);
 
         mPlaceBuyOrder.setOnClickListener(new View.OnClickListener() {
-            public int mAmnt, mPrice;
+            public Integer mAmnt, mPrice;
             public long mTotal;
 
             @Override
@@ -117,10 +126,17 @@ public class OrdersListFragment  extends Fragment {
                 sentBuying.setText(mBuying);
                 final NumberPicker numPickerAmt = (NumberPicker) dialogView.findViewById(R.id.number_picker_amount);
                 final NumberPicker numPickerPrice = (NumberPicker) dialogView.findViewById(R.id.number_picker_price);
-                numPickerAmt.setMinValue(0);numPickerAmt.setMaxValue(999999);
-                numPickerAmt.setValue(1);
-                numPickerPrice.setMinValue(0);numPickerPrice.setMaxValue(999999);
-                numPickerPrice.setValue(1);
+                numPickerAmt.setMinValue(1);
+                if(mBuy.toUpperCase().equals("SELL")) {
+                    Log.v(TAG, "SDLKFJS:DLFKSDKFJ: " + mMemeObject.mSharesHeld.toString());
+                    numPickerAmt.setMaxValue(mMemeObject.mSharesHeld);
+                    numPickerAmt.setValue(mMemeObject.mSharesHeld);
+                } else {
+                    numPickerAmt.setMaxValue(999999);
+                    numPickerAmt.setValue(10);
+                }
+                numPickerPrice.setMinValue(1);numPickerPrice.setMaxValue(99999);
+                numPickerPrice.setValue(mMemeObject.mPrice);
                 sentBuyingN.setText(String.format("%d", numPickerAmt.getValue()));
                 sentPriceN.setText(String.format("$%d", numPickerPrice.getValue()));
                 mAmnt = numPickerAmt.getValue();
@@ -135,6 +151,14 @@ public class OrdersListFragment  extends Fragment {
                         sentBuyingN.setText(String.format("%d", mAmnt));
                         mTotal = mAmnt*numPickerPrice.getValue();
                         sentTotalN.setText(String.format("$%d", mTotal));
+                        if(mBuy.toUpperCase().equals("BUY")) {
+                            if(mTotal > mApplication.userData.getMoney()) {
+                                if(sentTotalN.getCurrentTextColor() != Color.RED)
+                                    sentTotalN.setTextColor(Color.RED);
+                            } else if(sentTotalN.getCurrentTextColor() == Color.RED) {
+                                sentTotalN.setTextColor(Color.WHITE);
+                            }
+                        }
                     }
                 });
 
@@ -145,6 +169,14 @@ public class OrdersListFragment  extends Fragment {
                         sentPriceN.setText(String.format("$%d", mPrice));
                         mTotal = mPrice*numPickerAmt.getValue();
                         sentTotalN.setText(String.format("$%d", mTotal));
+                        if(mBuy.toUpperCase().equals("BUY")) {
+                            if(mTotal > mApplication.userData.getMoney()) {
+                                if(sentTotalN.getCurrentTextColor() != Color.RED)
+                                    sentTotalN.setTextColor(Color.RED);
+                            } else if(sentTotalN.getCurrentTextColor() == Color.RED) {
+                                sentTotalN.setTextColor(Color.WHITE);
+                            }
+                        }
                     }
                 });
 
@@ -155,6 +187,50 @@ public class OrdersListFragment  extends Fragment {
                         AlertDialog.Builder dBuilder = new AlertDialog.Builder(getActivity());
 
                         LayoutInflater infltr = getActivity().getLayoutInflater();
+                        if(mBuy.toUpperCase().equals("BUY") && mTotal > mApplication.userData.getMoney()) {
+                            View dlogView = infltr.inflate(R.layout.invalid_order, null);
+                            dBuilder.setView(dlogView);
+                            mResponseAD = dBuilder.create();
+                            mResponseAD.show();
+                            Button ok = (Button) dlogView.findViewById(R.id.response_ok_btn);
+                            ok.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    mResponseAD.dismiss();
+                                }
+                            });
+                            return;
+                        } else if(mBuy.toUpperCase().equals("SELL") && mAmnt > mMemeObject.mSharesHeld) {
+                            View dlogView = infltr.inflate(R.layout.invalid_order, null);
+                            dBuilder.setView(dlogView);
+                            mResponseAD = dBuilder.create();
+                            mResponseAD.show();
+                            TextView sent = (TextView) dlogView.findViewById(R.id.response_ok_btn);
+                            sent.setText("Not enough Stocks to sell!");
+                            Button ok = (Button) dlogView.findViewById(R.id.response_ok_btn);
+                            ok.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    mResponseAD.dismiss();
+                                }
+                            });
+                            return;
+                        } else if (mTotal == 0) {
+                            View dlogView = infltr.inflate(R.layout.invalid_order, null);
+                            dBuilder.setView(dlogView);
+                            mResponseAD = dBuilder.create();
+                            mResponseAD.show();
+                            TextView sent = (TextView) dlogView.findViewById(R.id.response_ok_btn);
+                            sent.setText("Can not " + mBuy + " $0 of stock!");
+                            Button ok = (Button) dlogView.findViewById(R.id.response_ok_btn);
+                            ok.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    mResponseAD.dismiss();
+                                }
+                            });
+                            return;
+                        }
                         View dlogView = infltr.inflate(R.layout.confirm_new_order, null);
                         dBuilder.setView(dlogView);
 
@@ -180,7 +256,11 @@ public class OrdersListFragment  extends Fragment {
                             @Override
                             public void onClick(View v) {
                                 setProgressDialog(true);
-                                new MenuActivity.PlaceOrder(mApplication.userData.getID(), mSelectedMemeID, mAmnt, mPrice).execute(Defines.SERVER_ADDRESS + String.format("/new%sOrder.php",mBuy));
+
+
+                                mListener.onOrdersListNewOrder(mSelectedMemeID, mAmnt, mPrice, mIsBuy, mBuy);
+//                                new MenuActivity.PlaceOrder(mApplication.userData.getID(), mSelectedMemeID, 0, mAmnt, mPrice)
+//                                        .execute(Defines.SERVER_ADDRESS + String.format("/new%sOrder.php",mBuy), "NEW_ORDER");
 
                             }
                         });
@@ -208,6 +288,7 @@ public class OrdersListFragment  extends Fragment {
 
     public void updateList(HashMap<Integer, OrderRow> orderIDtoRow, Integer selectedMemeID, MemeObject memeObject, String sell) {
         mOrderRows.clear();
+        mAdapter.setReady(false);
         mSelectedMemeID = selectedMemeID;
         mName = WordUtils.capitalize(memeObject.mName);
         mTitle.setText(sell + " orders for " + mName);
@@ -218,6 +299,7 @@ public class OrdersListFragment  extends Fragment {
             mCostingYou = "Costing you ";
             mBuying = "Buying ";
             mBuy = "Buy";
+            mFrom = " from ";
             mBought = "Bought";
             mIsBuy = true;
         } else {
@@ -227,10 +309,12 @@ public class OrdersListFragment  extends Fragment {
             mCostingYou = "For a minimum profit of ";
             mBuying = "Selling ";
             mBuy = "Sell";
-            mBought = "Bought";
+            mFrom = " to ";
+            mBought = "Sold";
             mIsBuy = false;
         }
-        mAdapter.setBuyOrSell(mIsBuy);
+        mAdapter.updateBuyInfo(mIsBuy, mSelectedMemeID, mName, mBuy, mBuying, mBought, mFrom, mSubTitle, mCostingYou);
+        mAdapter.setReady(true);
         String iconName = "icon_" + memeObject.mName.replaceAll(" ", "_").toLowerCase();
 
 
@@ -251,9 +335,11 @@ public class OrdersListFragment  extends Fragment {
         if(mOrderRows.isEmpty())
         {
             mNothingHere.setText("No orders right now...");
+            mLayoutRView.setVisibility(View.GONE);
         }
         else
         {
+            mLayoutRView.setVisibility(View.VISIBLE);
             mNothingHere.setText(null);
         }
         mAdapter.notifyDataSetChanged();
@@ -267,11 +353,11 @@ public class OrdersListFragment  extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnOrdersListFragmentInteractionListener) {
-            mListener = (OnOrdersListFragmentInteractionListener) context;
+        if (context instanceof OnOrdersListNewOrderListener) {
+            mListener = (OnOrdersListNewOrderListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnOrdersListFragmentInteractionListener");
+                    + " must implement OnOrdersListNewOrderListener");
         }
     }
 
@@ -281,6 +367,7 @@ public class OrdersListFragment  extends Fragment {
         mListener = null;
     }
 
+    /* response from creating a new order */
     public void orderResponse(Integer newMoney, Integer newStocks, Integer moneyDiff,
                               Integer stocksDiff, Integer noOrders, String orderCompleted) {
         setProgressDialog(false);
@@ -335,13 +422,55 @@ public class OrdersListFragment  extends Fragment {
             }
         });
 
+        /* refresh list */
+        if(mBuy.equals("Buy")) {
+//            new MenuActivity.GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getOrders.php?sell=true", "GETTING_SELL_ORDERS");
+        } else {
+//            new MenuActivity.GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getOrders.php?buy=true", "GETTING_BUY_ORDERS");
+        }
+    }
 
+    public void orderResponseDirect(Integer mNewMoney, Integer mNewStocks, Integer mAmount) {
+        mAdapter.orderResponse(mNewMoney, mNewStocks, mAmount);
+    }
+
+    public void orderFailed() {
+        setProgressDialog(false);
+        mConfirmOrderAD.dismiss();
+        AlertDialog.Builder dBuilder = new AlertDialog.Builder(getActivity());
+
+        LayoutInflater infltr = getActivity().getLayoutInflater();
+        View dlogView = infltr.inflate(R.layout.order_response_direct, null);
+        dBuilder.setView(dlogView);
+
+        mResponseAD = dBuilder.create();
+        mResponseAD.show();
+
+        TextView resporders = (TextView) dlogView.findViewById(R.id.response_orders);
+
+        resporders.setText(String.format("Failed to complete order.. try again later."));
+
+        Button ok = (Button) dlogView.findViewById(R.id.response_ok_btn);
+        ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mResponseAD.dismiss();
+                mMakeOrderAD.dismiss();
+            }
+        });
+    }
+
+    public void orderDirectFailed() {
+        mAdapter.orderFailed();
     }
 
 
-    public interface OnOrdersListFragmentInteractionListener {
-        void onOrdersListFragmentInteraction(OrderRow orderRow);
+    public interface OnOrdersListNewOrderListener {
+        void onOrdersListNewOrder(Integer memeID, Integer amount, Integer price, Boolean isBuy, String buy);
+
+        void onOrdersListDirectOrder(Integer memeID, Integer orderID, Integer amount, Boolean isBuy, String buy);
     }
+
     private void setProgressDialog(boolean wait) {
 
         if (wait) {

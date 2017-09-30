@@ -55,6 +55,7 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import com.robthecornallgmail.memarket.Fragments.BagGridFragment;
 import com.robthecornallgmail.memarket.Fragments.ListMemesFragment;
 import com.robthecornallgmail.memarket.Fragments.MemeDetailsFragment;
+import com.robthecornallgmail.memarket.Fragments.OrdersListAdapter;
 import com.robthecornallgmail.memarket.Fragments.OrdersListFragment;
 import com.robthecornallgmail.memarket.Util.BagGrid;
 import com.robthecornallgmail.memarket.Util.ItemObject;
@@ -85,31 +86,31 @@ import static java.lang.Thread.sleep;
 public class MenuActivity extends AppCompatActivity implements ListMemesFragment.OnListFragmentInteractionListener,
         MemeDetailsFragment.OnFragmentInteractionListener,
         LeaderboardDialogFragment.OnLeaderboardFragmentInteractionListener,
-        OrdersListFragment.OnOrdersListFragmentInteractionListener,
+        OrdersListFragment.OnOrdersListNewOrderListener,
         BagGridFragment.OnBagGridInteractionListener,
 
         HouseSurfaceView.OnBuildingInteractionListener
 {
-    private static long timeTillUpdate = 900000;
-    private static CountDownTimer mFifteenMinTimer;
-    private static MyApplication mApplication;
-    private static Calendar calendar;
-
     private static final String TAG = "Menu";
+    public  static MyApplication mApplication;
+
+    private Calendar calendar;
+    private  long timeTillUpdate = 900000;
+    private static CountDownTimer mFifteenMinTimer;
 
     private ProgressDialog mProgressDialog;
 
     private Button mSettingsWheelButton, mLeaderboardButton;
-    RelativeLayout mAddMemeLayout;
-    FloatingActionButton mAddMemeButton;
+    private RelativeLayout mAddMemeLayout;
+    private FloatingActionButton mAddMemeButton;
     /*graph stuff*/
     private GraphView mGraphView;
     private GetGraphData mGetGraphTask;
 
     private DateRange mDateRange = DateRange.DAY;
     /*maps holding various data*/
-    static HashMap<Integer, MemeObject> mMemeIdtoObject = new HashMap<>();
-    HashMap<Integer, OrderRow> mOrderIdtoOrderRow = new HashMap<>();
+    private HashMap<Integer, MemeObject> mMemeIdtoObject = new HashMap<>();
+    private HashMap<Integer, OrderRow> mOrderIdtoOrderRow = new HashMap<>();
     private Map<Integer, LineGraphSeries<DataPoint>> mMemeIDtoSeriesMap = new HashMap<>();
     private Map<String,Integer> mLeaderboardUsersToMoneyMap = new LinkedHashMap<>(); //preserves ordering in HashMap
     private HashMap<Integer, ItemObject> mItemsIdToObject = new HashMap<>();
@@ -120,22 +121,22 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
     private Integer mSelectedMemeID;
 
-    EditText mSearchView;
+    private EditText mSearchView;
+
     /*fragments*/
-    ListMemesFragment mMemeListFragment;
-    static MemeDetailsFragment mMemeDetailsFragment;
-    static OrdersListFragment mOrdersListFragment;
-    LeaderboardDialogFragment mLeaderboardDialogFragment;
-    BagGridFragment mBagGridFragment;
+    private ListMemesFragment mMemeListFragment;
+    private MemeDetailsFragment mMemeDetailsFragment;
+    private OrdersListFragment mOrdersListFragment;
+    private LeaderboardDialogFragment mLeaderboardDialogFragment;
+    private BagGridFragment mBagGridFragment;
 
-    FrameLayout mMemeListFrameLayout, mMemeDetailsFrameLayout, mMemeOrdersFrameLayout;
+    private FrameLayout mMemeListFrameLayout, mMemeDetailsFrameLayout, mMemeOrdersFrameLayout;
 
-
-    HouseSurfaceView mHouseSurfaceView;
-    InsideHouseSurfaceView mInsideHouseSurfaceView;
+    private HouseSurfaceView mHouseSurfaceView;
+    private InsideHouseSurfaceView mInsideHouseSurfaceView;
     // map meme IDs to their respective past Data from server.
     private Map<Integer, MemePastData> mGraphDataObjectMap = new HashMap<>();
-    private static TextView mMoney;
+    private TextView mMoney;
 
 
     @Override
@@ -726,8 +727,16 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     }
 
     @Override
-    public void onOrdersListFragmentInteraction(OrderRow orderRow) {
-
+    public void onOrdersListNewOrder(Integer memeId, Integer amount, Integer price, Boolean isBuy, String buy) {
+        /* clicking new order */
+        new PlaceOrder(mApplication.userData.getID(), memeId, 0, amount, price)
+            .execute(Defines.SERVER_ADDRESS + String.format("/new%sOrder.php",buy), "NEW_ORDER");
+    }
+    @Override
+    public void onOrdersListDirectOrder(Integer memeID, Integer orderID, Integer amount, Boolean isBuy, String buy) {
+        /* clicking direct buy */
+        new PlaceOrder(mApplication.userData.getID(), memeID, orderID, amount, 0)
+                .execute(Defines.SERVER_ADDRESS + String.format("/%sOrder.php", buy.toLowerCase()), "ORDER_FROM_USER");
     }
 
 
@@ -1124,10 +1133,11 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
     // TODO: 03/08/17 NEED TO MAKE SURE ONLY ONE INSTANCE OF THIS THREAD IS RUNNING AT ONCE BEFORE STARTING A NEW ONE
 
-    public static class PlaceOrder extends AsyncTask<String,Void,Boolean>
+    public class PlaceOrder extends AsyncTask<String,Void,Boolean>
     {
         private String serverResponse;
         private final Integer mUserID;
+        private final Integer mOrderID;
         private final Integer mMemeID;
         private final Integer mAmount;
         private final Integer mPrice;
@@ -1135,16 +1145,20 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         private Integer mNewStocks;
         Integer mMoneyDiff, mStocksDiff, mNoOrders;
         String mOrderCompleted;
-        public PlaceOrder(Integer user_id, Integer meme_id, Integer amount, Integer price)
-        {
+        private String mRequest;
+
+        public PlaceOrder(Integer user_id, Integer meme_id, Integer order_id, Integer amount, Integer price) {
             mUserID = user_id;
             mMemeID = meme_id;
             mAmount = amount;
             mPrice = price;
+            mOrderID = order_id;
         }
+
         @Override
         protected Boolean doInBackground(String... strings)
         {
+            mRequest = strings[1];
             URL url;
             HttpURLConnection urlConnection;
             String charset = "UTF-8";
@@ -1160,10 +1174,19 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 OutputStream out = urlConnection.getOutputStream();
                 BufferedWriter writer = new BufferedWriter(
                         new OutputStreamWriter(out, "UTF-8"));
+                String query;
+                if(mRequest.equals("ORDER_FROM_USER")) {
+                    query = String.format("Content-Type: application/json&charset=%s&user=%d&order_id=%d&amount=%d",
+                            URLEncoder.encode(charset, charset),
+                            mUserID,mOrderID,mAmount);
+                } else if(mRequest.equals("NEW_ORDER")) {
+                    query = String.format("Content-Type: application/json&charset=%s&user=%d&meme=%d&amount=%d&price=%d",
+                            URLEncoder.encode(charset, charset),
+                            mUserID,mMemeID,mAmount,mPrice);
+                } else {
+                    return false;
+                }
 
-                String query = String.format("Content-Type: application/json&charset=%s&user=%d&meme=%d&amount=%d&price=%d",
-                        URLEncoder.encode(charset, charset),
-                        mUserID,mMemeID,mAmount,mPrice);
                 Log.v(TAG, "query is: " + query);
                 writer.write(query);
 
@@ -1203,14 +1226,23 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 String result = jsonObject.getString("result");
                 if (result.equals("true"))
                 {
-                    mNewMoney = jsonObject.getInt("new_money");
-                    mNewStocks = jsonObject.getInt("new_stocks");
-                    mMoneyDiff = jsonObject.getInt("money_diff");
-                    mStocksDiff = jsonObject.getInt("stocks_diff");
-                    mNoOrders = jsonObject.getInt("no_orders");
-                    mOrderCompleted = jsonObject.getString("completed");
-                    mMemeIdtoObject.get(mMemeID).mSharesHeld = mNewStocks;
-                    return true;
+                    if(mRequest.equals("ORDER_FROM_USER")){
+                        mNewMoney = jsonObject.getInt("new_money");
+                        mNewStocks = jsonObject.getInt("new_stocks");
+                        mMemeIdtoObject.get(mMemeID).mSharesHeld = mNewStocks;
+                        return true;
+                    } else if(mRequest.equals("NEW_ORDER")) {
+                        mNewMoney = jsonObject.getInt("new_money");
+                        mNewStocks = jsonObject.getInt("new_stocks");
+                        mMoneyDiff = jsonObject.getInt("money_diff");
+                        mStocksDiff = jsonObject.getInt("stocks_diff");
+                        mNoOrders = jsonObject.getInt("no_orders");
+                        mOrderCompleted = jsonObject.getString("completed");
+                        mMemeIdtoObject.get(mMemeID).mSharesHeld = mNewStocks;
+                        return true;
+                    } else {
+                        return  false;
+                    }
                 }
                 else
                 {
@@ -1245,13 +1277,22 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 mApplication.userData.setMoney(mNewMoney);
                 mMoney.setText(String.format("$%s", mNewMoney));
                 mMemeDetailsFragment.updateStocksOwned(mNewStocks);
-                mOrdersListFragment.orderResponse(mNewMoney, mNewStocks, mMoneyDiff, mStocksDiff,
-                        mNoOrders, mOrderCompleted);
+                if(mRequest.equals("ORDER_FROM_USER")) {
+                    mOrdersListFragment.orderResponseDirect(mNewMoney, mNewStocks, mAmount);
+                } else if(mRequest.equals("NEW_ORDER")) {
+                    mOrdersListFragment.orderResponse(mNewMoney, mNewStocks, mMoneyDiff, mStocksDiff,
+                            mNoOrders, mOrderCompleted);
+                }
 
 
 
             }
             else {
+                if(mRequest.equals("ORDER_FROM_USER")) {
+                    mOrdersListFragment.orderDirectFailed();
+                } else if(mRequest.equals("NEW_ORDER")) {
+                    mOrdersListFragment.orderFailed();
+                }
 
             }
             return;

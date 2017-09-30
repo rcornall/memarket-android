@@ -27,7 +27,7 @@ import java.util.Map;
  */
 
 public class BagGridFragment extends Fragment {
-String TAG = "BagGridFragment";
+    private final String TAG = "BagGridFragment";
     private int mColumnCount = 3;
     private OnBagGridInteractionListener mListener;
     private List<BagGrid> mBagGridList;

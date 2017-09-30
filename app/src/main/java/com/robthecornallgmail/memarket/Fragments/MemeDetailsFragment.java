@@ -65,7 +65,7 @@ public class MemeDetailsFragment extends Fragment {
     private static String mName;
 
 
-    static MemeObject mMemeObject;
+    public static  MemeObject mMemeObject;
 
     private View mView;
     private TextView mMemeTitleView;
@@ -494,6 +494,7 @@ public class MemeDetailsFragment extends Fragment {
     }
 
     public void updateStocksOwned(Integer owned) {
+        mMemeObject.mSharesHeld = owned;
         mStocksOwnedView.setText(owned.toString());
     }
 

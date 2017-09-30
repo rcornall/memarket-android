@@ -40,7 +40,7 @@ public class ListMemesFragment extends Fragment {
     private OnListFragmentInteractionListener mListener;
     private List<MemeRow> memeRowList;
     private MemesListAdapter mAdapter;
-    EditText mSearchView;
+    private EditText mSearchView;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
