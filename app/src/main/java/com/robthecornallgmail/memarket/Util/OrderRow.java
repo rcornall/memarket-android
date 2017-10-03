@@ -12,7 +12,8 @@ public class OrderRow {
     public Integer mPrice;
     public String mDate;
 
-    public OrderRow (Integer userID, String name, Integer memeID, Integer amount, Integer price, String date) {
+    public OrderRow (Integer orderID, Integer userID, String name, Integer memeID, Integer amount, Integer price, String date) {
+        mOrderID = orderID;
         mUserID = userID;
         mName = name;
         mMemeID = memeID;

@@ -3,7 +3,7 @@
     android:name="com.robthecornallgmail.memarket.Fragments.LeaderboardDialogFragment"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:padding="20dp">
     <TextView
         android:id="@+id/leaderboard_title"

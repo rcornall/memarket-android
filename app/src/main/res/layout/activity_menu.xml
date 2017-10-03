@@ -139,7 +139,7 @@
                         android:layout_weight="0.3"
                         android:layout_height="wrap_content"
                         android:hint="Search"
-                        android:drawableLeft="@mipmap/search_icon"
+                        android:drawableLeft="@drawable/ic_search_white_24dp"
                         android:textColor="@color/greenWhite"
                         android:textCursorDrawable="@null"
                         android:paddingLeft="15dp"
@@ -239,6 +239,12 @@
 
                 </FrameLayout>
 
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/active_listings_fragment">
+
+                </FrameLayout>
 
                 <FrameLayout
                     android:layout_width="match_parent"

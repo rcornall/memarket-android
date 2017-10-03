@@ -8,4 +8,5 @@
     <dimen name="spinnerHeight">40dp</dimen>
     <dimen name="text_margin">16dp</dimen>
     <dimen name="text_margin_small">12dp</dimen>
+    <dimen name="activeorders_amount_text_size">14sp</dimen>
 </resources>

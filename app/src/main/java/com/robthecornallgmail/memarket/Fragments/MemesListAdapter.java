@@ -131,7 +131,7 @@ public class MemesListAdapter extends RecyclerView.Adapter<MemesListAdapter.View
         return mRows.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    protected class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
         public final TextView mNameView;
         public final TextView mPriceView;

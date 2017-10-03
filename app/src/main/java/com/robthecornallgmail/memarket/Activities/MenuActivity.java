@@ -38,10 +38,13 @@ import java.net.URL;
 import java.net.MalformedURLException;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
@@ -51,10 +54,12 @@ import android.util.Log;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+import com.robthecornallgmail.memarket.Fragments.ActiveListingsFragment;
 import com.robthecornallgmail.memarket.Fragments.BagGridFragment;
 import com.robthecornallgmail.memarket.Fragments.ListMemesFragment;
 import com.robthecornallgmail.memarket.Fragments.MemeDetailsFragment;
 import com.robthecornallgmail.memarket.Fragments.OrdersListFragment;
+import com.robthecornallgmail.memarket.Util.ActiveRow;
 import com.robthecornallgmail.memarket.Util.BagGrid;
 import com.robthecornallgmail.memarket.Util.ItemObject;
 import com.robthecornallgmail.memarket.Util.MemeObject;
@@ -86,6 +91,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         LeaderboardDialogFragment.OnLeaderboardFragmentInteractionListener,
         OrdersListFragment.OnOrdersListNewOrderListener,
         BagGridFragment.OnBagGridInteractionListener,
+        ActiveListingsFragment.OnActiveListingsInteractionListener,
 
         HouseSurfaceView.OnBuildingInteractionListener
 {
@@ -108,7 +114,8 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     private DateRange mDateRange = DateRange.DAY;
     /*maps holding various data*/
     private HashMap<Integer, MemeObject> mMemeIdtoObject = new LinkedHashMap<>();
-    private HashMap<Integer, OrderRow> mOrderIdtoOrderRow = new LinkedHashMap<>();
+    private List<OrderRow> mOrderRows = new ArrayList<>();
+    private List<ActiveRow> mActiveOrdersList;
     private Map<Integer, LineGraphSeries<DataPoint>> mMemeIDtoSeriesMap = new HashMap<>();
     private Map<String,Integer> mLeaderboardUsersToMoneyMap = new LinkedHashMap<>(); //preserves ordering in HashMap
     private HashMap<Integer, ItemObject> mItemsIdToObject = new HashMap<>();
@@ -124,6 +131,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
     /*fragments*/
     private ListMemesFragment mMemeListFragment;
+    private ActiveListingsFragment mActiveListingsFragment;
     private MemeDetailsFragment mMemeDetailsFragment;
     private OrdersListFragment mOrdersListFragment;
     private LeaderboardDialogFragment mLeaderboardDialogFragment;
@@ -138,6 +146,9 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     private TextView mMoney;
     private Button mActiveListingBtn;
     private Button mFreshMemesBtn;
+    private View mSearchMemesHighlight;
+    private View mActiveListingHighlight;
+    private View mFreshMemesHighlight;
 
 
     @Override
@@ -152,6 +163,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         Log.v(TAG, "memoryClass: " + Integer.toString(memoryClass));
 
         mMemeListFragment = new ListMemesFragment();
+        mActiveListingsFragment = new ActiveListingsFragment();
         mOrdersListFragment = new OrdersListFragment();
         mBagGridFragment = new BagGridFragment();
 
@@ -337,11 +349,11 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         /* setup search memes, activing listings, fresh memes layout */
 
         /* Setup highlights for bottom tab buttons e.g. home find store*/
-        final View searchMemesHighlight = findViewById(R.id.search_memes_highlight);
-        final View activeListingHighlight = findViewById(R.id.active_listing_highlight);
-        final View freshMemesHighlight = findViewById(R.id.fresh_memes_highlight);
-        activeListingHighlight.setVisibility(View.INVISIBLE);
-        freshMemesHighlight.setVisibility(View.INVISIBLE);
+        mSearchMemesHighlight = findViewById(R.id.search_memes_highlight);
+        mActiveListingHighlight = findViewById(R.id.active_listing_highlight);
+        mFreshMemesHighlight = findViewById(R.id.fresh_memes_highlight);
+        mActiveListingHighlight.setVisibility(View.INVISIBLE);
+        mFreshMemesHighlight.setVisibility(View.INVISIBLE);
 
         mActiveListingBtn = (Button) findViewById(R.id.active_listing_button);
         mFreshMemesBtn = (Button) findViewById(R.id.fresh_memes_button);
@@ -349,32 +361,53 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         mSearchMemes.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                searchMemesHighlight.setVisibility(View.VISIBLE);
-                activeListingHighlight.setVisibility(View.INVISIBLE);
-                freshMemesHighlight.setVisibility(View.INVISIBLE);
+                mSearchMemesHighlight.setVisibility(View.VISIBLE);
+                mActiveListingHighlight.setVisibility(View.INVISIBLE);
+                mFreshMemesHighlight.setVisibility(View.INVISIBLE);
 
                 mSearchMemes.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_search_white_24dp, 0,0,0);
+
+                FragmentManager fm = getSupportFragmentManager();
+                if (fm.getBackStackEntryCount() >= 2) {
+                    Log.i("MainActivity", "popping backstack  > 2");
+                    fm.popBackStackImmediate();
+                }
                 return false;
             }
         });
         mActiveListingBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                searchMemesHighlight.setVisibility(View.INVISIBLE);
-                activeListingHighlight.setVisibility(View.VISIBLE);
-                freshMemesHighlight.setVisibility(View.INVISIBLE);
+                mSearchMemesHighlight.setVisibility(View.INVISIBLE);
+                mActiveListingHighlight.setVisibility(View.VISIBLE);
+                mFreshMemesHighlight.setVisibility(View.INVISIBLE);
 
                 mSearchMemes.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_arrow_back_black_24dp, 0,0,0);
+                FragmentManager fm = getSupportFragmentManager();
+                if (fm.getBackStackEntryCount() == 2) {
+                    return;
+                }
+
+                /* fetch and inflate active listings fragment, on top of search. hide fresh memes fragment*/
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.add(R.id.active_listings_fragment, mActiveListingsFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+
+                new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getActiveOrders.php?user=" + mApplication.userData.getID(), "GETTING_ACTIVE_ORDERS");
+
             }
         });
         mFreshMemesBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                searchMemesHighlight.setVisibility(View.INVISIBLE);
-                activeListingHighlight.setVisibility(View.INVISIBLE);
-                freshMemesHighlight.setVisibility(View.VISIBLE);
+                mSearchMemesHighlight.setVisibility(View.INVISIBLE);
+                mActiveListingHighlight.setVisibility(View.INVISIBLE);
+                mFreshMemesHighlight.setVisibility(View.VISIBLE);
 
                 mSearchMemes.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_arrow_back_black_24dp, 0,0,0);
+
+                /*TODO: inflate fresh memes fragment, on top of search. hide active listings fragment*/
             }
         });
 
@@ -672,7 +705,14 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         } else if (fm.getBackStackEntryCount() == 2) {
             Log.i("MainActivity", "popping backstack == 2");
             fm.popBackStackImmediate();
+
             mSearchView.setVisibility(View.VISIBLE);
+            mSearchMemesHighlight.setVisibility(View.VISIBLE);
+            mActiveListingHighlight.setVisibility(View.INVISIBLE);
+            mFreshMemesHighlight.setVisibility(View.INVISIBLE);
+
+            mSearchMemes.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_search_white_24dp, 0,0,0);
+
             mAddMemeLayout.setVisibility(View.VISIBLE);
         } else {
             /* hide insidehouse view if visible */
@@ -795,6 +835,13 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
             new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getOrders.php?buy=true", "GETTING_BUY_ORDERS");
         }
     }
+    @Override
+    public void onActiveListingsCancel(ActiveRow row) {
+        /* active orders callback for cancelling an order */
+        return;
+    }
+
+
 
 
     public class GetDataFromServer extends AsyncTask<String , Void , MyHelper.results>
@@ -861,94 +908,103 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
             try {
                 if (strings[1].equals("GETTING_BUY_ORDERS") || strings[1].equals("GETTING_SELL_ORDERS")) {
-                    mOrderIdtoOrderRow.clear(); /*refresh with new values*/
+                    mOrderRows.clear(); /*refresh with new values*/
                 }
-                JSONArray jsonArray = new JSONArray(serverResponse);
-                for(int i=0; i < jsonArray.length(); i++)
-                {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    if (strings[1].equals("GETTING_DATA"))
+                if (mRequest.equals("GETTING_ACTIVE_ORDERS")) {
+                    JSONObject jsonObject = new JSONObject(serverResponse);
+                    JSONArray buyOrders = jsonObject.getJSONArray("buy_orders");
+                    JSONArray sellOrders = jsonObject.getJSONArray("sell_orders");
+                    /* merge+sort both arrays into 1 array, order by date desc */
+                    mActiveOrdersList = mergeAndSort(buyOrders, sellOrders);
+                    Result.success = true;
+                } else {
+                    JSONArray jsonArray = new JSONArray(serverResponse);
+                    for(int i=0; i < jsonArray.length(); i++)
                     {
-                        Integer ID = jsonObject.getInt("ID");
-                        String NAME = jsonObject.getString("NAME");
-                        Integer CURRENT_STOCK = jsonObject.getInt("CURRENT_STOCK");
-                        Integer LAST_STOCK = jsonObject.getInt("LAST_STOCK");
-                        String LINK = "http://knowyourmeme.com";
-                        try{
-                            LINK = jsonObject.getString("KYM_URL");
-                        } catch (JSONException e) {
-                            Log.v(TAG, "no knowyourmeme url for this meme: " + e.toString());
-                        }
-                        if (mMemeIdtoObject.get(ID) == null)
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        if (strings[1].equals("GETTING_DATA"))
                         {
-                            mMemeIdtoObject.put(ID, new MemeObject(NAME, CURRENT_STOCK,LAST_STOCK,LINK));
-                        }
-                        else
-                        {
-                            mMemeIdtoObject.get(ID).mPrice = CURRENT_STOCK;
-                            mMemeIdtoObject.get(ID).mLastPrice = LAST_STOCK;
-                        }
-                    } else if (strings[1].equals("GETTING_USER_STOCKS")) {
-                        Integer MEME_ID = jsonObject.getInt("MEME_ID");
-                        Integer AMOUNT = jsonObject.getInt("AMOUNT");
-                        mMemeIdtoObject.get(MEME_ID).mSharesHeld = AMOUNT;
-                    } else if (strings[1].equals("GETTING_LEADERBOARD")) {
-                        String NAME = jsonObject.getString("USER_DISPLAY_NAME");
-                        Integer MONEY = jsonObject.getInt("MONEY");
-                        mLeaderboardUsersToMoneyMap.put(NAME, MONEY);
-                    } else if (strings[1].equals("GETTING_ITEM_TYPES")) {
-                        Integer ID = jsonObject.getInt("ITEM_ID");
-                        String NAME = jsonObject.getString("ITEM_NAME");
-                        String ITEM_DESCRIPTION = jsonObject.getString("ITEM_DESCRIPTION");
-                        Integer ITEM_PRICE = jsonObject.getInt("ITEM_PRICE");
-                        Integer ITEM_MAX_AMOUNT = jsonObject.getInt("ITEM_MAX_AMOUNT");
-                        Integer ITEM_TYPE = jsonObject.getInt("ITEM_TYPE");
-                        Integer ITEM_SUBTYPE = jsonObject.getInt("ITEM_SUBTYPE");
-                        Integer ITEM_WIDTH = jsonObject.getInt("ITEM_WIDTH");
-                        mItemsIdToObject.put(ID, new ItemObject(NAME, ITEM_DESCRIPTION, ITEM_PRICE,
-                                            ITEM_MAX_AMOUNT,ITEM_TYPE,ITEM_SUBTYPE, ITEM_WIDTH));
-                    } else if (strings[1].equals("GETTING_USER_ITEMS")) {
-                        Integer USER_ITEM_ID = jsonObject.getInt("USER_ITEM_ID");
-                        Integer ITEM_ID = jsonObject.getInt("ITEM_ID");
-                        Integer ITEM_AMOUNT = jsonObject.getInt("ITEM_AMOUNT");
-                        Integer EQUIPPED = 0;
-                        Integer X_COORDINATE = 0;
-                        Integer WORKING_AT = 0;
-                        Integer WORKING_POSITION = 0;
-                        Integer WORKER_LEVEL = 0;
-                        try{
-                            EQUIPPED = jsonObject.getInt("EQUIPPED");
-                            X_COORDINATE = jsonObject.getInt("X_COORDINATE");
-                            WORKING_AT = jsonObject.getInt("WORKING_AT");
-                            WORKING_POSITION = jsonObject.getInt("WORKING_POSITION");
-                            WORKER_LEVEL = jsonObject.getInt("WORKER_LEVEL");
-                        } catch (JSONException e) {
-                            Log.v(TAG, e.toString());
-                        }
-                        mUserItemIdToUsersItems.put(USER_ITEM_ID, new UserItem(ITEM_ID,ITEM_AMOUNT,EQUIPPED,X_COORDINATE,WORKING_AT,WORKING_POSITION, WORKER_LEVEL));
-                    } else if (strings[1].equals("GETTING_BUY_ORDERS") || strings[1].equals("GETTING_SELL_ORDERS")) {
+                            Integer ID = jsonObject.getInt("ID");
+                            String NAME = jsonObject.getString("NAME");
+                            Integer CURRENT_STOCK = jsonObject.getInt("CURRENT_STOCK");
+                            Integer LAST_STOCK = jsonObject.getInt("LAST_STOCK");
+                            String LINK = "http://knowyourmeme.com";
+                            try{
+                                LINK = jsonObject.getString("KYM_URL");
+                            } catch (JSONException e) {
+                                Log.v(TAG, "no knowyourmeme url for this meme: " + e.toString());
+                            }
+                            if (mMemeIdtoObject.get(ID) == null)
+                            {
+                                mMemeIdtoObject.put(ID, new MemeObject(NAME, CURRENT_STOCK,LAST_STOCK,LINK));
+                            }
+                            else
+                            {
+                                mMemeIdtoObject.get(ID).mPrice = CURRENT_STOCK;
+                                mMemeIdtoObject.get(ID).mLastPrice = LAST_STOCK;
+                            }
+                        } else if (strings[1].equals("GETTING_USER_STOCKS")) {
+                            Integer MEME_ID = jsonObject.getInt("MEME_ID");
+                            Integer AMOUNT = jsonObject.getInt("AMOUNT");
+                            mMemeIdtoObject.get(MEME_ID).mSharesHeld = AMOUNT;
+                        } else if (strings[1].equals("GETTING_LEADERBOARD")) {
+                            String NAME = jsonObject.getString("USER_DISPLAY_NAME");
+                            Integer MONEY = jsonObject.getInt("MONEY");
+                            mLeaderboardUsersToMoneyMap.put(NAME, MONEY);
+                        } else if (strings[1].equals("GETTING_ITEM_TYPES")) {
+                            Integer ID = jsonObject.getInt("ITEM_ID");
+                            String NAME = jsonObject.getString("ITEM_NAME");
+                            String ITEM_DESCRIPTION = jsonObject.getString("ITEM_DESCRIPTION");
+                            Integer ITEM_PRICE = jsonObject.getInt("ITEM_PRICE");
+                            Integer ITEM_MAX_AMOUNT = jsonObject.getInt("ITEM_MAX_AMOUNT");
+                            Integer ITEM_TYPE = jsonObject.getInt("ITEM_TYPE");
+                            Integer ITEM_SUBTYPE = jsonObject.getInt("ITEM_SUBTYPE");
+                            Integer ITEM_WIDTH = jsonObject.getInt("ITEM_WIDTH");
+                            mItemsIdToObject.put(ID, new ItemObject(NAME, ITEM_DESCRIPTION, ITEM_PRICE,
+                                    ITEM_MAX_AMOUNT,ITEM_TYPE,ITEM_SUBTYPE, ITEM_WIDTH));
+                        } else if (strings[1].equals("GETTING_USER_ITEMS")) {
+                            Integer USER_ITEM_ID = jsonObject.getInt("USER_ITEM_ID");
+                            Integer ITEM_ID = jsonObject.getInt("ITEM_ID");
+                            Integer ITEM_AMOUNT = jsonObject.getInt("ITEM_AMOUNT");
+                            Integer EQUIPPED = 0;
+                            Integer X_COORDINATE = 0;
+                            Integer WORKING_AT = 0;
+                            Integer WORKING_POSITION = 0;
+                            Integer WORKER_LEVEL = 0;
+                            try{
+                                EQUIPPED = jsonObject.getInt("EQUIPPED");
+                                X_COORDINATE = jsonObject.getInt("X_COORDINATE");
+                                WORKING_AT = jsonObject.getInt("WORKING_AT");
+                                WORKING_POSITION = jsonObject.getInt("WORKING_POSITION");
+                                WORKER_LEVEL = jsonObject.getInt("WORKER_LEVEL");
+                            } catch (JSONException e) {
+                                Log.v(TAG, e.toString());
+                            }
+                            mUserItemIdToUsersItems.put(USER_ITEM_ID, new UserItem(ITEM_ID,ITEM_AMOUNT,EQUIPPED,X_COORDINATE,WORKING_AT,WORKING_POSITION, WORKER_LEVEL));
+                        } else if (strings[1].equals("GETTING_BUY_ORDERS") || strings[1].equals("GETTING_SELL_ORDERS")) {
                         /*TODO: make new buy order button work*/
 
-                        Integer ORDER_ID;
-                        if(strings[1].equals("GETTING_BUY_ORDERS")) {
-                            ORDER_ID = jsonObject.getInt("buy_order_id");
+                            Integer ORDER_ID;
+                            if(strings[1].equals("GETTING_BUY_ORDERS")) {
+                                ORDER_ID = jsonObject.getInt("buy_order_id");
+                            } else {
+                                ORDER_ID = jsonObject.getInt("sell_order_id");
+                            }
+                            Integer USER_ID = jsonObject.getInt("user_id");
+                            Integer MEME_ID = jsonObject.getInt("meme_id");
+                            String USER_NAME = jsonObject.getString("user_name");
+                            Integer AMOUNT = jsonObject.getInt("amount");
+                            Integer PRICE = jsonObject.getInt("price");
+                            String DATE = jsonObject.getString("date");
+                            mOrderRows.add(new OrderRow(ORDER_ID, USER_ID,USER_NAME,MEME_ID,AMOUNT,PRICE,DATE));
                         } else {
-                            ORDER_ID = jsonObject.getInt("sell_order_id");
+                            Result.success = false;
+                            Log.e(TAG, "params wrong..");
+                            return  Result;
                         }
-                        Integer USER_ID = jsonObject.getInt("user_id");
-                        Integer MEME_ID = jsonObject.getInt("meme_id");
-                        String USER_NAME = jsonObject.getString("user_name");
-                        Integer AMOUNT = jsonObject.getInt("amount");
-                        Integer PRICE = jsonObject.getInt("price");
-                        String DATE = jsonObject.getString("date");
-                        mOrderIdtoOrderRow.put(ORDER_ID, new OrderRow(USER_ID,USER_NAME,MEME_ID,AMOUNT,PRICE,DATE));
-                    } else {
-                        Result.success = false;
-                        Log.e(TAG, "params wrong..");
-                        return  Result;
                     }
                 }
-                for(OrderRow order  :mOrderIdtoOrderRow.values()) {
+                for(OrderRow order  : mOrderRows) {
                     Log.v(TAG, "order: " + order.mAmount);
                 }
                 Result.success = true;
@@ -967,11 +1023,72 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                         Result.response = jsonObject.getString("error");
                     }
                 } catch (JSONException e2) {
-                    Log.e(TAG, "error cant get server response:"  + e2);
+                    Log.e(TAG, "error cant get server response:"  + e2.toString());
                     Result.response = "Server Connection Issues, Try again later";
                 }
+            } catch (ParseException e) {
+                Log.e(TAG, "Error parsing dates----- " + e.toString());
+                e.printStackTrace();
             }
             return Result;
+        }
+
+        private List<ActiveRow> mergeAndSort(JSONArray a, JSONArray b) throws JSONException, ParseException {
+            int i = 0, j = 0, k = 0;
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            List<ActiveRow> ret = new ArrayList<>();
+            while (i < a.length() && j < b.length()) {
+                JSONObject jsonA = a.getJSONObject(i);
+                JSONObject jsonB = b.getJSONObject(j);
+                Date dateA = sdf.parse(jsonA.getString("date"));
+                Date dateB = sdf.parse(jsonB.getString("date"));
+                if (dateA.after(dateB)) {
+                    Integer ORDER_ID = jsonA.getInt("buy_order_id");
+                    Integer MEME_ID = jsonA.getInt("meme_id");
+                    String MEME_NAME = mMemeIdtoObject.get(MEME_ID).mName;
+                    Integer AMOUNT = jsonA.getInt("amount");
+                    Integer PRICE = jsonA.getInt("price");
+                    ret.add(new ActiveRow(true, ORDER_ID, MEME_ID, MEME_NAME, AMOUNT, PRICE, dateA));
+                    i++;
+                } else {
+                    Integer ORDER_ID = jsonB.getInt("sell_order_id");
+                    Integer MEME_ID = jsonB.getInt("meme_id");
+                    String MEME_NAME = mMemeIdtoObject.get(MEME_ID).mName;
+                    Integer AMOUNT = jsonB.getInt("amount");
+                    Integer PRICE = jsonB.getInt("price");
+                    ret.add(new ActiveRow(false, ORDER_ID, MEME_ID, MEME_NAME, AMOUNT, PRICE, dateB));
+                    j++;
+                }
+                k++;
+            }
+            while (i < a.length())
+            {
+                JSONObject jsonA = a.getJSONObject(i);
+                Date dateA = sdf.parse(jsonA.getString("date"));
+                Integer ORDER_ID = jsonA.getInt("buy_order_id");
+                Integer MEME_ID = jsonA.getInt("meme_id");
+                String MEME_NAME = mMemeIdtoObject.get(MEME_ID).mName;
+                Integer AMOUNT = jsonA.getInt("amount");
+                Integer PRICE = jsonA.getInt("price");
+                ret.add(new ActiveRow(true, ORDER_ID, MEME_ID, MEME_NAME, AMOUNT, PRICE, dateA));
+                i++;
+                k++;
+            }
+
+            while (j < b.length())
+            {
+                JSONObject jsonB = b.getJSONObject(j);
+                Date dateB = sdf.parse(jsonB.getString("date"));
+                Integer ORDER_ID = jsonB.getInt("sell_order_id");
+                Integer MEME_ID = jsonB.getInt("meme_id");
+                String MEME_NAME = mMemeIdtoObject.get(MEME_ID).mName;
+                Integer AMOUNT = jsonB.getInt("amount");
+                Integer PRICE = jsonB.getInt("price");
+                ret.add(new ActiveRow(false, ORDER_ID, MEME_ID, MEME_NAME, AMOUNT, PRICE, dateB));
+                j++;
+                k++;
+            }
+            return ret;
         }
 
         @Override
@@ -1012,11 +1129,14 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 } else if(mRequest.equals("GETTING_USER_STOCKS")){
 //                    mMemeDetailsFragment.updateOwned(mMemeIdtoObject.get(mSelectedMemeID).mSharesHeld);
                 } else if(mRequest.equals("GETTING_BUY_ORDERS")) {
-                    mOrdersListFragment.updateList(mOrderIdtoOrderRow, mSelectedMemeID, mMemeIdtoObject.get(mSelectedMemeID), "Buy");
                     Log.v(TAG, "getting  buy orders");
+                    mOrdersListFragment.updateList(mOrderRows, mSelectedMemeID, mMemeIdtoObject.get(mSelectedMemeID), "Buy");
                 } else if(mRequest.equals("GETTING_SELL_ORDERS")) {
-                    mOrdersListFragment.updateList(mOrderIdtoOrderRow, mSelectedMemeID, mMemeIdtoObject.get(mSelectedMemeID), "Sell");
                     Log.v(TAG, "getting  sell orders");
+                    mOrdersListFragment.updateList(mOrderRows, mSelectedMemeID, mMemeIdtoObject.get(mSelectedMemeID), "Sell");
+                } else if(mRequest.equals("GETTING_ACTIVE_ORDERS")) {
+                    Log.v(TAG, "updating active orders");
+                    mActiveListingsFragment.updateList(mActiveOrdersList);
                 } else {
                     Log.v(TAG, "NOT SPECIFIED REQUEST TYPE");
                 }

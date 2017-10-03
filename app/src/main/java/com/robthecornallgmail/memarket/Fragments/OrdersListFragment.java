@@ -9,13 +9,10 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.BoringLayout;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -24,9 +21,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.robthecornallgmail.memarket.Activities.MainActivity;
-import com.robthecornallgmail.memarket.Activities.MenuActivity;
 import com.robthecornallgmail.memarket.R;
-import com.robthecornallgmail.memarket.Util.Defines;
 import com.robthecornallgmail.memarket.Util.MemeObject;
 import com.robthecornallgmail.memarket.Util.MyApplication;
 import com.robthecornallgmail.memarket.Util.OrderRow;
@@ -35,14 +30,9 @@ import com.squareup.picasso.Picasso;
 import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.logging.Handler;
 
-import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 import static com.robthecornallgmail.memarket.Fragments.MemeDetailsFragment.mMemeObject;
 
 /**
@@ -286,7 +276,7 @@ public class OrdersListFragment  extends Fragment {
         return view;
     }
 
-    public void updateList(HashMap<Integer, OrderRow> orderIDtoRow, Integer selectedMemeID, MemeObject memeObject, String sell) {
+    public void updateList(List<OrderRow> orderRows, Integer selectedMemeID, MemeObject memeObject, String sell) {
         mOrderRows.clear();
         mAdapter.setReady(false);
         mSelectedMemeID = selectedMemeID;
@@ -326,12 +316,10 @@ public class OrdersListFragment  extends Fragment {
         }
 
         Log.v(TAG, "updateListCalled");
-        for(Map.Entry<Integer, OrderRow> order: orderIDtoRow.entrySet()) {
-            order.getValue().mOrderID = order.getKey();
-            if(order.getValue().mMemeID.equals(selectedMemeID)) {
-                mOrderRows.add(order.getValue());
-            }
+        for(OrderRow row : orderRows) {
+            mOrderRows.add(row);
         }
+
         if(mOrderRows.isEmpty())
         {
             mNothingHere.setText("No orders right now...");
