@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/activity_horizontal_margin"
+    android:background="@color/colorMyGrey">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18dp"
+        android:text="Confirm Cancel Order"
+        android:textColor="@color/greenWhiter"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@color/greenWhiteFaded"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/cancel_sentence"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancelling Sell Order for "
+            android:textColor="@color/greenWhite"/>
+        <TextView
+            android:id="@+id/cancel_memeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pepe Frog:"
+            android:textColor="@android:color/white"/>
+
+    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:id="@+id/cancel_refund_sentence"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Refunding "
+            android:textColor="@color/greenWhite"/>
+        <TextView
+            android:id="@+id/sharesText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="100 shares"
+            android:textColor="@android:color/white"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" At: "
+            android:textColor="@color/greenWhite"/>
+        <TextView
+            android:id="@+id/priceText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="$10/share"
+            android:textColor="@android:color/white"/>
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/greenWhite"
+            android:text="Total Refund: "/>
+        <TextView
+            android:id="@+id/costText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:text="$1000"/>
+    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/cancel_order_button"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:background="@color/colorMyGrey"
+            android:textColor="@color/accent"
+            android:text="Cancel"/>
+
+        <Button
+            android:id="@+id/confirm_order_button"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:background="@color/colorMyGrey"
+            android:textColor="@color/accent"
+            android:text="confirm"/>
+    </LinearLayout>
+
+</LinearLayout>

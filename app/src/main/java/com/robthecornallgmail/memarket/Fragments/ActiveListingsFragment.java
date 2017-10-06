@@ -90,7 +90,17 @@ public class ActiveListingsFragment extends Fragment {
         mAdapter.notifyDataSetChanged();
     }
 
+    public void cancelOrderResponse(Integer moneyDiff, Integer stocksDiff) {
+        mAdapter.orderResponse(moneyDiff, stocksDiff);
+    }
+
+    public void cancelOrderFailed() {
+        mAdapter.orderFailed();
+    }
+
     public interface OnActiveListingsInteractionListener {
         void onActiveListingsCancel(ActiveRow row);
+
+        void refreshList();
     }
 }

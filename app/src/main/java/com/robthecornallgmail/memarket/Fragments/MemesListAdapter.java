@@ -62,7 +62,6 @@ public class MemesListAdapter extends RecyclerView.Adapter<MemesListAdapter.View
         }
 
         DecimalFormat df = new DecimalFormat("#0.0#");
-        holder.mItem = mRows.get(position);
         String name = mRows.get(position).getName();
         String nameToDisplay = name.replace("meme", "");
         nameToDisplay = WordUtils.capitalize(nameToDisplay);
@@ -92,16 +91,16 @@ public class MemesListAdapter extends RecyclerView.Adapter<MemesListAdapter.View
         int iconId = holder.mView.getResources().getIdentifier(iconName, "drawable", MainActivity.PACKAGE_NAME);
 //        holder.mImageView.setImageResource(iconId);
         Picasso.with(holder.mView.getContext()).load(iconId).centerCrop().fit().into(holder.mImageView);
-        holder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
-                }
-            }
-        });
+//        holder.mView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (null != mListener) {
+//                    // Notify the active callbacks interface (the activity, if the
+//                    // fragment is attached to one) that an item has been selected.
+//                    mListener.onListFragmentInteraction(holder.mItem);
+//                }
+//            }
+//        });
     }
 
     public void filter(String text)
@@ -138,7 +137,6 @@ public class MemesListAdapter extends RecyclerView.Adapter<MemesListAdapter.View
         public final TextView mPriceDifferenceView;
         public final ImageView mUpDownArrowView;
         public final AppCompatImageButton mImageView;
-        public MemeRow mItem;
 
         public ViewHolder(View view) {
             super(view);
@@ -150,6 +148,17 @@ public class MemesListAdapter extends RecyclerView.Adapter<MemesListAdapter.View
 //            mPriceView.setTypeface(pixelStartFont);
             mImageView = (AppCompatImageButton) view.findViewById(R.id.MemeImage);
             mUpDownArrowView = (ImageView) view.findViewById(R.id.UpDownArrow);
+
+            mView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (null != mListener) {
+                        // Notify the active callbacks interface (the activity, if the
+                        // fragment is attached to one) that an item has been selected.
+                        mListener.onListFragmentInteraction(mRows.get(getAdapterPosition()));
+                    }
+                }
+            });
         }
 
         @Override

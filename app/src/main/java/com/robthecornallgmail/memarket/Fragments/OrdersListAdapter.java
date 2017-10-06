@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,17 +14,10 @@ import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.robthecornallgmail.memarket.Activities.MenuActivity;
 import com.robthecornallgmail.memarket.R;
-import com.robthecornallgmail.memarket.Util.Defines;
 import com.robthecornallgmail.memarket.Util.OrderRow;
 
-import org.w3c.dom.Text;
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import static com.robthecornallgmail.memarket.Activities.MenuActivity.mApplication;
 import static com.robthecornallgmail.memarket.Fragments.MemeDetailsFragment.mMemeObject;
@@ -39,14 +31,16 @@ public class OrdersListAdapter extends RecyclerView.Adapter<OrdersListAdapter.Vi
     private final String TAG = "OrdersListAdapter";
     private final List<OrderRow> mRows;
     private final OrdersListFragment.OnOrdersListNewOrderListener mListener;
+    private View mClassView;
     private Boolean mIsBuy = true;
 
-    private static View mView;
-    private static AlertDialog mMakeOrderAD;
     private Integer mAmnt;
     private Integer mPrice;
     private Integer mTotal;
+
+
     private  AlertDialog mResponseAD;
+    private static AlertDialog mMakeOrderAD;
     private AlertDialog mConfirmOrderAD;
     private  ProgressDialog mProgressDialog;
 
@@ -59,6 +53,7 @@ public class OrdersListAdapter extends RecyclerView.Adapter<OrdersListAdapter.Vi
     private Integer mSelectedMemeID;
     private String mBought;
     private Boolean mReady;
+    private AlertDialog.Builder mDialogBuilder;
 
 
     public OrdersListAdapter(List<OrderRow> items, OrdersListFragment.OnOrdersListNewOrderListener listener) {
@@ -71,6 +66,7 @@ public class OrdersListAdapter extends RecyclerView.Adapter<OrdersListAdapter.Vi
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_order_row, parent, false);
+        mDialogBuilder = new AlertDialog.Builder(view.getContext());
         return new ViewHolder(view);
     }
 
@@ -83,8 +79,8 @@ public class OrdersListAdapter extends RecyclerView.Adapter<OrdersListAdapter.Vi
             holder.mView.setBackgroundColor(holder.mView.getResources().getColor(R.color.colorMySlightlyBetweenGreyDark));
         }
         holder.mUsernameView.setText(mRows.get(position).mName);
-        holder.mAmount.setText(mRows.get(position).mAmount.toString());
-        holder.mPrice.setText("$ " + mRows.get(position).mPrice.toString());
+        holder.mAmountView.setText(mRows.get(position).mAmount.toString());
+        holder.mPriceView.setText("$ " + mRows.get(position).mPrice.toString());
         if(mIsBuy)
         {
             holder.mBuyNowButton.setText("BUY NOW");
@@ -93,21 +89,63 @@ public class OrdersListAdapter extends RecyclerView.Adapter<OrdersListAdapter.Vi
         {
             holder.mBuyNowButton.setText("SELL NOW");
         }
-        holder.mBuyNowButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+
+    }
+
+    @Override
+    public int getItemCount() {
+        return mRows.size();
+    }
+
+
+    public void updateBuyInfo(Boolean mIsBuy, Integer mSelectedMemeID, String mName, String mBuy, String mBuying, String mBought, String mFrom, String mSubTitle, String mCostingYou) {
+        this.mIsBuy = mIsBuy;
+        this.mSelectedMemeID = mSelectedMemeID;
+        this.mMemeName = mName;
+        this.mBuy = mBuy;
+        this.mBuying = mBuying;
+        this.mBought = mBought;
+        this.mFrom = mFrom;
+        this.mSubTitle = mSubTitle;
+        this.mCostingYou = mCostingYou;
+    }
+
+    public void setReady(boolean ready) {
+        this.mReady = ready;
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder{
+
+        public final TextView mUsernameView;
+
+        public final TextView mAmountView;
+        public final TextView mPriceView;
+        public final Button mBuyNowButton;
+        public final View mView;
+
+        public ViewHolder(View view) {
+            super(view);
+            mView = view;
+            mClassView = mView;
+            mUsernameView = (TextView) view.findViewById(R.id.order_user_name);
+            mAmountView = (TextView) view.findViewById(R.id.order_amount);
+            mPriceView = (TextView) view.findViewById(R.id.order_price);
+            mBuyNowButton = (Button) view.findViewById(R.id.orders_buy_now_button);
+
+            /* handle on click events with dialogs */
+            mBuyNowButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
                 if(!mReady)
                 {
                     return; /*avoid race conditions*/
                 }
-                mView = holder.mView;
-                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(holder.mView.getContext());
 
-                LayoutInflater inflater = (LayoutInflater)holder.mView.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                LayoutInflater inflater = (LayoutInflater)mView.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 View dialogView = inflater.inflate(R.layout.new_order_layout, null);
-                dialogBuilder.setView(dialogView);
+                mDialogBuilder.setView(dialogView);
 
-                mMakeOrderAD = dialogBuilder.create();
+                mMakeOrderAD = mDialogBuilder.create();
                 mMakeOrderAD.show();
                 TextView title =(TextView) dialogView.findViewById(R.id.new_order_title);
                 TextView subTitle = (TextView) dialogView.findViewById(R.id.new_order_subtitle);
@@ -117,20 +155,20 @@ public class OrdersListAdapter extends RecyclerView.Adapter<OrdersListAdapter.Vi
                 final TextView sentTotalN = (TextView) dialogView.findViewById(R.id.pricing_sentence_total_n);
                 final Button placeOrder = (Button) dialogView.findViewById(R.id.place_new_order);
 
-                title.setText(mBuy + mFrom + mRows.get(position).mName);
+                title.setText(mBuy + mFrom + mRows.get(getAdapterPosition()).mName);
                 subTitle.setText(mSubTitle);
                 sentBuying.setText(mBuying);
                 final NumberPicker numPickerAmt = (NumberPicker) dialogView.findViewById(R.id.number_picker_amount);
                 final NumberPicker numPickerPrice = (NumberPicker) dialogView.findViewById(R.id.number_picker_price);
 
                 numPickerAmt.setMinValue(1);
-                numPickerAmt.setMaxValue(mRows.get(position).mAmount);
-                numPickerAmt.setValue(mRows.get(position).mAmount);
+                numPickerAmt.setMaxValue(mRows.get(getAdapterPosition()).mAmount);
+                numPickerAmt.setValue(mRows.get(getAdapterPosition()).mAmount);
 
-                numPickerPrice.setMinValue(mRows.get(position).mPrice);
-                numPickerPrice.setMaxValue(mRows.get(position).mPrice);
-                numPickerPrice.setValue(mRows.get(position).mPrice);
-                setNumberPickerTextColor(numPickerPrice, holder.mView.getContext().getResources().getColor(R.color.greenWhiteFaded));
+                numPickerPrice.setMinValue(mRows.get(getAdapterPosition()).mPrice);
+                numPickerPrice.setMaxValue(mRows.get(getAdapterPosition()).mPrice);
+                numPickerPrice.setValue(mRows.get(getAdapterPosition()).mPrice);
+                setNumberPickerTextColor(numPickerPrice, mView.getContext().getResources().getColor(R.color.greenWhiteFaded));
 
                 sentBuyingN.setText(String.format("%d", numPickerAmt.getValue()));
                 sentPriceN.setText(String.format("$%d", numPickerPrice.getValue()));
@@ -160,13 +198,12 @@ public class OrdersListAdapter extends RecyclerView.Adapter<OrdersListAdapter.Vi
                 placeOrder.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        /* try placing the order */
-                        AlertDialog.Builder dBuilder = new AlertDialog.Builder(holder.mView.getContext());
-                        LayoutInflater infltr = (LayoutInflater)holder.mView.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    /* try placing the order */
+                        LayoutInflater infltr = (LayoutInflater)mView.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                         if (mBuy.toUpperCase().equals("BUY") && mTotal > mApplication.userData.getMoney()) {
                             View dlogView = infltr.inflate(R.layout.invalid_order, null);
-                            dBuilder.setView(dlogView);
-                            mResponseAD = dBuilder.create();
+                            mDialogBuilder.setView(dlogView);
+                            mResponseAD = mDialogBuilder.create();
                             mResponseAD.show();
                             Button ok = (Button) dlogView.findViewById(R.id.response_ok_btn);
                             ok.setOnClickListener(new View.OnClickListener() {
@@ -178,8 +215,8 @@ public class OrdersListAdapter extends RecyclerView.Adapter<OrdersListAdapter.Vi
                             return;
                         } else if(mBuy.toUpperCase().equals("SELL") && mAmnt > mMemeObject.mSharesHeld) {
                             View dlogView = infltr.inflate(R.layout.invalid_order, null);
-                            dBuilder.setView(dlogView);
-                            mResponseAD = dBuilder.create();
+                            mDialogBuilder.setView(dlogView);
+                            mResponseAD = mDialogBuilder.create();
                             mResponseAD.show();
                             TextView sent = (TextView) dlogView.findViewById(R.id.invalid_order_sent);
                             sent.setText("Not enough Stocks to sell!");
@@ -193,8 +230,8 @@ public class OrdersListAdapter extends RecyclerView.Adapter<OrdersListAdapter.Vi
                             return;
                         } else if (mTotal == 0) {
                             View dlogView = infltr.inflate(R.layout.invalid_order, null);
-                            dBuilder.setView(dlogView);
-                            mResponseAD = dBuilder.create();
+                            mDialogBuilder.setView(dlogView);
+                            mResponseAD = mDialogBuilder.create();
                             mResponseAD.show();
                             TextView sent = (TextView) dlogView.findViewById(R.id.invalid_order_sent);
                             sent.setText("Can not " + mBuy + " $0 of stock!");
@@ -208,9 +245,9 @@ public class OrdersListAdapter extends RecyclerView.Adapter<OrdersListAdapter.Vi
                             return;
                         }
                         View dlogView = infltr.inflate(R.layout.confirm_new_order, null);
-                        dBuilder.setView(dlogView);
+                        mDialogBuilder.setView(dlogView);
 
-                        mConfirmOrderAD = dBuilder.create();
+                        mConfirmOrderAD = mDialogBuilder.create();
                         mConfirmOrderAD.show();
 
                         TextView meme = (TextView) dlogView.findViewById(R.id.memeText);
@@ -231,12 +268,9 @@ public class OrdersListAdapter extends RecyclerView.Adapter<OrdersListAdapter.Vi
                         confirm.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                setProgressDialog(true, holder.mView);
+                                setProgressDialog(true, mView);
 
-                                mListener.onOrdersListDirectOrder(mSelectedMemeID, mRows.get(position).mOrderID, mAmnt, mIsBuy, mBuy);
-//                                new MenuActivity.PlaceOrder(mApplication.userData.getID(), mSelectedMemeID, mRows.get(position).mOrderID, mAmnt, 0)
-//                                        .execute(Defines.SERVER_ADDRESS + String.format("/%sOrder.php", mBuy.toLowerCase()), "ORDER_FROM_USER");
-
+                                mListener.onOrdersListDirectOrder(mSelectedMemeID, mRows.get(getAdapterPosition()).mOrderID, mAmnt, mIsBuy, mBuy);
                             }
                         });
                         Button cancel = (Button) dlogView.findViewById(R.id.cancel_order_button);
@@ -248,63 +282,21 @@ public class OrdersListAdapter extends RecyclerView.Adapter<OrdersListAdapter.Vi
                         });
                     }
                 });
-            }
-        });
-    }
-
-    @Override
-    public int getItemCount() {
-        return mRows.size();
-    }
-
-
-    public void updateBuyInfo(Boolean mIsBuy, Integer mSelectedMemeID, String mName, String mBuy, String mBuying, String mBought, String mFrom, String mSubTitle, String mCostingYou) {
-        this.mIsBuy = mIsBuy;
-        this.mSelectedMemeID = mSelectedMemeID;
-        this.mMemeName = mName;
-        this.mBuy = mBuy;
-        this.mBuying = mBuying;
-        this.mBought = mBought;
-        this.mFrom = mFrom;
-        this.mSubTitle = mSubTitle;
-        this.mCostingYou = mCostingYou;
-    }
-
-    public void setReady(boolean ready) {
-        this.mReady = ready;
-    }
-
-    public class ViewHolder extends RecyclerView.ViewHolder{
-
-        public final TextView mUsernameView;
-
-        public final TextView mAmount;
-        public final TextView mPrice;
-        public final Button mBuyNowButton;
-        public final View mView;
-
-        public ViewHolder(View view) {
-            super(view);
-            mView = view;
-            mUsernameView = (TextView) view.findViewById(R.id.order_user_name);
-            mAmount = (TextView) view.findViewById(R.id.order_amount);
-            mPrice = (TextView) view.findViewById(R.id.order_price);
-            mBuyNowButton = (Button) view.findViewById(R.id.orders_buy_now_button);
+                }
+            });
         }
 
     }
-
     /* order response from direct order from user */
     public void orderResponse(Integer mNewMoney, Integer mNewStocks, Integer stocksDiff) {
-        setProgressDialog(false, mView);
+        setProgressDialog(false, mClassView);
         mConfirmOrderAD.dismiss();
-        AlertDialog.Builder dBuilder = new AlertDialog.Builder(mView.getContext());
 
-        LayoutInflater infltr = (LayoutInflater)mView.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater infltr = (LayoutInflater)mClassView.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View dlogView = infltr.inflate(R.layout.order_response_direct, null);
-        dBuilder.setView(dlogView);
+        mDialogBuilder.setView(dlogView);
 
-        mResponseAD = dBuilder.create();
+        mResponseAD = mDialogBuilder.create();
         mResponseAD.show();
 
         TextView resporders = (TextView) dlogView.findViewById(R.id.response_orders);
@@ -326,20 +318,22 @@ public class OrdersListAdapter extends RecyclerView.Adapter<OrdersListAdapter.Vi
 
         mListener.refreshList(mIsBuy);
     }
+
     public void orderFailed() {
-        setProgressDialog(false, mView);
+        setProgressDialog(false, mClassView);
         mConfirmOrderAD.dismiss();
-        AlertDialog.Builder dBuilder = new AlertDialog.Builder(mView.getContext());
 
-        LayoutInflater infltr = (LayoutInflater)mView.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater infltr = (LayoutInflater)mClassView.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View dlogView = infltr.inflate(R.layout.order_response_direct, null);
-        dBuilder.setView(dlogView);
+        mDialogBuilder.setView(dlogView);
 
-        mResponseAD = dBuilder.create();
+        mResponseAD = mDialogBuilder.create();
         mResponseAD.show();
 
+        TextView respSuccess = (TextView) dlogView.findViewById(R.id.response_success);
         TextView resporders = (TextView) dlogView.findViewById(R.id.response_orders);
 
+        respSuccess.setText("Error");
         resporders.setText(String.format("Failed to complete order.. try again later."));
 
         Button ok = (Button) dlogView.findViewById(R.id.response_ok_btn);

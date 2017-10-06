@@ -55,8 +55,11 @@ public class OrdersListFragment  extends Fragment {
     private String mBuying;
     private Integer mSelectedMemeID;
     private String mBuy;
+
+    AlertDialog.Builder mDialogBuilder;
     private AlertDialog mMakeOrderAD, mConfirmOrderAD, mResponseAD;
     private ProgressDialog mProgressDialog;
+
     private String mName;
     private String mCostingYou;
     private String mBought;
@@ -78,6 +81,7 @@ public class OrdersListFragment  extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_orders_list, container, false);
 //        view.setBackgroundColor(getResources().getColor(R.color.colorMyGrey)); /* covers up drop down arrow */
         mApplication = (MyApplication) getActivity().getApplicationContext();
+        mDialogBuilder = new AlertDialog.Builder(getActivity());
 
         mTitle = (TextView) view.findViewById(R.id.orders_text_title);
         mOrderMaker = (TextView) view.findViewById(R.id.order_maker);
@@ -97,13 +101,12 @@ public class OrdersListFragment  extends Fragment {
             public void onClick(View v) {
                 if(!mReady)
                     return;
-                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
 
                 LayoutInflater inflater = getActivity().getLayoutInflater();
                 View dialogView = inflater.inflate(R.layout.new_order_layout, null);
-                dialogBuilder.setView(dialogView);
+                mDialogBuilder.setView(dialogView);
 
-                mMakeOrderAD = dialogBuilder.create();
+                mMakeOrderAD = mDialogBuilder.create();
                 mMakeOrderAD.show();
                 TextView subTitle = (TextView) dialogView.findViewById(R.id.new_order_subtitle);
                 final TextView sentBuying = (TextView) dialogView.findViewById(R.id.pricing_sentence_buying);
@@ -179,8 +182,8 @@ public class OrdersListFragment  extends Fragment {
                         LayoutInflater infltr = getActivity().getLayoutInflater();
                         if(mBuy.toUpperCase().equals("BUY") && mTotal > mApplication.userData.getMoney()) {
                             View dlogView = infltr.inflate(R.layout.invalid_order, null);
-                            dBuilder.setView(dlogView);
-                            mResponseAD = dBuilder.create();
+                            mDialogBuilder.setView(dlogView);
+                            mResponseAD = mDialogBuilder.create();
                             mResponseAD.show();
                             Button ok = (Button) dlogView.findViewById(R.id.response_ok_btn);
                             ok.setOnClickListener(new View.OnClickListener() {
@@ -192,8 +195,8 @@ public class OrdersListFragment  extends Fragment {
                             return;
                         } else if(mBuy.toUpperCase().equals("SELL") && mAmnt > mMemeObject.mSharesHeld) {
                             View dlogView = infltr.inflate(R.layout.invalid_order, null);
-                            dBuilder.setView(dlogView);
-                            mResponseAD = dBuilder.create();
+                            mDialogBuilder.setView(dlogView);
+                            mResponseAD = mDialogBuilder.create();
                             mResponseAD.show();
                             TextView sent = (TextView) dlogView.findViewById(R.id.invalid_order_sent);
                             sent.setText("Not enough Stocks to sell!");
@@ -207,8 +210,8 @@ public class OrdersListFragment  extends Fragment {
                             return;
                         } else if (mTotal == 0) {
                             View dlogView = infltr.inflate(R.layout.invalid_order, null);
-                            dBuilder.setView(dlogView);
-                            mResponseAD = dBuilder.create();
+                            mDialogBuilder.setView(dlogView);
+                            mResponseAD = mDialogBuilder.create();
                             mResponseAD.show();
                             TextView sent = (TextView) dlogView.findViewById(R.id.invalid_order_sent);
                             sent.setText("Can not " + mBuy + " $0 of stock!");
@@ -222,9 +225,9 @@ public class OrdersListFragment  extends Fragment {
                             return;
                         }
                         View dlogView = infltr.inflate(R.layout.confirm_new_order, null);
-                        dBuilder.setView(dlogView);
+                        mDialogBuilder.setView(dlogView);
 
-                        mConfirmOrderAD = dBuilder.create();
+                        mConfirmOrderAD = mDialogBuilder.create();
                         mConfirmOrderAD.show();
 
                         TextView meme = (TextView) dlogView.findViewById(R.id.memeText);
@@ -249,7 +252,7 @@ public class OrdersListFragment  extends Fragment {
 
 
                                 mListener.onOrdersListNewOrder(mSelectedMemeID, mAmnt, mPrice, mIsBuy, mBuy);
-//                                new MenuActivity.PlaceOrder(mApplication.userData.getID(), mSelectedMemeID, 0, mAmnt, mPrice)
+//                                new MenuActivity.PlaceOrder(mApplication.userData.getID(), mSelectedMemeID, 0, mAmnt, mPriceView)
 //                                        .execute(Defines.SERVER_ADDRESS + String.format("/new%sOrder.php",mBuy), "NEW_ORDER");
 
                             }
@@ -360,13 +363,13 @@ public class OrdersListFragment  extends Fragment {
                               Integer stocksDiff, Integer noOrders, String orderCompleted) {
         setProgressDialog(false);
         mConfirmOrderAD.dismiss();
-        AlertDialog.Builder dBuilder = new AlertDialog.Builder(getActivity());
 
+        /* inflate a response info dialog */
         LayoutInflater infltr = getActivity().getLayoutInflater();
         View dlogView = infltr.inflate(R.layout.order_response, null);
-        dBuilder.setView(dlogView);
+        mDialogBuilder.setView(dlogView);
 
-        mResponseAD = dBuilder.create();
+        mResponseAD = mDialogBuilder.create();
         mResponseAD.show();
 
         TextView resp = (TextView) dlogView.findViewById(R.id.response_sentence_status);
@@ -421,17 +424,19 @@ public class OrdersListFragment  extends Fragment {
     public void orderFailed() {
         setProgressDialog(false);
         mConfirmOrderAD.dismiss();
-        AlertDialog.Builder dBuilder = new AlertDialog.Builder(getActivity());
 
+        /* inflate an error dialog */
         LayoutInflater infltr = getActivity().getLayoutInflater();
         View dlogView = infltr.inflate(R.layout.order_response_direct, null);
-        dBuilder.setView(dlogView);
+        mDialogBuilder.setView(dlogView);
 
-        mResponseAD = dBuilder.create();
+        mResponseAD = mDialogBuilder.create();
         mResponseAD.show();
 
+        TextView respSuccess = (TextView) dlogView.findViewById(R.id.response_success);
         TextView resporders = (TextView) dlogView.findViewById(R.id.response_orders);
 
+        respSuccess.setText("Error");
         resporders.setText(String.format("Failed to complete order.. try again later."));
 
         Button ok = (Button) dlogView.findViewById(R.id.response_ok_btn);

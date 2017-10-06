@@ -749,49 +749,24 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         Log.v(TAG, "onListFragmentInteraction called: " + arg);
         if (arg.equals("buy"))
         {
-//            if (mApplication.userData.getMoney() < mMemeIdtoObject.get(mSelectedMemeID).mPrice + 5)
-//            {
-//                Toast.makeText(getBaseContext(), "Not enough money!",
-//                        Toast.LENGTH_SHORT).show();
-//            }
-//            else
-//            {
-//                new MenuActivity.PurchaseStockFromServer(mApplication.userData.getID(), mSelectedMemeID, 1).execute(Defines.SERVER_ADDRESS + "/purchaseStock.php");
-//            }
-//            setProgressDialog(true);
             Log.v(TAG, "buy called" + mMemeIdtoObject.get(mSelectedMemeID).mName);
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.setCustomAnimations(R.anim.enter_from_bottom, 0);
             transaction.addToBackStack(null);
             transaction.add(R.id.orders_list_fragment, mOrdersListFragment);
             transaction.commit();
-//            mOrdersListFragment.show(getFragmentManager(), TAG);
-            new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getOrders.php?sell=true", "GETTING_SELL_ORDERS");
+            new GetDataFromServer().execute(Defines.SERVER_ADDRESS + String.format("/getOrders.php?meme=%d&sell=true", mSelectedMemeID), "GETTING_SELL_ORDERS");
         }
         else
         {
-//            if (mMemeIdtoObject.get(mSelectedMemeID).mSharesHeld == null)
-//                Toast.makeText(getBaseContext(), "Still loading, Try again",
-//                        Toast.LENGTH_SHORT).show();
-//            else if (mMemeIdtoObject.get(mSelectedMemeID).mSharesHeld == 0)
-//            {
-//                Toast.makeText(getBaseContext(), "Not enough Stocks!",
-//                        Toast.LENGTH_SHORT).show();
-//            }
-//            else
-//            {
-//                new MenuActivity.PurchaseStockFromServer(mApplication.userData.getID(), mSelectedMemeID, 1).execute(Defines.SERVER_ADDRESS + "/sellStock.php");
-//            }
-//            setProgressDialog(true);
             Log.v(TAG, "sell called" + mMemeIdtoObject.get(mSelectedMemeID).mName);
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.setCustomAnimations(R.anim.enter_from_bottom, 0);
             transaction.addToBackStack(null);
             transaction.add(R.id.orders_list_fragment, mOrdersListFragment);
             transaction.commit();
-//            mOrdersListFragment.show(getFragmentManager(), TAG);
 
-            new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getOrders.php?buy=true", "GETTING_BUY_ORDERS");
+            new GetDataFromServer().execute(Defines.SERVER_ADDRESS + String.format("/getOrders.php?meme=%d&buy=true", mSelectedMemeID), "GETTING_BUY_ORDERS");
         }
     }
 
@@ -838,10 +813,15 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     @Override
     public void onActiveListingsCancel(ActiveRow row) {
         /* active orders callback for cancelling an order */
+        new PlaceOrder(mApplication.userData.getID(), null, row.mOrderID, null, null)
+                .execute(Defines.SERVER_ADDRESS + String.format("/cancelOrder.php"), row.mIsBuy ? "CANCEL_BUY_ORDER" : "CANCEL_SELL_ORDER");
         return;
     }
 
-
+    @Override
+    public void refreshList() {
+        new GetDataFromServer().execute(Defines.SERVER_ADDRESS + "/getActiveOrders.php?user=" + mApplication.userData.getID(), "GETTING_ACTIVE_ORDERS");
+    }
 
 
     public class GetDataFromServer extends AsyncTask<String , Void , MyHelper.results>
@@ -1352,14 +1332,22 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 BufferedWriter writer = new BufferedWriter(
                         new OutputStreamWriter(out, "UTF-8"));
                 String query;
-                if(mRequest.equals("ORDER_FROM_USER")) {
+                if (mRequest.equals("ORDER_FROM_USER")) {
                     query = String.format("Content-Type: application/json&charset=%s&user=%d&order_id=%d&amount=%d",
                             URLEncoder.encode(charset, charset),
-                            mUserID,mOrderID,mAmount);
-                } else if(mRequest.equals("NEW_ORDER")) {
+                            mUserID, mOrderID, mAmount);
+                } else if (mRequest.equals("NEW_ORDER")) {
                     query = String.format("Content-Type: application/json&charset=%s&user=%d&meme=%d&amount=%d&price=%d",
                             URLEncoder.encode(charset, charset),
-                            mUserID,mMemeID,mAmount,mPrice);
+                            mUserID, mMemeID, mAmount, mPrice);
+                } else if (mRequest.equals("CANCEL_BUY_ORDER")){
+                    query = String.format("Content-Type: application/json&charset=%s&user=%d&buy_order_id=%d",
+                            URLEncoder.encode(charset, charset),
+                            mUserID, mOrderID);
+                } else if (mRequest.equals("CANCEL_SELL_ORDER")){
+                    query = String.format("Content-Type: application/json&charset=%s&user=%d&sell_order_id=%d",
+                            URLEncoder.encode(charset, charset),
+                            mUserID, mOrderID);
                 } else {
                     return false;
                 }
@@ -1379,6 +1367,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     Log.v(TAG, "git purchase: we got 200");
                     serverResponse = MyHelper.readHttpStream(urlConnection.getInputStream());
+                    Log.v(TAG, serverResponse);
                 } else {
                     Log.v(TAG, "purchase we got " + responseCode);
                     return false;
@@ -1417,9 +1406,16 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                         mOrderCompleted = jsonObject.getString("completed");
                         mMemeIdtoObject.get(mMemeID).mSharesHeld = mNewStocks;
                         return true;
+                    } else if(mRequest.equals("CANCEL_BUY_ORDER")) {
+                        mNewMoney = jsonObject.getInt("new_money");
+                        mMoneyDiff = jsonObject.getInt("money_diff");
+                    } else if(mRequest.equals("CANCEL_SELL_ORDER")) {
+                        mNewStocks = jsonObject.getInt("new_stocks");
+                        mStocksDiff = jsonObject.getInt("stocks_diff");
                     } else {
                         return  false;
                     }
+                    return true;
                 }
                 else
                 {
@@ -1450,15 +1446,30 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 //                TextView sharesOwnedView = (TextView) findViewById(R.id.stocks_owned);
 //                sharesOwnedView.setText(mNewStocks.toString());
 
-                mMemeIdtoObject.get(mMemeID).mSharesHeld = mNewStocks;
-                mApplication.userData.setMoney(mNewMoney);
-                mMoney.setText(String.format("$%s", mNewMoney));
-                mMemeDetailsFragment.updateStocksOwned(mNewStocks);
+
                 if(mRequest.equals("ORDER_FROM_USER")) {
+                    mMemeIdtoObject.get(mMemeID).mSharesHeld = mNewStocks;
+                    mApplication.userData.setMoney(mNewMoney);
+                    mMoney.setText(String.format("$%s", mNewMoney));
+                    mMemeDetailsFragment.updateStocksOwned(mNewStocks);
                     mOrdersListFragment.orderResponseDirect(mNewMoney, mNewStocks, mAmount);
                 } else if(mRequest.equals("NEW_ORDER")) {
+                    mMemeIdtoObject.get(mMemeID).mSharesHeld = mNewStocks;
+                    mApplication.userData.setMoney(mNewMoney);
+                    mMoney.setText(String.format("$%s", mNewMoney));
+                    mMemeDetailsFragment.updateStocksOwned(mNewStocks);
                     mOrdersListFragment.orderResponse(mNewMoney, mNewStocks, mMoneyDiff, mStocksDiff,
                             mNoOrders, mOrderCompleted);
+                } else if(mRequest.equals("CANCEL_BUY_ORDER")) {
+                    mApplication.userData.setMoney(mNewMoney);
+                    mMoney.setText(String.format("$%s", mNewMoney));
+                    mActiveListingsFragment.cancelOrderResponse(mMoneyDiff, mStocksDiff);
+                } else if(mRequest.equals("CANCEL_SELL_ORDER")) {
+                    mMemeIdtoObject.get(mMemeID).mSharesHeld = mNewStocks;
+                    mMemeDetailsFragment.updateStocksOwned(mNewStocks);
+                    mActiveListingsFragment.cancelOrderResponse(mMoneyDiff, mStocksDiff);
+                } else {
+                    Log.e(TAG, "placeOrder success but wrong request type");
                 }
 
 
@@ -1469,6 +1480,10 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                     mOrdersListFragment.orderDirectFailed();
                 } else if(mRequest.equals("NEW_ORDER")) {
                     mOrdersListFragment.orderFailed();
+                } else if(mRequest.equals("CANCEL_BUY_ORDER") || mRequest.equals("CANCEL_SELL_ORDER")) {
+                    mActiveListingsFragment.cancelOrderFailed();
+                } else {
+                    Log.e(TAG, "placeOrder failed wrong request type");
                 }
 
             }
