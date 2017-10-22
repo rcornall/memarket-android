@@ -58,6 +58,7 @@ import com.robthecornallgmail.memarket.Fragments.ActiveListingsFragment;
 import com.robthecornallgmail.memarket.Fragments.BagGridFragment;
 import com.robthecornallgmail.memarket.Fragments.ListMemesFragment;
 import com.robthecornallgmail.memarket.Fragments.MemeDetailsFragment;
+import com.robthecornallgmail.memarket.Fragments.NewMemeFragment;
 import com.robthecornallgmail.memarket.Fragments.OrdersListFragment;
 import com.robthecornallgmail.memarket.Util.ActiveRow;
 import com.robthecornallgmail.memarket.Util.BagGrid;
@@ -133,6 +134,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
     private ListMemesFragment mMemeListFragment;
     private ActiveListingsFragment mActiveListingsFragment;
     private MemeDetailsFragment mMemeDetailsFragment;
+    private NewMemeFragment mNewMemeFragment;
     private OrdersListFragment mOrdersListFragment;
     private LeaderboardDialogFragment mLeaderboardDialogFragment;
     private BagGridFragment mBagGridFragment;
@@ -163,6 +165,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         Log.v(TAG, "memoryClass: " + Integer.toString(memoryClass));
 
         mMemeListFragment = new ListMemesFragment();
+        mNewMemeFragment = new NewMemeFragment();
         mActiveListingsFragment = new ActiveListingsFragment();
         mOrdersListFragment = new OrdersListFragment();
         mBagGridFragment = new BagGridFragment();
@@ -221,10 +224,11 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
         mAddMemeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*TODO: fragment for adding a new meme submission
-                * initial investment
-                * image
-                * */
+                /*TODO: fragment for adding a new meme submission*/
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.add(R.id.new_meme_fragment, mNewMemeFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
             }
         });
 
@@ -382,7 +386,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 mActiveListingHighlight.setVisibility(View.VISIBLE);
                 mFreshMemesHighlight.setVisibility(View.INVISIBLE);
 
-                mSearchMemes.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_arrow_back_black_24dp, 0,0,0);
+                mSearchMemes.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_arrow_back_white_24dp, 0,0,0);
                 FragmentManager fm = getSupportFragmentManager();
                 if (fm.getBackStackEntryCount() == 2) {
                     return;
@@ -405,7 +409,7 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
                 mActiveListingHighlight.setVisibility(View.INVISIBLE);
                 mFreshMemesHighlight.setVisibility(View.VISIBLE);
 
-                mSearchMemes.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_arrow_back_black_24dp, 0,0,0);
+                mSearchMemes.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_arrow_back_white_24dp, 0,0,0);
 
                 /*TODO: inflate fresh memes fragment, on top of search. hide active listings fragment*/
             }
@@ -634,11 +638,6 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
 
     }
 
-
-
-
-
-
     @Override
     public void onListFragmentInteraction(MemeRow row)
     {
@@ -693,7 +692,6 @@ public class MenuActivity extends AppCompatActivity implements ListMemesFragment
             mGetGraphTask.execute(Defines.SERVER_ADDRESS + "/getPast2Days.php?");
         } catch (Exception e) {Log.e(TAG, e.toString());}
     }
-
 
 
     @Override

@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:materialdesign="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!--title bar part-->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:id="@+id/title_bar"
+        android:background="@color/backgroundGrey"
+        android:clickable="true"
+        android:layout_width="match_parent"
+        android:layout_height="69dp">
+        <Button
+            android:background="@android:color/transparent"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:layout_weight="0.2"
+            android:drawableLeft="@drawable/ic_arrow_back_white_24dp"
+            android:paddingLeft="15dp"
+            android:paddingStart="15dp"
+            android:drawablePadding="7dp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.7"
+            android:text="New Meme"
+            android:textColor="@color/greenWhiter"
+            android:textSize="@dimen/titles_size"
+            android:textStyle="bold"
+            android:gravity="center_vertical"/>
+
+        <Button
+            android:background="@android:color/transparent"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:drawableLeft="@drawable/ic_done_green_48dp"
+            android:layout_weight="0.2"/>
+
+    </LinearLayout>
+
+    <!--scrolling part-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:background="@color/colorMyGrey"
+        android:clickable="true"
+        android:layout_height="match_parent"
+        >
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            >
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/activity_horizontal_margin">
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="0.3"
+                        android:layout_height="match_parent"
+                        android:text="Meme Name:"
+                        android:textColor="@color/greenWhite"
+                        android:gravity="center_vertical"/>
+                    <EditText
+                        android:id="@+id/new_meme_name"
+                        android:layout_width="0dp"
+                        android:layout_weight=".7"
+                        android:layout_height="match_parent"
+                        android:textSize="@dimen/text_default"
+                        android:hint=" cool name.."
+                        android:textColorHint="@color/colorMyOffGrey"
+                        android:gravity="center_vertical"
+                        />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight=".3"
+                        android:layout_height="match_parent"
+                        android:text="Image:"
+                        android:textColor="@color/greenWhite"
+                        android:gravity="center_vertical"/>
+                    <EditText
+                        android:id="@+id/imgur_url"
+                        android:layout_width="0dp"
+                        android:layout_weight=".7"
+                        android:layout_height="match_parent"
+                        android:textSize="@dimen/text_default"
+                        android:hint=" paste imgur link.."
+                        android:textColorHint="@color/colorMyOffGrey"
+                        android:gravity="center_vertical"/>
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/new_meme_preview"
+                    android:layout_width="250dp"
+                    android:layout_height="250dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="0dp"
+                    android:background="@android:drawable/picture_frame"
+                    app:srcCompat="@drawable/ic_photo_black_24dp"
+                    android:backgroundTint="@color/pictureFrame"
+                    android:scaleType="centerCrop"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Market Size:"
+                    android:textColor="@color/greenWhite"/>
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <android.support.v7.widget.AppCompatSeekBar
+                        android:id="@+id/size_seekbar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:max="4"
+                        />
+                </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SMALL"
+                    android:textStyle="bold"
+                    android:textColor="@color/accent"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Required Funding:"
+                        android:textColor="@color/greenWhite"/>
+                </LinearLayout>
+                <android.support.v7.widget.AppCompatSeekBar
+                    android:id="@+id/funding_seekbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:max="1000000000"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="$1000000"
+                    android:textStyle="bold"
+                    android:textColor="@color/accent"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp" />
+
+
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+
+</LinearLayout>

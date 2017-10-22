@@ -568,7 +568,7 @@
             android:layout_marginTop="5dp"
             android:layout_marginBottom="0dp"
             android:layout_marginLeft="3dp"
-            android:textSize="22sp"/>
+            android:textSize="@dimen/titles_size"/>
         <View
             android:layout_toRightOf="@id/character_icon"
             android:id="@+id/view1"
@@ -668,5 +668,10 @@
                 />
         </LinearLayout>
     </RelativeLayout>
+
+    <FrameLayout
+        android:id="@+id/new_meme_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
 </android.support.design.widget.CoordinatorLayout>
