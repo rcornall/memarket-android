@@ -57,10 +57,11 @@
             android:layout_height="match_parent"
             >
             <LinearLayout
+                android:id="@+id/new_meme_layout"
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="@dimen/activity_horizontal_margin">
+                android:layout_margin="@dimen/activity_horizontal_margin">
 
                 <LinearLayout
                     android:orientation="horizontal"
@@ -121,26 +122,29 @@
                     android:backgroundTint="@color/pictureFrame"
                     android:scaleType="centerCrop"
                     />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Market Size:"
-                    android:textColor="@color/greenWhite"/>
                 <LinearLayout
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Market Size:"
+                        android:textColor="@color/greenWhite"/>
                     <android.support.v7.widget.AppCompatSeekBar
                         android:id="@+id/size_seekbar"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:max="4"
+                        android:max="3"
                         />
                 </LinearLayout>
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:id="@+id/size"
+                    android:layout_width="70dp"
                     android:layout_height="wrap_content"
-                    android:text="SMALL"
+                    android:lines="2"
+                    android:gravity="center"
+                    android:text="MAIN-STREAM"
                     android:textStyle="bold"
                     android:textColor="@color/accent"/>
 
@@ -157,14 +161,15 @@
                         android:layout_height="wrap_content"
                         android:text="Required Funding:"
                         android:textColor="@color/greenWhite"/>
+                    <android.support.v7.widget.AppCompatSeekBar
+                        android:id="@+id/funding_seekbar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:max="1000000000"
+                        />
                 </LinearLayout>
-                <android.support.v7.widget.AppCompatSeekBar
-                    android:id="@+id/funding_seekbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:max="1000000000"
-                    />
                 <TextView
+                    android:id="@+id/funding"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="$1000000"

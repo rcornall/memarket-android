@@ -57,5 +57,12 @@ public final class Defines
         public static int INSIDE_BUILDING_TOP = 5;
 
     }
+
+    public static final class MEME_SIZE {
+        public static int MEME_SMALL = 0;
+        public static int MEME_MEDIUM = 1;
+        public static int MEME_LARGE = 2;
+        public static int MEME_MAINSTREAM = 3;
+    }
 }
 
