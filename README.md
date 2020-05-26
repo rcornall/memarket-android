@@ -7,3 +7,6 @@ Backend is a PostGreSQL database with simple PHP scripts, and a C++ app to query
 
 Animation and media created using aseprite https://www.aseprite.org/
 
+![gifeg](memarket-eg.gif)
+
+![stocks](memarket-stocks.png) ![home](memarket.png)
